@@ -33,8 +33,8 @@ export default function OnboardingModal() {
   }
 
   const handleSkip = () => {
+    localStorage.setItem('onboardingCompleted', 'true')
     setIsOpen(false)
-    // Don't set the flag so it appears next time
   }
 
   return (

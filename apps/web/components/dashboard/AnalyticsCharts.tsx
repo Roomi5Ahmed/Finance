@@ -43,40 +43,40 @@ export default function AnalyticsCharts({ transactions }: { transactions: any[] 
   const COLORS = ['#818cf8', '#34d399', '#f472b6', '#fbbf24', '#38bdf8']
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
       
       {/* Spending Over Time (Line Chart) */}
-      <div className="bg-[#151D2C] rounded-2xl border border-white/5 shadow-xl p-6 h-96 flex flex-col">
-        <h3 className="text-slate-400 font-medium tracking-wide mb-6">Spending Trend (Last 7 Days)</h3>
-        <div className="flex-1 w-full h-full">
+      <div className="bg-[#151D2C] rounded-2xl border border-white/5 shadow-xl p-5 flex flex-col">
+        <h3 className="text-sm text-slate-400 font-medium tracking-wide mb-4">Spending Trend (Last 7 Days)</h3>
+        <div className="w-full h-64">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={lineChartData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
-              <XAxis dataKey="name" stroke="#64748b" tick={{ fill: '#64748b', fontSize: 12 }} tickLine={false} axisLine={false} />
-              <YAxis stroke="#64748b" tick={{ fill: '#64748b', fontSize: 12 }} tickLine={false} axisLine={false} tickFormatter={(value) => `₹${value}`} />
+            <LineChart data={lineChartData} margin={{ top: 5, right: 10, bottom: 5, left: -10 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#ffffff08" vertical={false} />
+              <XAxis dataKey="name" stroke="#64748b" tick={{ fill: '#64748b', fontSize: 11 }} tickLine={false} axisLine={false} />
+              <YAxis stroke="#64748b" tick={{ fill: '#64748b', fontSize: 11 }} tickLine={false} axisLine={false} tickFormatter={(value) => `₹${value}`} width={55} />
               <Tooltip 
-                contentStyle={{ backgroundColor: '#0F1523', border: '1px solid #ffffff10', borderRadius: '8px', color: '#fff' }}
+                contentStyle={{ backgroundColor: '#0F1523', border: '1px solid #ffffff10', borderRadius: '8px', color: '#fff', fontSize: '12px' }}
                 itemStyle={{ color: '#818cf8' }}
                 formatter={(value: any) => [`₹${value.toLocaleString()}`, 'Spent']}
               />
-              <Line type="monotone" dataKey="value" stroke="#818cf8" strokeWidth={3} dot={{ fill: '#818cf8', strokeWidth: 2, r: 4 }} activeDot={{ r: 6, fill: '#fff' }} />
+              <Line type="monotone" dataKey="value" stroke="#818cf8" strokeWidth={2.5} dot={{ fill: '#818cf8', strokeWidth: 2, r: 3 }} activeDot={{ r: 5, fill: '#fff' }} />
             </LineChart>
           </ResponsiveContainer>
         </div>
       </div>
 
       {/* Top Categories (Bar Chart) */}
-      <div className="bg-[#151D2C] rounded-2xl border border-white/5 shadow-xl p-6 h-96 flex flex-col">
-        <h3 className="text-slate-400 font-medium tracking-wide mb-6">Top Categories (All Time)</h3>
-        <div className="flex-1 w-full h-full">
+      <div className="bg-[#151D2C] rounded-2xl border border-white/5 shadow-xl p-5 flex flex-col">
+        <h3 className="text-sm text-slate-400 font-medium tracking-wide mb-4">Top Categories (All Time)</h3>
+        <div className="w-full h-64">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={barChartData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }} layout="vertical">
-              <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" horizontal={false} />
-              <XAxis type="number" stroke="#64748b" tick={{ fill: '#64748b', fontSize: 12 }} tickLine={false} axisLine={false} />
-              <YAxis dataKey="name" type="category" stroke="#64748b" tick={{ fill: '#cbd5e1', fontSize: 12 }} tickLine={false} axisLine={false} width={100} />
+            <BarChart data={barChartData} margin={{ top: 5, right: 10, bottom: 5, left: 0 }} layout="vertical">
+              <CartesianGrid strokeDasharray="3 3" stroke="#ffffff08" horizontal={false} />
+              <XAxis type="number" stroke="#64748b" tick={{ fill: '#64748b', fontSize: 11 }} tickLine={false} axisLine={false} />
+              <YAxis dataKey="name" type="category" stroke="#64748b" tick={{ fill: '#cbd5e1', fontSize: 11 }} tickLine={false} axisLine={false} width={90} />
               <Tooltip 
                 cursor={{ fill: '#ffffff05' }}
-                contentStyle={{ backgroundColor: '#0F1523', border: '1px solid #ffffff10', borderRadius: '8px', color: '#fff' }}
+                contentStyle={{ backgroundColor: '#0F1523', border: '1px solid #ffffff10', borderRadius: '8px', color: '#fff', fontSize: '12px' }}
                 formatter={(value: any) => [`₹${value.toLocaleString()}`, 'Amount']}
               />
               <Bar dataKey="value" radius={[0, 4, 4, 0]}>

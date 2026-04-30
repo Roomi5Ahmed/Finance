@@ -1,6 +1,5 @@
 import { createClient } from '@/utils/supabase/server'
 import AnalyticsCharts from '@/components/dashboard/AnalyticsCharts'
-import AIInsightsWidget from '@/components/dashboard/AIInsightsWidget'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -42,40 +41,42 @@ export default async function DashboardPage() {
   const recentTxs = transactions.slice(0, 5)
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold text-white tracking-tight">Dashboard</h1>
-        <p className="mt-2 text-slate-400">
+    <div className="space-y-6 animate-in">
+      {/* Page Header */}
+      <div className="mb-2">
+        <h1 className="text-2xl font-bold text-white tracking-tight">Dashboard</h1>
+        <p className="mt-1 text-sm text-slate-400">
           Welcome back, {user?.email}
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* KPI Cards */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         
         {/* Total Balance Card */}
-        <div className="relative overflow-hidden bg-[#151D2C] rounded-2xl border border-white/5 shadow-xl p-6 flex flex-col h-72">
+        <div className="relative overflow-hidden bg-[#151D2C] rounded-2xl border border-white/5 shadow-xl p-5 flex flex-col h-56">
           <div className="flex items-start justify-between relative z-10">
-            <h3 className="text-slate-400 font-medium tracking-wide">Total Balance</h3>
-            <span className="text-yellow-500 bg-yellow-500/10 p-2 rounded-full">
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <h3 className="text-sm text-slate-400 font-medium tracking-wide">Total Balance</h3>
+            <span className="text-yellow-500 bg-yellow-500/10 p-1.5 rounded-lg">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </span>
           </div>
           
-          <div className="mt-4 relative z-10">
-            <p className="text-4xl font-bold text-white tracking-tight">₹{totalBalance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</p>
+          <div className="mt-3 relative z-10">
+            <p className="text-3xl font-bold text-white tracking-tight">₹{totalBalance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</p>
           </div>
 
           <div className="mt-auto relative z-10">
-            <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-emerald-500/10 text-emerald-400">
+            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-emerald-500/10 text-emerald-400">
               <svg className="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" /></svg>
               Calculated from all transactions
             </span>
           </div>
 
           {/* Decorative Wave Gradient */}
-          <div className="absolute bottom-0 left-0 right-0 h-32 opacity-50 pointer-events-none">
+          <div className="absolute bottom-0 left-0 right-0 h-24 opacity-50 pointer-events-none">
             <svg viewBox="0 0 400 150" preserveAspectRatio="none" className="w-full h-full">
               <path d="M0,150 C100,50 150,120 250,80 C350,40 400,100 400,100 L400,150 L0,150 Z" fill="url(#gradient)" />
               <defs>
@@ -90,16 +91,16 @@ export default async function DashboardPage() {
         </div>
 
         {/* Monthly Budget Card */}
-        <div className="bg-[#151D2C] rounded-2xl border border-white/5 shadow-xl p-6 flex flex-col h-72">
+        <div className="bg-[#151D2C] rounded-2xl border border-white/5 shadow-xl p-5 flex flex-col h-56">
           <div className="flex items-start justify-between">
-            <h3 className="text-slate-400 font-medium tracking-wide">Monthly Budget</h3>
-            <span className="text-pink-500 bg-pink-500/10 p-2 rounded-full">
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+            <h3 className="text-sm text-slate-400 font-medium tracking-wide">Monthly Budget</h3>
+            <span className="text-pink-500 bg-pink-500/10 p-1.5 rounded-lg">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
             </span>
           </div>
           
-          <div className="flex-1 flex flex-col items-center justify-center mt-2">
-            <div className="relative w-32 h-32 flex items-center justify-center">
+          <div className="flex-1 flex flex-col items-center justify-center">
+            <div className="relative w-24 h-24 flex items-center justify-center">
               {/* SVG Donut Chart */}
               <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
                 <path
@@ -120,40 +121,40 @@ export default async function DashboardPage() {
                 />
               </svg>
               <div className="absolute flex flex-col items-center">
-                <span className="text-3xl font-bold text-white">{budgetPercentage}%</span>
-                <span className="text-xs text-slate-400">Spent</span>
+                <span className="text-2xl font-bold text-white">{budgetPercentage}%</span>
+                <span className="text-[10px] text-slate-400">Spent</span>
               </div>
             </div>
             
-            <p className="mt-4 text-sm text-white font-medium">
-              ₹{thisMonthExpenses.toLocaleString('en-IN')} <span className="text-slate-500 font-normal">/ ₹{monthlyBudget.toLocaleString('en-IN')} Used</span>
+            <p className="mt-3 text-sm text-white font-medium">
+              ₹{thisMonthExpenses.toLocaleString('en-IN')} <span className="text-slate-500 font-normal">/ ₹{monthlyBudget.toLocaleString('en-IN')}</span>
             </p>
           </div>
         </div>
 
         {/* Recent Activity Card */}
-        <div className="bg-[#151D2C] rounded-2xl border border-white/5 shadow-xl p-6 flex flex-col h-72">
-          <h3 className="text-slate-400 font-medium tracking-wide mb-4">Recent Activity</h3>
+        <div className="bg-[#151D2C] rounded-2xl border border-white/5 shadow-xl p-5 flex flex-col h-56">
+          <h3 className="text-sm text-slate-400 font-medium tracking-wide mb-3">Recent Activity</h3>
           
-          <div className="flex-1 overflow-y-auto pr-2 space-y-4 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
+          <div className="flex-1 overflow-y-auto pr-1 space-y-3">
             {recentTxs.length === 0 ? (
               <p className="text-slate-500 text-sm mt-4 text-center">No recent activity found.</p>
             ) : recentTxs.map((tx) => (
               <div key={tx.id} className="flex items-center justify-between group">
-                <div className="flex items-center space-x-4">
-                  <div className="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center text-xl shadow-sm border border-white/5">
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-base shadow-sm border border-white/5 shrink-0">
                     {(tx.categories as any)?.icon || '🛒'}
                   </div>
-                  <div>
-                    <p className="text-white font-medium text-sm group-hover:text-indigo-400 transition-colors truncate max-w-[120px]">
+                  <div className="min-w-0">
+                    <p className="text-white font-medium text-xs group-hover:text-indigo-400 transition-colors truncate max-w-[110px]">
                       {tx.merchant}
                     </p>
-                    <p className="text-slate-500 text-xs mt-0.5">
-                      {new Date(tx.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                    <p className="text-slate-500 text-[10px] mt-0.5">
+                      {new Date(tx.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                     </p>
                   </div>
                 </div>
-                <span className={`font-medium text-sm ${tx.amount < 0 ? 'text-white' : 'text-emerald-400'}`}>
+                <span className={`font-semibold text-xs ${tx.amount < 0 ? 'text-white' : 'text-emerald-400'}`}>
                   {tx.amount < 0 ? '-' : '+'}₹{Math.abs(tx.amount).toLocaleString('en-IN')}
                 </span>
               </div>
@@ -163,9 +164,8 @@ export default async function DashboardPage() {
 
       </div>
 
+      {/* Analytics Charts */}
       <AnalyticsCharts transactions={transactions} />
-      
-      <AIInsightsWidget />
     </div>
   )
 }
