@@ -1,0 +1,555 @@
+
+PRODUCT REQUIREMENTS DOCUMENT
+Smart Finance Tracker
+Foundation & Architecture Sprint
+Weeks 1–2  ·  Phase 1 of 4
+Document version
+v1.0
+Sprint dates
+Week 1–2 (Month 1 of 4)
+Status
+Draft — ready for review
+Author
+College Final Year Project
+Stakeholders
+Developer, College Mentor/Evaluator
+Last updated
+April 2026
+AI stack
+Gemini 2.5 Pro (API) · Gemini CLI · Ollama (local fallback)
+Tech stack
+Next.js 14 · TypeScript · PostgreSQL · Prisma · NextAuth.js · Tailwind CSS
+
+Sprint goal: Establish the full project foundation — repository, CI/CD pipeline, database schema, authentication, and base UI component library — so that every subsequent sprint builds on a stable, tested skeleton.
+
+1. Overview
+1.1 Project Summary
+The Smart Finance Tracker is a cross-platform personal finance application that connects to payment services and bank accounts to automatically track expenses, presents visualised weekly/monthly/yearly spending dashboards, and proactively suggests cheaper alternatives to the user's current subscriptions and software — for example, recommending DaVinci Resolve as a free alternative to Adobe Premiere Pro.
+The product ships first as a web application (Next.js), then is converted to a React Native mobile app (Expo) in Month 4, sharing business logic through a shared monorepo package.
+1.2 Sprint Scope — Weeks 1–2
+This sprint covers the entire project foundation. No end-user-visible features ship in this sprint; the deliverable is a deployed skeleton application that subsequent sprints can build upon confidently.
+
+In scope: Repo setup, CI/CD, database schema design, Prisma ORM setup, NextAuth.js authentication (Google + email/password), base layout shell, onboarding flow wireframes, and reusable component library.
+
+Out of scope: Transaction entry, Plaid integration, dashboards, suggestion engine, mobile app — all deferred to Weeks 3–16.
+1.3 Success Definition
+The sprint is complete when all of the following are true:
+A Next.js 14 app is live on Vercel at a public URL with zero build errors.
+A PostgreSQL database is provisioned on Supabase (free tier) with all schema tables migrated.
+A user can sign in with Google OAuth and email/password, and their session persists across page refreshes.
+The dashboard shell renders (empty state) with sidebar navigation and responsive layout.
+The onboarding modal launches for new users and stores currency preference + income in the database.
+GitHub Actions CI runs on every pull request: lint, type-check, and Prisma schema validation all pass.
+Figma wireframes are complete for Dashboard, Transaction List, Add Expense, and Settings screens.
+
+2. User Stories
+2.1 Authentication
+
+ID
+User Story
+Priority
+Est.
+Status
+US-01
+As a new user, I can sign up with my Google account so that I don't need to create a separate password.
+Must have
+0.5 day
+Not started
+US-02
+As a new user, I can sign up with email and password so that I can use the app without a Google account.
+Must have
+0.5 day
+Not started
+US-03
+As a returning user, I can sign in and have my session persist for 30 days so that I am not logged out unexpectedly.
+Must have
+0.5 day
+Not started
+US-04
+As a user, I can sign out from any page using the nav menu so that I can securely end my session.
+Must have
+0.5 day
+Not started
+US-05
+As a user, I can reset my password via a magic link sent to my email so that I can recover access if I forget it.
+Should have
+1 day
+Not started
+
+2.2 Onboarding
+
+ID
+User Story
+Priority
+Est.
+Status
+US-06
+As a new user, I am shown an onboarding modal on first login asking for my preferred currency, monthly income, and primary financial goal so that the app can personalise my experience.
+Must have
+1 day
+Not started
+US-07
+As a new user, I can skip onboarding and complete it later from Settings so that I am not blocked from exploring the app.
+Should have
+0.5 day
+Not started
+US-08
+As a user, I can change my currency, income, and goals in Settings at any time so that the app stays accurate as my situation changes.
+Should have
+0.5 day
+Not started
+
+2.3 Layout & Navigation
+
+ID
+User Story
+Priority
+Est.
+Status
+US-09
+As a user, I see a left-sidebar navigation on desktop with links to Dashboard, Transactions, Insights, Budgets, and Settings so that I can move between sections quickly.
+Must have
+1 day
+Not started
+US-10
+As a user on mobile web, the sidebar collapses to a hamburger menu so that the interface is usable on smaller screens.
+Must have
+0.5 day
+Not started
+US-11
+As a developer, I have a reusable component library (Button, Card, Modal, Input, Badge, Skeleton) so that UI is consistent and I don't rebuild primitives every sprint.
+Must have
+2 days
+Not started
+
+3. Functional Requirements
+3.1 Authentication System
+3.1.1 Google OAuth
+Implement NextAuth.js with the Google provider using NEXTAUTH_SECRET and GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET environment variables.
+On first OAuth sign-in, create a User record in the database with name, email, image, and provider set to 'google'.
+Redirect to /onboarding after first sign-in; redirect to /dashboard on subsequent sign-ins.
+Session token is stored as a secure, httpOnly cookie with a 30-day max-age.
+3.1.2 Email/Password Authentication
+Implement NextAuth.js Credentials provider with bcrypt password hashing (salt rounds: 12).
+Registration form must validate: email format, password minimum 8 characters, one uppercase, one number.
+Display inline field-level error messages on validation failure without clearing the form.
+Rate-limit login attempts to 5 per minute per IP using a middleware edge function.
+3.1.3 Password Reset
+Generate a signed JWT reset token valid for 1 hour, stored in PasswordResetToken table.
+Send reset email via Resend API (free tier: 3,000 emails/month).
+Token is invalidated after use or expiry — single-use only.
+3.2 Onboarding Flow
+Onboarding modal renders as a multi-step flow: Step 1 — Currency & locale, Step 2 — Monthly income (optional), Step 3 — Primary goal (Save money / Reduce subscriptions / Track spending / Debt paydown).
+Currency selector searches from a list of 50 common currencies with ISO codes.
+All onboarding data is saved to the UserProfile table on completion of the final step.
+A onboardingCompleted boolean on the User record gates whether the modal appears on login.
+'Skip for now' sets onboardingCompleted = false and stores nothing — the modal re-appears on next login.
+3.3 Base Layout
+App shell uses Next.js App Router layout.tsx with a persistent sidebar and a main content slot.
+Sidebar items: Dashboard (icon: BarChart2), Transactions (Receipt), Insights (Lightbulb), Budgets (Target), Accounts (Building2), Settings (Settings). Each links to /dashboard, /transactions, /insights, /budgets, /accounts, /settings respectively.
+Active route is highlighted with a brand-colour left border and a tinted background.
+Sidebar is 240px wide on desktop; collapses to 0px with an animated slide-out on mobile (<768px).
+Top header bar shows: user avatar + name (right), page title (left), and a notification bell icon.
+All pages that require authentication redirect to /auth/signin if the session is null — handled in middleware.ts.
+3.4 Component Library
+The following components must be built as standalone, Storybook-documented (optional) primitives in /components/ui/:
+Button — variants: primary, secondary, ghost, destructive. Sizes: sm, md, lg. Loading spinner state.
+Card — with optional header, body, and footer slots. Hover elevation variant.
+Modal — accessible dialog with focus trap, Escape to dismiss, backdrop click to dismiss.
+Input — text, email, password (with show/hide toggle), number. Error and helper text slots.
+Select — searchable dropdown built on Radix UI primitives.
+Badge — colour variants: green (income), red (expense), blue (transfer), gray (neutral).
+Skeleton — animated loading placeholder that matches the shape of the content it replaces.
+Avatar — circular image with fallback initials. Sizes: sm (24px), md (36px), lg (48px).
+Toast — success, error, warning, info variants. Auto-dismiss after 4 seconds. Stacked queue.
+
+4. Database Schema
+All tables are managed by Prisma ORM. Migrations are run via prisma migrate dev. The database is hosted on Supabase (PostgreSQL 15).
+4.1 Users Table
+
+Field
+Type
+Nullable
+Notes
+id
+UUID
+NO
+Primary key. Auto-generated (cuid()).
+email
+TEXT
+NO
+Unique. Indexed. Used for all auth lookups.
+name
+TEXT
+YES
+Display name from OAuth or registration.
+image
+TEXT
+YES
+Avatar URL from Google OAuth.
+passwordHash
+TEXT
+YES
+Null for OAuth-only users.
+provider
+TEXT
+NO
+Enum: 'google' | 'credentials'.
+onboardingCompleted
+BOOLEAN
+NO
+Default false. Set true after onboarding.
+createdAt
+TIMESTAMP
+NO
+Auto-set on insert.
+updatedAt
+TIMESTAMP
+NO
+Auto-updated on any change.
+
+4.2 UserProfile Table
+
+Field
+Type
+Nullable
+Notes
+id
+UUID
+NO
+Primary key.
+userId
+UUID
+NO
+FK to Users.id. Unique (1-to-1 relation).
+currency
+TEXT
+NO
+ISO 4217 code. Default 'INR'.
+locale
+TEXT
+NO
+BCP 47 locale. Default 'en-IN'.
+monthlyIncome
+DECIMAL(12,2)
+YES
+User-declared income. Optional.
+financialGoal
+TEXT
+YES
+Enum: SAVE | REDUCE_SUBS | TRACK | DEBT.
+timezone
+TEXT
+NO
+IANA timezone. Default 'Asia/Kolkata'.
+
+4.3 Accounts Table (NextAuth)
+
+Field
+Type
+Nullable
+Notes
+id
+UUID
+NO
+Primary key.
+userId
+UUID
+NO
+FK to Users.id.
+type
+TEXT
+NO
+NextAuth account type: 'oauth' | 'credentials'.
+provider
+TEXT
+NO
+Provider ID: 'google' | 'credentials'.
+providerAccountId
+TEXT
+NO
+Provider's user ID (e.g. Google sub).
+access_token
+TEXT
+YES
+OAuth access token. Encrypted at rest.
+refresh_token
+TEXT
+YES
+OAuth refresh token. Encrypted at rest.
+expires_at
+INTEGER
+YES
+Token expiry in seconds (Unix epoch).
+
+4.4 Sessions Table (NextAuth)
+
+Field
+Type
+Nullable
+Notes
+id
+UUID
+NO
+Primary key.
+sessionToken
+TEXT
+NO
+Unique. The JWT cookie value.
+userId
+UUID
+NO
+FK to Users.id.
+expires
+TIMESTAMP
+NO
+Session expiry. 30 days from creation.
+
+4.5 PasswordResetToken Table
+
+Field
+Type
+Nullable
+Notes
+id
+UUID
+NO
+Primary key.
+email
+TEXT
+NO
+Target email. Indexed.
+token
+TEXT
+NO
+Unique signed JWT token.
+expires
+TIMESTAMP
+NO
+1 hour from creation.
+used
+BOOLEAN
+NO
+Default false. Set true after use.
+
+5. Technical Architecture
+5.1 Repository Structure
+The project uses a monorepo structure to enable future code sharing with the React Native mobile app.
+
+smart-finance-tracker/
+  apps/
+    web/                   Next.js 14 application
+      app/                 App Router pages and layouts
+        (auth)/            Authentication pages
+        (dashboard)/       Protected app pages
+      components/
+        ui/                Reusable primitive components
+        layout/            Sidebar, Header, etc.
+      lib/
+        auth.ts            NextAuth config
+        prisma.ts          Prisma client singleton
+        validations.ts     Zod schemas
+      prisma/
+        schema.prisma      Database schema
+        migrations/        Auto-generated migration files
+    mobile/                Expo app (created in Month 4)
+  packages/
+    shared/                Shared types, utils, validators
+  .github/workflows/       CI/CD pipelines
+5.2 Tech Stack Decisions
+
+Concern
+Choice
+Rationale
+Framework
+Next.js 14 (App Router)
+SSR + API routes in one project; Vercel free tier deployment; React Native shares component logic.
+Language
+TypeScript
+Catches schema mismatches at compile time; essential when Prisma types flow to UI.
+Database
+PostgreSQL on Supabase
+Free tier with 500MB; direct Prisma connection; row-level security for future multi-user work.
+ORM
+Prisma
+Type-safe queries, auto-migrations, and excellent Next.js integration.
+Auth
+NextAuth.js v5
+Handles Google OAuth + Credentials in < 100 lines; session management built in.
+Styling
+Tailwind CSS
+Utility-first; shares token vocabulary with NativeWind for the future mobile port.
+Hosting
+Vercel (free tier)
+Zero-config Next.js deployment; preview URLs on every PR; 100GB bandwidth/month free.
+Email
+Resend
+3,000 emails/month free; simple API; great for magic links and reset emails.
+5.3 Environment Variables
+All secrets are stored in .env.local (gitignored) and configured in Vercel project settings. The following must be set before the app will start:
+
+DATABASE_URL=postgresql://...               # Supabase connection string
+DIRECT_URL=postgresql://...                # Direct URL (required by Prisma for migrations)
+NEXTAUTH_URL=https://your-app.vercel.app   # App base URL
+NEXTAUTH_SECRET=<random 32-char string>    # Session signing secret
+GOOGLE_CLIENT_ID=<from Google Console>
+GOOGLE_CLIENT_SECRET=<from Google Console>
+RESEND_API_KEY=re_<from Resend dashboard>
+5.4 CI/CD Pipeline
+GitHub Actions runs the following pipeline on every push to main and on every pull request:
+Checkout code and install dependencies (pnpm install --frozen-lockfile).
+Run ESLint (pnpm lint) — fails on any error, warns on warnings.
+Run TypeScript type-check (pnpm tsc --noEmit) — zero type errors allowed.
+Validate Prisma schema (pnpm prisma validate).
+Run unit tests (pnpm test) — must all pass.
+Vercel automatically deploys preview URLs on PR; promotes to production on merge to main.
+
+6. Non-Functional Requirements
+6.1 Performance
+Largest Contentful Paint (LCP) must be under 2.5 seconds on a simulated 4G connection.
+Time to First Byte (TTFB) must be under 800ms for all server-rendered pages.
+All database queries in this sprint must complete in under 100ms (schema is small; no optimisation needed yet).
+6.2 Security
+All pages under /(dashboard) must be protected by auth middleware — unauthenticated requests redirect to /auth/signin with a callbackUrl parameter.
+Passwords are hashed with bcrypt (cost factor 12) and are never logged or returned in API responses.
+OAuth tokens are encrypted at rest in the database using the NEXTAUTH_SECRET as the encryption key.
+CSP headers are set via next.config.js: default-src 'self'; script-src 'self' 'nonce-{nonce}'.
+Rate limiting: 5 login attempts per minute per IP. Implemented as an Edge Middleware function.
+6.3 Accessibility
+All interactive elements must be keyboard-navigable and have visible focus indicators.
+Form fields must have associated <label> elements. Error messages linked via aria-describedby.
+Modal dialogs must trap focus and return focus to the trigger on close.
+Colour contrast ratio for all body text must meet WCAG 2.1 AA (4.5:1 minimum).
+6.4 Code Quality
+ESLint with eslint-config-next + @typescript-eslint/recommended. Zero errors on CI.
+Prettier for formatting. Enforced via a pre-commit hook (husky + lint-staged).
+Each component and utility function must have a JSDoc comment explaining its purpose.
+No any type in TypeScript — use unknown or proper typed interfaces.
+
+7. Milestones & Timeline
+
+Milestone
+Owner
+Due
+Success Criteria
+Repo + CI/CD live
+Developer
+End of Day 2
+GitHub Actions passes on first push; Vercel preview URL resolves.
+Database schema migrated
+Developer
+End of Day 3
+prisma migrate dev succeeds; all tables exist in Supabase.
+Google OAuth working
+Developer
+End of Day 4
+Developer can sign in and out with own Google account.
+Email/password auth
+Developer
+End of Day 5
+Can register and sign in; password stored as bcrypt hash.
+Onboarding flow complete
+Developer
+End of Day 7
+New user completes 3-step modal; data persists in DB.
+Base layout shell
+Developer
+End of Day 8
+Sidebar + nav renders; protected routes redirect correctly.
+Component library
+Developer
+End of Day 9
+All 8 components built and render without console errors.
+Figma wireframes
+Developer
+End of Day 10
+4 screens wireframed: Dashboard, Transactions, Add Expense, Settings.
+Sprint review ready
+Developer
+End of Day 14
+All success criteria met; demo-able to mentor.
+
+8. Acceptance Criteria
+Each user story below must pass its acceptance criteria before being marked Done. Criteria are written as given/when/then scenarios.
+US-01 — Google Sign-In
+Given a new visitor on /auth/signin, when they click 'Continue with Google' and authenticate successfully, then they are redirected to /onboarding and a User record is created in the database.
+Given a returning user, when they sign in with Google, then they are redirected to /dashboard (not /onboarding).
+Given a user who cancels the Google OAuth dialog, when they return to the app, then they remain on /auth/signin with no error shown.
+US-02 — Email/Password Registration
+Given a registration form, when submitted with a valid email and password meeting all requirements, then a User is created, the password is stored as a bcrypt hash, and the user is redirected to /onboarding.
+Given a registration form, when submitted with an email already in use, then an inline error 'An account with this email already exists' is shown.
+Given a registration form, when submitted with a password shorter than 8 characters, then an inline error 'Password must be at least 8 characters' is shown and no record is created.
+US-06 — Onboarding Modal
+Given a new user on their first login, when /dashboard loads, then the onboarding modal renders immediately over the dashboard shell.
+Given a user on onboarding Step 1, when they select 'INR — Indian Rupee' and click Next, then Step 2 is shown and the currency is staged in local state.
+Given a user who completes all 3 steps, when they click 'Get Started', then UserProfile is created in the database, onboardingCompleted is set to true, and the modal closes.
+Given a user who clicks 'Skip for now', when they next log in, then the modal appears again.
+US-09 — Navigation
+Given a signed-in user on /dashboard, when they click 'Transactions' in the sidebar, then the URL changes to /transactions and the Transactions link is highlighted.
+Given an unauthenticated user who navigates directly to /dashboard, when the page loads, then they are redirected to /auth/signin?callbackUrl=%2Fdashboard.
+
+9. Risks & Mitigations
+
+Risk
+Likelihood
+Impact
+Mitigation
+Google OAuth consent screen takes time to verify
+Medium
+High — blocks auth testing
+Set up credentials immediately on Day 1; use test user list during unverified phase.
+Supabase free tier connection pooling limits
+Low
+Medium — slow queries
+Use Prisma connection pool with max 1 connection on free tier (DATABASE_URL).
+NextAuth v5 breaking changes from v4 docs
+Medium
+Medium — lost setup time
+Pin to 5.0.0-beta.25 (latest stable). Follow official v5 migration guide strictly.
+Scope creep into transaction features during this sprint
+High
+High — sprint fails
+Strict task board; anything beyond this PRD's scope goes to the backlog.
+Environment variable misconfiguration on Vercel
+Low
+High — prod breaks
+Document all env vars in .env.example; add a startup check that throws if any are missing.
+
+10. Appendix
+10.1 Wireframe Checklist
+The following screens must be wireframed in Figma by end of Week 2 (Day 10):
+Dashboard — empty state with placeholder cards for Spending Overview, Recent Transactions, and Budget Status.
+Transaction List — table layout, search bar, filter chips (Category, Date, Amount range), and 'Add Transaction' button.
+Add Expense modal — Amount, Category dropdown, Merchant, Date picker, Notes field, and Recurring toggle.
+Settings — Profile section (avatar, name, email), Preferences section (currency, locale), Security section (change password, connected accounts).
+10.2 Useful Commands
+
+# Start development server
+pnpm dev
+
+# Run database migrations
+pnpm prisma migrate dev --name init
+
+# Open Prisma Studio (DB GUI)
+pnpm prisma studio
+
+# Generate Prisma client after schema changes
+pnpm prisma generate
+
+# Run linting
+pnpm lint
+
+# Type-check without emitting files
+pnpm tsc --noEmit
+
+# Run Gemini CLI for AI assistance
+gemini -p "explain the NextAuth session flow"
+10.3 References
+Next.js 14 App Router docs — https://nextjs.org/docs
+NextAuth.js v5 docs — https://authjs.dev
+Prisma with Next.js guide — https://www.prisma.io/nextjs
+Supabase connection string setup — https://supabase.com/docs/guides/database/prisma
+Gemini 2.5 Pro API (Google AI Studio) — https://aistudio.google.com
+Gemini CLI — https://github.com/google-gemini/gemini-cli
+
+— End of Document —

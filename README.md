@@ -1,159 +1,74 @@
-# Turborepo starter
+# ✨ Smart Finance Tracker
 
-This Turborepo starter is maintained by the Turborepo core team.
+![Next.js](https://img.shields.io/badge/Next.js-14-black?style=for-the-badge&logo=next.js)
+![Supabase](https://img.shields.io/badge/Supabase-Database_&_Auth-3ECF8E?style=for-the-badge&logo=supabase)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css)
+![Google Gemini](https://img.shields.io/badge/Google_Gemini-AI-4285F4?style=for-the-badge&logo=google)
 
-## Using this example
+The **Smart Finance Tracker** is a next-generation personal finance dashboard that moves beyond static expense tracking. By seamlessly integrating real-time data ingestion with Google's Gemini AI, it acts as a proactive financial assistant—automatically categorizing every transaction and generating highly personalized, dynamic financial insights based on live spending habits.
 
-Run the following command:
+## 🚀 Key Features
 
-```sh
-npx create-turbo@latest
-```
+- **🧠 Intelligent AI Auto-Categorization:** Say goodbye to manual data entry. An AI pipeline powered by **Google Gemini 2.5 Flash** instantly analyzes merchant names and assigns them to the correct budget categories. A smart caching layer minimizes latency and API costs.
+- **💡 Proactive AI Financial Insights:** At the click of a button, the system analyzes your last 30 days of spending, income, and category distributions to generate highly personalized, actionable advice (warnings, tips, and budget goals).
+- **🏦 Bank Aggregator Webhooks:** Built for the real world, featuring a secure Webhook API designed to ingest live transaction payloads from external Account Aggregators (like Setu or Finvu).
+- **📄 Bulk CSV Import:** An intelligent CSV module that automatically parses and maps statement templates from major banks like HDFC and SBI directly into the database.
+- **📊 Live Analytics Dashboard:** A visually stunning, glassmorphism-styled dashboard featuring interactive charts (`recharts`), live KPIs, and spending velocity tracking.
 
-## What's inside?
+## 🛠️ Technology Stack
 
-This Turborepo includes the following packages/apps:
+- **Frontend:** Next.js (React), Tailwind CSS, Recharts
+- **Backend:** Next.js Server Actions, Supabase (PostgreSQL)
+- **Security:** Supabase Auth, strictly enforced PostgreSQL Row Level Security (RLS)
+- **Artificial Intelligence:** `@google/generative-ai` (`gemini-2.5-flash`)
+- **Data Processing:** PapaParse (Client-side CSV mapping)
 
-### Apps and Packages
+## ⚙️ Getting Started
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+### Prerequisites
+- Node.js (v18 or higher)
+- A [Supabase](https://supabase.com) project
+- A [Google Gemini API Key](https://aistudio.google.com/)
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+### Installation
 
-### Utilities
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/yourusername/smart-finance-tracker.git
+   cd smart-finance-tracker
+   ```
 
-This Turborepo has some additional tools already setup for you:
+2. **Install dependencies:**
+   ```bash
+   npm install
+   # or
+   pnpm install
+   ```
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+3. **Environment Setup:**
+   Create a `.env.local` file in the `apps/web` directory with the following variables:
+   ```env
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+   GEMINI_API_KEY=your_gemini_api_key
+   ```
 
-### Build
+4. **Database Setup:**
+   Run the provided `supabase_setup.sql` script in your Supabase SQL Editor to instantly generate all required tables, Enum types, and Row Level Security policies.
 
-To build all apps and packages, run the following command:
+5. **Run the development server:**
+   ```bash
+   npm run dev
+   # or
+   pnpm dev
+   ```
+   Open [http://localhost:3000](http://localhost:3000) to view the dashboard!
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
+## 🏗️ Architecture Highlights
 
-```sh
-cd my-turborepo
-turbo build
-```
+- **Row Level Security:** Every database operation is cryptographically verified against the active user's JWT, ensuring bank-level data isolation.
+- **Server Actions:** By utilizing Next.js Server Actions, all AI prompting and database mutations occur securely on the backend, ensuring API keys and business logic are never exposed to the client.
+- **Dynamic Fallback Engine:** The AI Insights widget includes a robust fallback system that calculates personalized advice locally if the Google Gemini API experiences an outage, guaranteeing uninterrupted user experience.
 
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo build
-pnpm dlx turbo build
-pnpm exec turbo build
-```
-
-You can build a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo build --filter=docs
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-```
-
-### Develop
-
-To develop all apps and packages, run the following command:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo dev
-```
-
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo dev
-pnpm exec turbo dev
-pnpm exec turbo dev
-```
-
-You can develop a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo dev --filter=web
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-```
-
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo login
-```
-
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo login
-pnpm exec turbo login
-pnpm exec turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo link
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo link
-pnpm exec turbo link
-pnpm exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.dev/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.dev/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.dev/docs/reference/configuration)
-- [CLI Usage](https://turborepo.dev/docs/reference/command-line-reference)
+---
+*Built as a Fintech proof-of-concept demonstrating the integration of LLMs in personal finance.*
