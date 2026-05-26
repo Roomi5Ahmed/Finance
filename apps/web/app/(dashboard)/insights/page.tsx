@@ -59,7 +59,7 @@ export default async function InsightsPage() {
     categoryData[catName].merchants.add(tx.merchant)
     
     // Group history by date for the chart
-    const dateStr = new Date(tx.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+    const dateStr = new Date(tx.date).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })
     const existingDate = categoryData[catName].history.find(h => h.date === dateStr)
     if (existingDate) {
       existingDate.amount += amount

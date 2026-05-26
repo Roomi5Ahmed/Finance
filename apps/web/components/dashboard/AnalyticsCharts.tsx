@@ -11,7 +11,7 @@ export default function AnalyticsCharts({ transactions }: { transactions: any[] 
   for (let i = 6; i >= 0; i--) {
     const d = new Date(today)
     d.setDate(d.getDate() - i)
-    const dateStr = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+    const dateStr = d.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })
     last7Days.set(dateStr, 0)
   }
 
@@ -24,7 +24,7 @@ export default function AnalyticsCharts({ transactions }: { transactions: any[] 
     const amountStr = Math.abs(tx.amount)
 
     // Populate Line Chart
-    const txDate = new Date(tx.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+    const txDate = new Date(tx.date).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })
     if (last7Days.has(txDate)) {
       last7Days.set(txDate, last7Days.get(txDate) + amountStr)
     }

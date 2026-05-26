@@ -7,6 +7,7 @@ CREATE TABLE public.user_profiles (
     id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
     currency TEXT NOT NULL DEFAULT 'INR',
     monthly_income DECIMAL(12,2),
+    monthly_budget DECIMAL(12,2) DEFAULT 50000.00,
     financial_goal TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()) NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()) NOT NULL

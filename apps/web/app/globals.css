@@ -3,6 +3,17 @@
 @theme {
   --color-background: #0B1121;
   --color-foreground: #e2e8f0;
+  --color-card: #151D2C;
+  --color-card-foreground: #e2e8f0;
+  --color-popover: #1E293B;
+  --color-popover-foreground: #e2e8f0;
+  --color-primary: #818cf8;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #1E293B;
+  --color-secondary-foreground: #e2e8f0;
+  --color-muted: #1E293B;
+  --color-muted-foreground: #94a3b8;
+  --color-border: rgba(255, 255, 255, 0.05);
 }
 
 html,
@@ -53,3 +64,88 @@ a {
     transform: translateY(0);
   }
 }
+
+/* ═══ Spotlight Glow Effect ═══════════════════════════════════════════ */
+[data-glow] {
+  --border-size: calc(var(--border, 2) * 1px);
+  --spotlight-size: calc(var(--size, 200) * 1px);
+  --hue: calc(var(--base, 280) + (var(--xp, 0) * var(--spread, 300)));
+  --glow-opacity: 0;
+  background-image: radial-gradient(
+    var(--spotlight-size) var(--spotlight-size) at
+    var(--x, 50%)
+    var(--y, 50%),
+    hsl(var(--hue) 100% 70% / calc(0.1 * var(--glow-opacity))),
+    transparent
+  );
+  background-color: hsl(0 0% 60% / 0.12);
+  border: var(--border-size) solid hsl(0 0% 60% / 0.12);
+  touch-action: none;
+}
+
+[data-glow]::before,
+[data-glow]::after {
+  pointer-events: none;
+  content: "";
+  position: absolute;
+  inset: calc(var(--border-size) * -1);
+  border: var(--border-size) solid transparent;
+  border-radius: calc(var(--radius, 14) * 1px);
+  background-repeat: no-repeat;
+  background-position: 50% 50%;
+  mask:
+    linear-gradient(transparent, transparent),
+    linear-gradient(white, white);
+  mask-clip: padding-box, border-box;
+  mask-composite: intersect;
+  opacity: var(--glow-opacity, 0);
+  transition: opacity 0.3s ease;
+}
+
+[data-glow]::before {
+  background-image: radial-gradient(
+    calc(var(--spotlight-size) * 0.75) calc(var(--spotlight-size) * 0.75) at
+    var(--x, 50%)
+    var(--y, 50%),
+    hsl(var(--hue) 100% 50% / 1),
+    transparent 100%
+  );
+  filter: brightness(2);
+}
+
+[data-glow]::after {
+  background-image: radial-gradient(
+    calc(var(--spotlight-size) * 0.5) calc(var(--spotlight-size) * 0.5) at
+    var(--x, 50%)
+    var(--y, 50%),
+    hsl(0 100% 100% / 1),
+    transparent 100%
+  );
+}
+
+/* Inner blur halo */
+[data-glow] > [data-glow] {
+  position: absolute;
+  inset: 0;
+  will-change: filter;
+  opacity: var(--glow-opacity, 0);
+  transition: opacity 0.3s ease;
+  border-radius: calc(var(--radius, 14) * 1px);
+  border-width: calc(var(--border-size) * 20);
+  filter: blur(calc(var(--border-size) * 10));
+  background: none;
+  pointer-events: none;
+  border: none;
+}
+
+[data-glow] > [data-glow]::before {
+  inset: -10px;
+  border-width: 10px;
+}
+
+/* Override background for cards/buttons that use glow — keep their BG */
+.glow-card,
+.glow-btn {
+  background-color: #151D2C !important;
+}
+

@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import { generateCategoryInsights } from '@/app/(dashboard)/insights/actions'
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
+import { GlowCard } from '@/components/ui/spotlight-card'
+import { GlowButton } from '@/components/ui/glow-button'
 
 type CategoryData = {
   name: string
@@ -43,7 +45,7 @@ export default function CategoryInsightCard({ category, globalBudget }: { catego
   const gradientId = `gradient-${category.name.replace(/[^a-zA-Z0-9]/g, '')}`
 
   return (
-    <div className="bg-[#151D2C] rounded-xl border border-white/5 shadow-xl overflow-hidden flex flex-col transition-all hover:border-white/10">
+    <GlowCard glowColor="purple" className="flex flex-col transition-all">
       
       {/* Top Header Section */}
       <div className="p-5 pb-0">
@@ -110,7 +112,7 @@ export default function CategoryInsightCard({ category, globalBudget }: { catego
         {!hasGenerated && !loading && (
           <button
             onClick={handleGenerate}
-            className="w-full flex items-center justify-center px-3 py-2 rounded-lg border border-indigo-500/20 text-indigo-400 text-xs font-medium hover:bg-indigo-500/10 transition-colors"
+            className="w-full flex items-center justify-center px-3 py-2 text-indigo-400 text-xs font-medium bg-[#151D2C] rounded-lg border border-white/5 hover:bg-white/5 transition-colors"
           >
             <span className="mr-1.5">✨</span> Generate Optimizations
           </button>
@@ -142,6 +144,6 @@ export default function CategoryInsightCard({ category, globalBudget }: { catego
           </div>
         )}
       </div>
-    </div>
+    </GlowCard>
   )
 }
