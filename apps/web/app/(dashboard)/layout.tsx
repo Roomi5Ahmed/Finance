@@ -10,22 +10,23 @@ export default async function DashboardLayout({
   children: React.ReactNode
 }) {
   const supabase = await createClient()
-  
+
   const {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // Although middleware protects this, we double check server-side for safety
   if (!user) {
     redirect('/auth/signin')
   }
 
   return (
-    <div className="flex flex-col h-screen bg-[#0B1121] overflow-hidden text-slate-300">
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', backgroundColor: '#000000', overflow: 'hidden', color: '#8C8C8C' }}>
       <OnboardingModal />
       <Header />
-      <main className="flex-1 overflow-y-auto p-2 pb-28 md:p-3 md:pb-32 bg-[#0F1523]">
-          {children}
+      <main style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', position: 'relative', zIndex: 10 }}>
+          <div style={{ padding: '32px 48px 160px 48px' }}>
+            {children}
+          </div>
       </main>
       <DockNav />
     </div>

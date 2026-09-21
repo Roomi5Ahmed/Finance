@@ -2,6 +2,8 @@
 
 import { createClient } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { checkAndFireBudgetAlerts } from '@/app/(dashboard)/budgets/actions'
+import { detectSubscriptions } from '@/app/(dashboard)/subscriptions/actions'
 
 export async function addTransaction(formData: FormData) {
   const supabase = await createClient()
@@ -59,7 +61,10 @@ export async function addTransaction(formData: FormData) {
     throw new Error(`DB Error: ${error.message} - ${error.details || ''}`)
   }
 
-  // 5. Revalidate
+  // 5. Check budget alerts (fire-and-forget)
+  checkAndFireBudgetAlerts(user.id).catch(console.error)
+
+  // 6. Revalidate
   revalidatePath('/transactions')
   revalidatePath('/dashboard')
 }
@@ -105,6 +110,12 @@ export async function bulkAddTransactions(transactions: any[]) {
     console.error('Bulk insert error:', error)
     throw new Error('Failed to insert bulk transactions')
   }
+
+  // Check budget alerts (fire-and-forget)
+  checkAndFireBudgetAlerts(user.id).catch(console.error)
+
+  // Detect new subscriptions (fire-and-forget)
+  detectSubscriptions().catch(console.error)
 
   revalidatePath('/transactions')
   revalidatePath('/dashboard')

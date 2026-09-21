@@ -2,7 +2,6 @@
 
 import * as React from "react"
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu"
-import { CheckIcon, ChevronRightIcon, CircleIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 function DropdownMenu({ ...props }: React.ComponentProps<typeof DropdownMenuPrimitive.Root>) {
@@ -24,7 +23,7 @@ function DropdownMenuContent({
         data-slot="dropdown-menu-content"
         sideOffset={sideOffset}
         className={cn(
-          "bg-[#1E293B] text-slate-200 z-50 min-w-[8rem] overflow-hidden rounded-lg border border-white/10 p-1 shadow-xl animate-in fade-in-0 zoom-in-95",
+          "bg-[#181818] text-[#EFEFEF] z-50 min-w-[8rem] overflow-hidden rounded-[11px] border border-white/10 p-1 shadow-xl animate-in fade-in-0 zoom-in-95",
           className
         )}
         {...props}
@@ -43,7 +42,7 @@ function DropdownMenuItem({
       data-slot="dropdown-menu-item"
       data-inset={inset}
       className={cn(
-        "relative flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm outline-none select-none transition-colors focus:bg-white/10 focus:text-white data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[inset]:pl-8 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "relative flex cursor-pointer items-center gap-2 rounded-[4px] px-2 py-1.5 text-sm outline-none select-none transition-all duration-[0.6s] ease-[cubic-bezier(0.19,1,0.22,1)] focus:bg-[#FF98A2]/10 focus:text-[#FF98A2] data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[inset]:pl-8 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         className
       )}
       {...props}
@@ -60,7 +59,7 @@ function DropdownMenuLabel({
     <DropdownMenuPrimitive.Label
       data-slot="dropdown-menu-label"
       data-inset={inset}
-      className={cn("px-2 py-1.5 text-xs font-semibold text-slate-400 uppercase tracking-wider data-[inset]:pl-8", className)}
+      className={cn("px-2 py-1.5 text-xs font-semibold text-[#8C8C8C] uppercase tracking-wider data-[inset]:pl-8", className)}
       {...props}
     />
   )

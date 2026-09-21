@@ -7,7 +7,8 @@ import {
   ArrowLeftRight,
   Sparkles,
   PieChart,
-  CreditCard,
+  Receipt,
+  Repeat,
   Settings
 } from 'lucide-react'
 
@@ -16,7 +17,8 @@ const navigation = [
   { icon: ArrowLeftRight, label: 'Transactions', href: '/transactions' },
   { icon: Sparkles, label: 'Insights', href: '/insights' },
   { icon: PieChart, label: 'Budgets', href: '/budgets' },
-  { icon: CreditCard, label: 'Accounts', href: '/accounts' },
+  { icon: Repeat, label: 'Subscriptions', href: '/subscriptions' },
+  { icon: Receipt, label: 'Bills', href: '/bills' },
   { icon: Settings, label: 'Settings', href: '/settings' },
 ]
 

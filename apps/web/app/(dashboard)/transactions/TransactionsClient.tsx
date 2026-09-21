@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState, useMemo } from 'react'
 import AddExpenseModal from '@/components/transactions/AddExpenseModal'
@@ -26,7 +26,6 @@ export default function TransactionsClient({ initialTransactions, categories }: 
   const [isAutoCategorising, setIsAutoCategorising] = useState(false)
   const [isSyncing, setIsSyncing] = useState(false)
 
-  // Table state
   const [searchQuery, setSearchQuery] = useState('')
   const [sortColumn, setSortColumn] = useState<SortKey | null>(null)
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
@@ -71,7 +70,6 @@ export default function TransactionsClient({ initialTransactions, categories }: 
   const filteredAndSorted = useMemo(() => {
     let data = [...initialTransactions]
 
-    // Search filter
     if (searchQuery) {
       const q = searchQuery.toLowerCase()
       data = data.filter((tx: any) =>
@@ -81,12 +79,10 @@ export default function TransactionsClient({ initialTransactions, categories }: 
       )
     }
 
-    // Category filter
     if (selectedCategory !== 'all') {
       data = data.filter((tx: any) => tx.categories?.name === selectedCategory)
     }
 
-    // Sort
     if (sortColumn) {
       data.sort((a: any, b: any) => {
         let aVal: any, bVal: any
@@ -119,7 +115,6 @@ export default function TransactionsClient({ initialTransactions, categories }: 
     return data
   }, [initialTransactions, searchQuery, selectedCategory, sortColumn, sortDirection])
 
-  // Pagination
   const totalPages = Math.max(1, Math.ceil(filteredAndSorted.length / pageSize))
   const paginatedData = filteredAndSorted.slice((currentPage - 1) * pageSize, currentPage * pageSize)
 
@@ -127,20 +122,25 @@ export default function TransactionsClient({ initialTransactions, categories }: 
     <Button
       variant="ghost"
       onClick={() => handleSort(column)}
-      className="h-8 px-2 text-xs uppercase tracking-wider font-semibold text-slate-400 hover:text-white"
+      className="h-8 px-2 text-xs uppercase tracking-wider font-semibold text-[#8C8C8C] hover:text-[#EFEFEF] transition-colors duration-[0.6s] ease-[cubic-bezier(0.19,1,0.22,1)]"
+      style={{ fontFamily: 'var(--font-roboto), Roboto, sans-serif', fontWeight: 900 }}
     >
       {children}
-      <ArrowUpDown className={`ml-1.5 h-3 w-3 ${sortColumn === column ? 'text-indigo-400' : 'text-slate-600'}`} />
+      <ArrowUpDown className={`ml-1.5 h-3 w-3 ${sortColumn === column ? 'text-[#FF98A2]' : 'text-[#8C8C8C]/50'}`} />
     </Button>
   )
 
   return (
-    <div className="space-y-4 animate-in">
-      {/* Header & Actions */}
+    <div className="space-y-5 animate-in">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">Transactions</h1>
-          <p className="mt-1 text-sm text-slate-400">
+          <h1
+            className="text-2xl font-bold text-[#EFEFEF] tracking-tight"
+            style={{ fontFamily: 'var(--font-inter), Inter, sans-serif', fontWeight: 700 }}
+          >
+            Transactions
+          </h1>
+          <p className="mt-1.5 text-sm text-[#8C8C8C]">
             Manage your income and expenses.
           </p>
         </div>
@@ -150,25 +150,24 @@ export default function TransactionsClient({ initialTransactions, categories }: 
             <span className="mr-1.5">🏦</span> {isSyncing ? 'Syncing...' : 'Sync Bank'}
           </GlowButton>
           <GlowButton onClick={handleAutoCategorise} disabled={isAutoCategorising} glowColor="purple"
-            className="inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium text-indigo-400">
+            className="inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium text-[#FF98A2]">
             <span className="mr-1.5">✨</span> {isAutoCategorising ? 'Categorising...' : 'Auto Categorise'}
           </GlowButton>
           <GlowButton onClick={() => setIsCsvModalOpen(true)} glowColor="blue"
-            className="inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium text-white">
+            className="inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium text-[#EFEFEF]">
             <span className="mr-1.5">📄</span> Import CSV
           </GlowButton>
           <GlowButton onClick={() => setIsModalOpen(true)} glowColor="purple"
-            className="inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium text-white bg-indigo-600/30">
+            className="inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium text-[#EFEFEF] bg-[#FF98A2]/30">
             <span className="mr-1.5">➕</span> Add Transaction
           </GlowButton>
         </div>
       </div>
 
-      {/* Search & Filter Bar */}
-      <GlowCard glowColor="blue" className="p-3">
-        <div className="flex flex-wrap gap-2 items-center">
+      <GlowCard glowColor="blue" className="p-4">
+        <div className="flex flex-wrap gap-3 items-center">
           <div className="relative flex-1 min-w-[200px]">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8C8C8C]" />
             <Input
               placeholder="Search by merchant, category, or tag..."
               value={searchQuery}
@@ -179,7 +178,8 @@ export default function TransactionsClient({ initialTransactions, categories }: 
           <select
             value={selectedCategory}
             onChange={(e) => { setSelectedCategory(e.target.value); setCurrentPage(1) }}
-            className="rounded-lg border border-white/10 bg-[#0B1121] h-9 pl-3 pr-8 text-sm text-white focus:border-indigo-500 outline-none"
+            className="rounded-[11px] border border-white/5 bg-[#000000] h-9 pl-3 pr-8 text-sm text-[#EFEFEF] focus:border-[#FF98A2] outline-none transition-colors duration-[0.6s] ease-[cubic-bezier(0.19,1,0.22,1)]"
+            style={{ fontFamily: 'var(--font-roboto), Roboto, sans-serif' }}
           >
             <option value="all">All Categories</option>
             {categories.map((c: any) => <option key={c.id} value={c.name}>{c.icon} {c.name}</option>)}
@@ -187,11 +187,11 @@ export default function TransactionsClient({ initialTransactions, categories }: 
         </div>
       </GlowCard>
 
-      {/* Data Table */}
       <GlowCard glowColor="purple" className="overflow-hidden">
+        <div className="overflow-x-auto">
         <Table>
           <TableHeader>
-            <TableRow className="bg-[#0B1121]/50 hover:bg-[#0B1121]/50">
+            <TableRow className="bg-[#181818]/50 hover:bg-[#181818]/50">
               <TableHead>
                 <SortableHeader column="date">Date</SortableHeader>
               </TableHead>
@@ -211,7 +211,7 @@ export default function TransactionsClient({ initialTransactions, categories }: 
           <TableBody>
             {paginatedData.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center h-24 text-slate-500">
+                <TableCell colSpan={6} className="text-center h-24 text-[#8C8C8C]">
                   {searchQuery || selectedCategory !== 'all'
                     ? 'No transactions match your filters.'
                     : 'No transactions found. Add one to get started!'}
@@ -219,10 +219,10 @@ export default function TransactionsClient({ initialTransactions, categories }: 
               </TableRow>
             ) : paginatedData.map((tx: any) => (
               <TableRow key={tx.id}>
-                <TableCell className="text-slate-400 text-xs">
+                <TableCell className="text-[#8C8C8C] text-xs">
                   {new Date(tx.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
                 </TableCell>
-                <TableCell className="font-medium text-white text-sm">
+                <TableCell className="font-medium text-[#EFEFEF] text-sm">
                   {tx.merchant}
                 </TableCell>
                 <TableCell>
@@ -230,14 +230,14 @@ export default function TransactionsClient({ initialTransactions, categories }: 
                     <Badge variant="outline" className="gap-1">
                       <span>{tx.categories.icon}</span> {tx.categories.name}
                     </Badge>
-                  ) : <span className="text-slate-600">—</span>}
+                  ) : <span className="text-[#8C8C8C]/50">—</span>}
                 </TableCell>
                 <TableCell className="text-xs">
                   {tx.tags?.length > 0
                     ? tx.tags.map((t: string, i: number) => (
                         <Badge key={i} variant="secondary" className="mr-1 text-[10px]">#{t}</Badge>
                       ))
-                    : <span className="text-slate-600">—</span>
+                    : <span className="text-[#8C8C8C]/50">—</span>
                   }
                 </TableCell>
                 <TableCell className="text-right">
@@ -271,10 +271,10 @@ export default function TransactionsClient({ initialTransactions, categories }: 
             ))}
           </TableBody>
         </Table>
+        </div>
       </GlowCard>
 
-      {/* Pagination Footer */}
-      <div className="flex items-center justify-between text-sm text-slate-500">
+      <div className="flex items-center justify-between text-sm text-[#8C8C8C] pt-1">
         <div>
           Showing {filteredAndSorted.length === 0 ? 0 : (currentPage - 1) * pageSize + 1}–{Math.min(currentPage * pageSize, filteredAndSorted.length)} of {filteredAndSorted.length} transaction{filteredAndSorted.length !== 1 ? 's' : ''}
         </div>
@@ -287,7 +287,7 @@ export default function TransactionsClient({ initialTransactions, categories }: 
           >
             <ChevronLeft className="h-4 w-4" /> Previous
           </Button>
-          <span className="text-xs text-slate-400 px-2">
+          <span className="text-xs text-[#8C8C8C] px-2">
             Page {currentPage} of {totalPages}
           </span>
           <Button

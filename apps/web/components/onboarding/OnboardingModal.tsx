@@ -12,7 +12,6 @@ export default function OnboardingModal() {
   const router = useRouter()
 
   useEffect(() => {
-    // Check if onboarding is completed
     const isCompleted = localStorage.getItem('onboardingCompleted') === 'true'
     if (!isCompleted) {
       setIsOpen(true)
@@ -23,9 +22,8 @@ export default function OnboardingModal() {
 
   const handleNext = () => setStep((prev) => prev + 1)
   const handleBack = () => setStep((prev) => prev - 1)
-  
+
   const handleFinish = async () => {
-    // Here we would save to Supabase UserProfile table
     console.log({ currency, income, goal })
     localStorage.setItem('onboardingCompleted', 'true')
     setIsOpen(false)
@@ -38,13 +36,13 @@ export default function OnboardingModal() {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
-        
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+      <div className="bg-[#181818] border border-white/10 rounded-[11px] shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
+
         {/* Progress Bar */}
-        <div className="w-full bg-gray-200 dark:bg-gray-800 h-1">
-          <div 
-            className="bg-indigo-600 h-1 transition-all duration-300" 
+        <div className="w-full bg-white/5 h-1">
+          <div
+            className="bg-[#FF98A2] h-1 transition-all duration-[0.6s] ease-[cubic-bezier(0.19,1,0.22,1)]"
             style={{ width: `${(step / 3) * 100}%` }}
           />
         </div>
@@ -53,14 +51,19 @@ export default function OnboardingModal() {
           {step === 1 && (
             <div className="space-y-6">
               <div>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Welcome!</h2>
-                <p className="text-gray-500 dark:text-gray-400 mt-2">Let's personalize your experience. What's your primary currency?</p>
+                <h2
+                  className="text-2xl font-bold text-[#EFEFEF]"
+                  style={{ fontFamily: 'var(--font-inter), Inter, sans-serif' }}
+                >
+                  Welcome!
+                </h2>
+                <p className="text-[#8C8C8C] mt-2">Let&apos;s personalize your experience. What&apos;s your primary currency?</p>
               </div>
               <div>
                 <select
                   value={currency}
                   onChange={(e) => setCurrency(e.target.value)}
-                  className="mt-1 block w-full pl-3 pr-10 py-3 text-base border-gray-300 dark:border-gray-700 dark:bg-gray-800 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+                  className="mt-1 block w-full pl-3 pr-10 py-3 text-base bg-[#000000] border border-white/10 rounded-[11px] text-[#EFEFEF] focus:outline-none focus:border-[#FF98A2] focus:ring-1 focus:ring-[#FF98A2]/20 transition-all duration-[0.6s] ease-[cubic-bezier(0.19,1,0.22,1)]"
                 >
                   <option value="INR">🇮🇳 INR - Indian Rupee</option>
                   <option value="USD">🇺🇸 USD - US Dollar</option>
@@ -74,19 +77,24 @@ export default function OnboardingModal() {
           {step === 2 && (
             <div className="space-y-6">
               <div>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Monthly Income</h2>
-                <p className="text-gray-500 dark:text-gray-400 mt-2">This helps us calculate your budget targets. (Optional)</p>
+                <h2
+                  className="text-2xl font-bold text-[#EFEFEF]"
+                  style={{ fontFamily: 'var(--font-inter), Inter, sans-serif' }}
+                >
+                  Monthly Income
+                </h2>
+                <p className="text-[#8C8C8C] mt-2">This helps us calculate your budget targets. (Optional)</p>
               </div>
               <div>
-                <div className="relative mt-1 rounded-md shadow-sm">
+                <div className="relative mt-1 rounded-[11px] shadow-sm">
                   <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                    <span className="text-gray-500 sm:text-sm">{currency === 'INR' ? '₹' : '$'}</span>
+                    <span className="text-[#8C8C8C] sm:text-sm">{currency === 'INR' ? '₹' : '$'}</span>
                   </div>
                   <input
                     type="number"
                     value={income}
                     onChange={(e) => setIncome(e.target.value)}
-                    className="block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-800 pl-7 pr-12 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-3"
+                    className="block w-full rounded-[11px] border border-white/10 bg-[#000000] pl-7 pr-12 focus:border-[#FF98A2] focus:ring-1 focus:ring-[#FF98A2]/20 focus:outline-none text-[#EFEFEF] sm:text-sm py-3 transition-all duration-[0.6s] ease-[cubic-bezier(0.19,1,0.22,1)]"
                     placeholder="0.00"
                   />
                 </div>
@@ -97,14 +105,35 @@ export default function OnboardingModal() {
           {step === 3 && (
             <div className="space-y-6">
               <div>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Your Goal</h2>
-                <p className="text-gray-500 dark:text-gray-400 mt-2">What do you want to achieve the most?</p>
+                <h2
+                  className="text-2xl font-bold text-[#EFEFEF]"
+                  style={{ fontFamily: 'var(--font-inter), Inter, sans-serif' }}
+                >
+                  Your Goal
+                </h2>
+                <p className="text-[#8C8C8C] mt-2">What do you want to achieve the most?</p>
               </div>
               <div className="space-y-3">
                 {['Save money', 'Reduce subscriptions', 'Track spending', 'Debt paydown'].map((g) => (
-                  <label key={g} className={`flex items-center p-4 border rounded-lg cursor-pointer transition-colors ${goal === g ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/30' : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800'}`}>
-                    <input type="radio" name="goal" value={g} checked={goal === g} onChange={() => setGoal(g)} className="sr-only" />
-                    <span className={`text-sm font-medium ${goal === g ? 'text-indigo-900 dark:text-indigo-200' : 'text-gray-900 dark:text-gray-300'}`}>{g}</span>
+                  <label
+                    key={g}
+                    className={`flex items-center p-4 border rounded-[11px] cursor-pointer transition-all duration-[0.6s] ease-[cubic-bezier(0.19,1,0.22,1)] ${
+                      goal === g
+                        ? 'border-[#FF98A2] bg-[#FF98A2]/10'
+                        : 'border-white/10 hover:bg-white/5'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="goal"
+                      value={g}
+                      checked={goal === g}
+                      onChange={() => setGoal(g)}
+                      className="sr-only"
+                    />
+                    <span className={`text-sm font-medium ${goal === g ? 'text-[#FF98A2]' : 'text-[#EFEFEF]'}`}>
+                      {g}
+                    </span>
                   </label>
                 ))}
               </div>
@@ -113,27 +142,33 @@ export default function OnboardingModal() {
 
           <div className="mt-8 flex items-center justify-between">
             {step === 1 ? (
-              <button onClick={handleSkip} className="text-sm font-medium text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
+              <button
+                onClick={handleSkip}
+                className="text-sm font-medium text-[#8C8C8C] hover:text-[#EFEFEF] transition-colors duration-[0.6s]"
+              >
                 Skip for now
               </button>
             ) : (
-              <button onClick={handleBack} className="text-sm font-medium text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
+              <button
+                onClick={handleBack}
+                className="text-sm font-medium text-[#8C8C8C] hover:text-[#EFEFEF] transition-colors duration-[0.6s]"
+              >
                 Back
               </button>
             )}
-            
+
             {step < 3 ? (
-              <button 
+              <button
                 onClick={handleNext}
-                className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-6 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                className="inline-flex justify-center rounded-[16px] border border-[#FF98A2] bg-[#FF98A2] py-2 px-6 text-sm font-medium text-[#000000] hover:bg-[#FF98A2]/90 focus:outline-none focus:ring-2 focus:ring-[#FF98A2] focus:ring-offset-2 focus:ring-offset-[#181818] transition-all duration-[0.6s] ease-[cubic-bezier(0.19,1,0.22,1)]"
               >
                 Next
               </button>
             ) : (
-              <button 
+              <button
                 onClick={handleFinish}
                 disabled={!goal}
-                className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-6 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="inline-flex justify-center rounded-[16px] border border-[#FF98A2] bg-[#FF98A2] py-2 px-6 text-sm font-medium text-[#000000] hover:bg-[#FF98A2]/90 focus:outline-none focus:ring-2 focus:ring-[#FF98A2] focus:ring-offset-2 focus:ring-offset-[#181818] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-[0.6s] ease-[cubic-bezier(0.19,1,0.22,1)]"
               >
                 Get Started
               </button>

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { generateCategoryInsights } from '@/app/(dashboard)/insights/actions'
@@ -45,35 +45,35 @@ export default function CategoryInsightCard({ category, globalBudget }: { catego
   const gradientId = `gradient-${category.name.replace(/[^a-zA-Z0-9]/g, '')}`
 
   return (
-    <GlowCard glowColor="purple" className="flex flex-col transition-all">
+    <GlowCard glowColor="purple" className="flex flex-col transition-all duration-[0.6s] ease-[cubic-bezier(0.19,1,0.22,1)]">
       
       {/* Top Header Section */}
-      <div className="p-5 pb-0">
+      <div className="p-6 pb-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div 
-              className="w-10 h-10 rounded-lg flex items-center justify-center text-xl border border-white/5 shrink-0"
+              className="w-11 h-11 rounded-[0px] flex items-center justify-center text-xl border border-white/5 shrink-0"
               style={{ backgroundColor: `${category.color}15` }}
             >
               {category.icon}
             </div>
             <div className="min-w-0">
-              <h3 className="text-sm font-bold text-white tracking-wide truncate">{category.name}</h3>
-              <p className="text-slate-500 text-xs">
+              <h3 className="text-sm font-bold text-white tracking-wide truncate" style={{ fontFamily: 'var(--font-inter)' }}>{category.name}</h3>
+              <p className="text-[#8C8C8C] text-xs" style={{ fontFamily: 'var(--font-roboto)' }}>
                 {category.merchants.length} Merchant{category.merchants.length !== 1 ? 's' : ''}
               </p>
             </div>
           </div>
           <div className="text-right shrink-0 ml-3">
-            <p className="text-base font-bold text-white">₹{category.totalSpent.toLocaleString('en-IN')}</p>
-            <p className="text-slate-500 text-xs">{percentage}% of budget</p>
+            <p className="text-base font-bold text-white">&#8377;{category.totalSpent.toLocaleString('en-IN')}</p>
+            <p className="text-[#8C8C8C] text-xs">{percentage}% of budget</p>
           </div>
         </div>
 
         {/* Progress Bar */}
-        <div className="mt-3 w-full bg-slate-800/60 rounded-full h-1 overflow-hidden">
+        <div className="mt-3 w-full bg-white/5 rounded-full h-1 overflow-hidden">
           <div 
-            className="h-1 rounded-full transition-all duration-1000 ease-out"
+            className="h-1 rounded-full transition-all duration-[0.6s] ease-[cubic-bezier(0.19,1,0.22,1)]"
             style={{ width: `${percentage}%`, backgroundColor: category.color }}
           ></div>
         </div>
@@ -90,10 +90,10 @@ export default function CategoryInsightCard({ category, globalBudget }: { catego
               </linearGradient>
             </defs>
             <Tooltip 
-              contentStyle={{ backgroundColor: '#0B1121', borderColor: 'rgba(255,255,255,0.1)', borderRadius: '8px', color: '#fff', fontSize: '12px', padding: '6px 10px' }}
-              itemStyle={{ color: '#fff' }}
-              formatter={(value: number) => [`₹${value.toLocaleString('en-IN')}`, 'Spent']}
-              labelStyle={{ color: '#94a3b8', fontSize: '11px' }}
+              contentStyle={{ backgroundColor: '#181818', borderColor: 'rgba(255,255,255,0.1)', borderRadius: '11px', color: '#EFEFEF', fontSize: '12px', padding: '6px 10px' }}
+              itemStyle={{ color: '#EFEFEF' }}
+              formatter={(value: number) => [`&#8377;${value.toLocaleString('en-IN')}`, 'Spent']}
+              labelStyle={{ color: '#8C8C8C', fontSize: '11px' }}
             />
             <Area 
               type="monotone" 
@@ -108,35 +108,35 @@ export default function CategoryInsightCard({ category, globalBudget }: { catego
       </div>
 
       {/* AI Tips Section */}
-      <div className="p-5 pt-3 bg-[#0B1121]/20 flex-1 flex flex-col justify-end border-t border-white/[0.03]">
+      <div className="p-6 pt-4 bg-[#181818]/50 flex-1 flex flex-col justify-end border-t border-white/5">
         {!hasGenerated && !loading && (
           <button
             onClick={handleGenerate}
-            className="w-full flex items-center justify-center px-3 py-2 text-indigo-400 text-xs font-medium bg-[#151D2C] rounded-lg border border-white/5 hover:bg-white/5 transition-colors"
+            className="w-full flex items-center justify-center px-3 py-2 text-[#FF98A2] text-xs font-medium bg-[#181818] rounded-[0px] border border-white/5 hover:bg-white/5 transition-colors duration-[0.6s] ease-[cubic-bezier(0.19,1,0.22,1)]"
           >
-            <span className="mr-1.5">✨</span> Generate Optimizations
+            <span className="mr-1.5">&#10024;</span> Generate Optimizations
           </button>
         )}
 
         {loading && (
           <div className="space-y-2 animate-pulse">
-            <div className="h-10 bg-indigo-500/10 rounded-lg" />
-            <div className="h-10 bg-indigo-500/10 rounded-lg" />
+            <div className="h-10 bg-[#FF98A2]/10 rounded-[0px]" />
+            <div className="h-10 bg-[#FF98A2]/10 rounded-[0px]" />
           </div>
         )}
 
         {hasGenerated && !loading && tips.length > 0 && (
           <div className="space-y-2 animate-in">
             {tips.map((tip, idx) => (
-              <div key={idx} className="flex items-start bg-indigo-500/5 border border-indigo-500/10 rounded-lg p-3">
-                <span className="text-indigo-400 mr-2 mt-0.5 text-sm shrink-0">💡</span>
-                <p className="text-xs text-slate-300 leading-relaxed flex-1">{tip}</p>
+              <div key={idx} className="flex items-start bg-[#FF98A2]/5 border border-[#FF98A2]/10 rounded-[0px] p-3">
+                <span className="text-[#FF98A2] mr-2 mt-0.5 text-sm shrink-0">&#128161;</span>
+                <p className="text-xs text-[#EFEFEF] leading-relaxed flex-1">{tip}</p>
               </div>
             ))}
             
             <button 
               onClick={handleGenerate}
-              className="text-[10px] text-slate-500 hover:text-indigo-400 transition-colors flex items-center pt-1 justify-end w-full"
+              className="text-[10px] text-[#8C8C8C]/50 hover:text-[#FF98A2] transition-colors duration-[0.6s] ease-[cubic-bezier(0.19,1,0.22,1)] flex items-center pt-1 justify-end w-full"
             >
               <svg className="w-2.5 h-2.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
               Refresh Tips

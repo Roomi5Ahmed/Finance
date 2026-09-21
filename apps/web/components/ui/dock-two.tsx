@@ -41,19 +41,19 @@ const DockIconButton = React.forwardRef<HTMLButtonElement, DockIconButtonProps>(
         whileHover={{ scale: 1.15, y: -4 }}
         whileTap={{ scale: 0.95 }}
         onClick={onClick}
-        className={cn(
-          "relative group p-3 rounded-xl transition-colors",
+          className={cn(
+            "relative group p-3.5 rounded-[11px] transition-all duration-[0.6s] ease-[cubic-bezier(0.19,1,0.22,1)]",
           isActive
-            ? "bg-indigo-500/15 text-indigo-400"
-            : "hover:bg-white/5 text-slate-400 hover:text-white",
+            ? "bg-[#FF98A2]/10 text-[#FF98A2]"
+            : "hover:bg-white/5 text-[#8C8C8C] hover:text-[#EFEFEF]",
           className
         )}
       >
-        <Icon className="w-5 h-5" strokeWidth={isActive ? 2.5 : 2} />
+        <Icon className="w-5 h-5" strokeWidth={isActive ? 2.5 : 1.5} />
         <span className={cn(
           "absolute -top-9 left-1/2 -translate-x-1/2",
-          "px-2.5 py-1 rounded-lg text-[11px] font-medium",
-          "bg-[#1E293B] text-white border border-white/10 shadow-lg",
+          "px-2.5 py-1 rounded-[4px] text-[11px] font-medium",
+          "bg-[#181818] text-[#EFEFEF] border border-white/10 shadow-lg",
           "opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100",
           "transition-all duration-200 whitespace-nowrap pointer-events-none"
         )}>
@@ -62,7 +62,7 @@ const DockIconButton = React.forwardRef<HTMLButtonElement, DockIconButtonProps>(
         {isActive && (
           <motion.div
             layoutId="dock-active"
-            className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-indigo-400"
+            className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#FF98A2]"
             transition={{ type: "spring", stiffness: 500, damping: 30 }}
           />
         )}
@@ -81,10 +81,10 @@ const Dock = React.forwardRef<HTMLDivElement, DockProps>(
           animate="animate"
           variants={floatingAnimation}
           className={cn(
-            "flex items-center gap-1 px-3 py-2 rounded-2xl",
-            "backdrop-blur-xl border shadow-2xl",
-            "bg-[#0B1121]/90 border-white/10",
-            "hover:shadow-[0_8px_40px_rgba(99,102,241,0.15)] transition-shadow duration-300"
+            "flex items-center gap-2 px-4 py-2.5 rounded-[16px]",
+            "backdrop-blur-sm border border-white/10",
+            "bg-[#000000]/90",
+            "hover:shadow-[0_8px_40px_rgba(255,152,162,0.1)] transition-shadow duration-[0.6s]"
           )}
         >
           {items.map((item) => (

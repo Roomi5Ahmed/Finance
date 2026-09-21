@@ -3,25 +3,32 @@ import { signup } from '../actions'
 export default async function SignUpPage(props: { searchParams: Promise<{ message: string }> }) {
   const searchParams = await props.searchParams;
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 py-12 sm:px-6 lg:px-8 dark:bg-gray-900">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-[#000000] py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
-          Create a new account
+        <h2
+          className="mt-6 text-center text-3xl font-bold text-[#EFEFEF]"
+          style={{ fontFamily: 'var(--font-inter), Inter, sans-serif' }}
+        >
+          Create your account
         </h2>
+        <p className="mt-2 text-center text-sm text-[#8C8C8C]" style={{ fontFamily: 'var(--font-roboto), Roboto, sans-serif', fontWeight: 900 }}>
+          Smart <span className="text-[#FF98A2]">Finance</span>
+        </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white px-4 py-8 shadow sm:rounded-lg sm:px-10 dark:bg-gray-800">
+        <div className="bg-[#181818] border border-white/5 px-4 py-8 sm:px-10">
           <form className="space-y-6" action={signup}>
             {searchParams?.message && (
-              <p className="mt-4 p-4 bg-red-100 text-red-700 text-center text-sm rounded-md">
+              <p className="mt-4 p-4 bg-[#FF98A2]/10 text-[#FF98A2] text-center text-sm rounded-[11px] border border-[#FF98A2]/20">
                 {searchParams.message}
               </p>
             )}
             <div>
               <label
                 htmlFor="email"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                className="block text-sm font-medium text-[#8C8C8C]"
+                style={{ fontFamily: 'var(--font-roboto), Roboto, sans-serif', fontWeight: 900 }}
               >
                 Email address
               </label>
@@ -32,7 +39,7 @@ export default async function SignUpPage(props: { searchParams: Promise<{ messag
                   type="email"
                   autoComplete="email"
                   required
-                  className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
+                  className="block w-full appearance-none rounded-[11px] border border-white/10 bg-[#000000] px-3 py-2 placeholder-[#8C8C8C] text-[#EFEFEF] focus:border-[#FF98A2] focus:outline-none focus:ring-1 focus:ring-[#FF98A2]/20 sm:text-sm transition-all duration-[0.6s] ease-[cubic-bezier(0.19,1,0.22,1)]"
                 />
               </div>
             </div>
@@ -40,7 +47,8 @@ export default async function SignUpPage(props: { searchParams: Promise<{ messag
             <div>
               <label
                 htmlFor="password"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                className="block text-sm font-medium text-[#8C8C8C]"
+                style={{ fontFamily: 'var(--font-roboto), Roboto, sans-serif', fontWeight: 900 }}
               >
                 Password
               </label>
@@ -51,7 +59,7 @@ export default async function SignUpPage(props: { searchParams: Promise<{ messag
                   type="password"
                   autoComplete="new-password"
                   required
-                  className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
+                  className="block w-full appearance-none rounded-[11px] border border-white/10 bg-[#000000] px-3 py-2 placeholder-[#8C8C8C] text-[#EFEFEF] focus:border-[#FF98A2] focus:outline-none focus:ring-1 focus:ring-[#FF98A2]/20 sm:text-sm transition-all duration-[0.6s] ease-[cubic-bezier(0.19,1,0.22,1)]"
                 />
               </div>
             </div>
@@ -59,17 +67,17 @@ export default async function SignUpPage(props: { searchParams: Promise<{ messag
             <div>
               <button
                 type="submit"
-                className="flex w-full justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                className="flex w-full justify-center rounded-[16px] border border-[#FF98A2] bg-[#FF98A2] px-4 py-2 text-sm font-medium text-[#000000] hover:bg-[#FF98A2]/90 focus:outline-none focus:ring-2 focus:ring-[#FF98A2] focus:ring-offset-2 focus:ring-offset-[#181818] transition-all duration-[0.6s] ease-[cubic-bezier(0.19,1,0.22,1)]"
               >
                 Sign up
               </button>
             </div>
-            
+
             <div className="mt-6 text-center text-sm">
-                <span className="text-gray-500">Already have an account? </span>
-                <a href="/auth/signin" className="font-medium text-indigo-600 hover:text-indigo-500">
-                    Sign in
-                </a>
+              <span className="text-[#8C8C8C]">Already have an account? </span>
+              <a href="/auth/signin" className="font-medium text-[#FF98A2] hover:text-[#FF98A2]/80 transition-colors duration-[0.6s]">
+                Sign in
+              </a>
             </div>
           </form>
         </div>

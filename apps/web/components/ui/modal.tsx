@@ -15,12 +15,12 @@ export function Modal({ isOpen, onClose, children }: ModalProps) {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose()
     }
-    
+
     if (isOpen) {
       document.addEventListener('keydown', handleEscape)
-      document.body.style.overflow = 'hidden' // prevent scrolling
+      document.body.style.overflow = 'hidden'
     }
-    
+
     return () => {
       document.removeEventListener('keydown', handleEscape)
       document.body.style.overflow = 'unset'
@@ -36,12 +36,12 @@ export function Modal({ isOpen, onClose, children }: ModalProps) {
   }
 
   return (
-    <div 
+    <div
       ref={overlayRef}
       onClick={handleOverlayClick}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
     >
-      <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-200">
+      <div className="bg-[#181818] border border-white/10 w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-200">
         {children}
       </div>
     </div>

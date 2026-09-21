@@ -46,8 +46,8 @@ export default function AnalyticsCharts({ transactions }: { transactions: any[] 
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
       
       {/* Spending Over Time (Line Chart) */}
-      <div className="bg-[#151D2C] rounded-2xl border border-white/5 shadow-xl p-5 flex flex-col">
-        <h3 className="text-sm text-slate-400 font-medium tracking-wide mb-4">Spending Trend (Last 7 Days)</h3>
+      <div className="bg-[#181818] rounded-[11px] border border-white/5 shadow-xl p-5 flex flex-col">
+        <h3 className="text-sm text-[#8C8C8C] font-medium tracking-wide mb-4">Spending Trend (Last 7 Days)</h3>
         <div className="w-full h-64">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={lineChartData} margin={{ top: 5, right: 10, bottom: 5, left: -10 }}>
@@ -66,8 +66,8 @@ export default function AnalyticsCharts({ transactions }: { transactions: any[] 
       </div>
 
       {/* Top Categories (Bar Chart) */}
-      <div className="bg-[#151D2C] rounded-2xl border border-white/5 shadow-xl p-5 flex flex-col">
-        <h3 className="text-sm text-slate-400 font-medium tracking-wide mb-4">Top Categories (All Time)</h3>
+      <div className="bg-[#181818] rounded-[11px] border border-white/5 shadow-xl p-5 flex flex-col">
+        <h3 className="text-sm text-[#8C8C8C] font-medium tracking-wide mb-4">Top Categories (All Time)</h3>
         <div className="w-full h-64">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={barChartData} margin={{ top: 5, right: 10, bottom: 5, left: 0 }} layout="vertical">
