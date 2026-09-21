@@ -92,7 +92,7 @@ export default function SubscriptionsClient({
   }
 
   return (
-    <div className="space-y-6 animate-in">
+    <div className="animate-in" style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-white tracking-tight" style={{ fontFamily: 'var(--font-inter)' }}>Subscriptions</h1>
@@ -116,34 +116,34 @@ export default function SubscriptionsClient({
       {/* Summary */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <GlowCard glowColor="purple" className="p-5">
-          <div className="flex items-center gap-3">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <div className="p-2.5 rounded-[0px] bg-[#FF98A2]/10">
               <CreditCard className="w-4 h-4 text-[#FF98A2]" />
             </div>
             <div>
-              <p className="text-xs text-[#8C8C8C]" style={{ fontFamily: 'var(--font-roboto)' }}>Monthly Cost</p>
-              <p className="text-lg font-bold text-white">₹{totalMonthly.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</p>
+              <p className="text-xs text-[#8C8C8C]" style={{ fontFamily: 'var(--font-roboto)', marginBottom: '2px' }}>Monthly Cost</p>
+              <p className="text-lg font-bold text-white">{'\u20B9'}{totalMonthly.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</p>
             </div>
           </div>
         </GlowCard>
         <GlowCard glowColor="blue" className="p-5">
-          <div className="flex items-center gap-3">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <div className="p-2.5 rounded-[0px] bg-[#FF98A2]/10">
               <TrendingUp className="w-4 h-4 text-[#FF98A2]" />
             </div>
             <div>
-              <p className="text-xs text-[#8C8C8C]" style={{ fontFamily: 'var(--font-roboto)' }}>Annual Cost</p>
-              <p className="text-lg font-bold text-white">₹{totalAnnual.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</p>
+              <p className="text-xs text-[#8C8C8C]" style={{ fontFamily: 'var(--font-roboto)', marginBottom: '2px' }}>Annual Cost</p>
+              <p className="text-lg font-bold text-white">{'\u20B9'}{totalAnnual.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</p>
             </div>
           </div>
         </GlowCard>
         <GlowCard glowColor="green" className="p-5">
-          <div className="flex items-center gap-3">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <div className="p-2.5 rounded-[0px] bg-[#EFEFEF]/10">
               <Calendar className="w-4 h-4 text-[#EFEFEF]" />
             </div>
             <div>
-              <p className="text-xs text-[#8C8C8C]" style={{ fontFamily: 'var(--font-roboto)' }}>Active Subscriptions</p>
+              <p className="text-xs text-[#8C8C8C]" style={{ fontFamily: 'var(--font-roboto)', marginBottom: '2px' }}>Active Subscriptions</p>
               <p className="text-lg font-bold text-white">{activeSubs.length}</p>
             </div>
           </div>
@@ -152,10 +152,12 @@ export default function SubscriptionsClient({
 
       {/* Subscription List */}
       {subscriptions.length === 0 ? (
-        <GlowCard glowColor="blue" className="p-10 text-center">
-          <CreditCard className="w-12 h-12 text-[#8C8C8C]/50 mx-auto mb-4" />
-          <p className="text-[#8C8C8C] text-sm mb-2">No subscriptions detected yet.</p>
-          <p className="text-[#8C8C8C]/50 text-xs">Click "Scan for Subscriptions" to analyze your transactions for recurring patterns.</p>
+        <GlowCard glowColor="blue" className="p-10">
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '20px 0' }}>
+            <CreditCard className="w-12 h-12 text-[#8C8C8C]/50" style={{ marginBottom: '16px' }} />
+            <p className="text-[#8C8C8C] text-sm" style={{ marginBottom: '8px' }}>No subscriptions detected yet.</p>
+            <p className="text-[#8C8C8C]/50 text-xs">Click &quot;Scan for Subscriptions&quot; to analyze your transactions for recurring patterns.</p>
+          </div>
         </GlowCard>
       ) : (
         <div className="space-y-3">

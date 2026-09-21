@@ -134,7 +134,7 @@ export default function BudgetClient({
   const usedCategories = new Set(budgets.filter(b => b.category_id).map(b => b.category_id))
 
   return (
-    <div className="space-y-6 animate-in">
+    <div className="animate-in" style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-white tracking-tight" style={{ fontFamily: 'var(--font-inter)' }}>Budgets</h1>
@@ -157,34 +157,34 @@ export default function BudgetClient({
       {/* Overall Summary */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <GlowCard glowColor="blue" className="p-5">
-          <div className="flex items-center gap-3">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <div className="p-2.5 rounded-[0px] bg-[#FF98A2]/10">
               <WalletCards className="w-4 h-4 text-[#FF98A2]" />
             </div>
             <div>
-              <p className="text-xs text-[#8C8C8C]" style={{ fontFamily: 'var(--font-roboto)' }}>Monthly Income</p>
-              <p className="text-lg font-bold text-white">₹{(profile?.monthly_income || 0).toLocaleString('en-IN')}</p>
+              <p className="text-xs text-[#8C8C8C]" style={{ fontFamily: 'var(--font-roboto)', marginBottom: '2px' }}>Monthly Income</p>
+              <p className="text-lg font-bold text-white">{'\u20B9'}{(profile?.monthly_income || 0).toLocaleString('en-IN')}</p>
             </div>
           </div>
         </GlowCard>
         <GlowCard glowColor="green" className="p-5">
-          <div className="flex items-center gap-3">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <div className="p-2.5 rounded-[0px] bg-[#EFEFEF]/10">
               <PieChart className="w-4 h-4 text-[#EFEFEF]" />
             </div>
             <div>
-              <p className="text-xs text-[#8C8C8C]" style={{ fontFamily: 'var(--font-roboto)' }}>Spent This Month</p>
-              <p className="text-lg font-bold text-white">₹{totalMonthlySpend.toLocaleString('en-IN')}</p>
+              <p className="text-xs text-[#8C8C8C]" style={{ fontFamily: 'var(--font-roboto)', marginBottom: '2px' }}>Spent This Month</p>
+              <p className="text-lg font-bold text-white">{'\u20B9'}{totalMonthlySpend.toLocaleString('en-IN')}</p>
             </div>
           </div>
         </GlowCard>
         <GlowCard glowColor="orange" className="p-5">
-          <div className="flex items-center gap-3">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <div className="p-2.5 rounded-[0px] bg-[#FF98A2]/10">
               <Calendar className="w-4 h-4 text-[#FF98A2]/70" />
             </div>
             <div>
-              <p className="text-xs text-[#8C8C8C]" style={{ fontFamily: 'var(--font-roboto)' }}>Active Budgets</p>
+              <p className="text-xs text-[#8C8C8C]" style={{ fontFamily: 'var(--font-roboto)', marginBottom: '2px' }}>Active Budgets</p>
               <p className="text-lg font-bold text-white">{budgets.length}</p>
             </div>
           </div>
@@ -284,9 +284,11 @@ export default function BudgetClient({
 
       {/* Budget List */}
       {budgets.length === 0 ? (
-        <GlowCard glowColor="blue" className="p-10 text-center">
-          <PieChart className="w-12 h-12 text-[#8C8C8C]/50 mx-auto mb-4" />
-          <p className="text-[#8C8C8C] text-sm">No budgets set yet. Create one to start tracking your spending limits.</p>
+        <GlowCard glowColor="blue" className="p-10">
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '20px 0' }}>
+            <PieChart className="w-12 h-12 text-[#8C8C8C]/50" style={{ marginBottom: '16px' }} />
+            <p className="text-[#8C8C8C] text-sm">No budgets set yet. Create one to start tracking your spending limits.</p>
+          </div>
         </GlowCard>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">

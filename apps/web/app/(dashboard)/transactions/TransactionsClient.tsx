@@ -131,7 +131,7 @@ export default function TransactionsClient({ initialTransactions, categories }: 
   )
 
   return (
-    <div className="space-y-5 animate-in">
+    <div className="animate-in" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1
@@ -167,12 +167,12 @@ export default function TransactionsClient({ initialTransactions, categories }: 
       <GlowCard glowColor="blue" className="p-4">
         <div className="flex flex-wrap gap-3 items-center">
           <div className="relative flex-1 min-w-[200px]">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8C8C8C]" />
+            <Search className="absolute text-[#8C8C8C]" style={{ left: '12px', top: '50%', transform: 'translateY(-50%)', height: '16px', width: '16px', pointerEvents: 'none' }} />
             <Input
               placeholder="Search by merchant, category, or tag..."
               value={searchQuery}
               onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1) }}
-              className="pl-10"
+              style={{ paddingLeft: '36px' }}
             />
           </div>
           <select

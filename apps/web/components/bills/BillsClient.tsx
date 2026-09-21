@@ -120,7 +120,7 @@ export default function BillsClient({ bills }: { bills: Bill[] }) {
   }
 
   return (
-    <div className="space-y-6 animate-in">
+    <div className="animate-in" style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-white tracking-tight" style={{ fontFamily: 'var(--font-inter)' }}>Bill Reminders</h1>
@@ -143,46 +143,46 @@ export default function BillsClient({ bills }: { bills: Bill[] }) {
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
         <GlowCard glowColor="blue" className="p-5">
-          <div className="flex items-center gap-3">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <div className="p-2.5 rounded-[0px] bg-[#FF98A2]/10">
               <Receipt className="w-4 h-4 text-[#FF98A2]" />
             </div>
             <div>
-              <p className="text-xs text-[#8C8C8C]" style={{ fontFamily: 'var(--font-roboto)' }}>Active Bills</p>
+              <p className="text-xs text-[#8C8C8C]" style={{ fontFamily: 'var(--font-roboto)', marginBottom: '2px' }}>Active Bills</p>
               <p className="text-lg font-bold text-white">{activeBills.length}</p>
             </div>
           </div>
         </GlowCard>
         <GlowCard glowColor="orange" className="p-5">
-          <div className="flex items-center gap-3">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <div className="p-2.5 rounded-[0px] bg-[#FF98A2]/10">
               <Clock className="w-4 h-4 text-[#FF98A2]/70" />
             </div>
             <div>
-              <p className="text-xs text-[#8C8C8C]" style={{ fontFamily: 'var(--font-roboto)' }}>Due Soon</p>
+              <p className="text-xs text-[#8C8C8C]" style={{ fontFamily: 'var(--font-roboto)', marginBottom: '2px' }}>Due Soon</p>
               <p className="text-lg font-bold text-white">{dueSoonBills.length}</p>
             </div>
           </div>
         </GlowCard>
         <GlowCard glowColor="red" className="p-5">
-          <div className="flex items-center gap-3">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <div className="p-2.5 rounded-[0px] bg-[#FF98A2]/10">
               <AlertTriangle className="w-4 h-4 text-[#FF98A2]" />
             </div>
             <div>
-              <p className="text-xs text-[#8C8C8C]" style={{ fontFamily: 'var(--font-roboto)' }}>Overdue</p>
+              <p className="text-xs text-[#8C8C8C]" style={{ fontFamily: 'var(--font-roboto)', marginBottom: '2px' }}>Overdue</p>
               <p className="text-lg font-bold text-white">{overdueBills.length}</p>
             </div>
           </div>
         </GlowCard>
         <GlowCard glowColor="green" className="p-5">
-          <div className="flex items-center gap-3">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <div className="p-2.5 rounded-[0px] bg-[#EFEFEF]/10">
-              <span className="text-[#EFEFEF] text-sm font-bold">&#8377;</span>
+              <span className="text-[#EFEFEF] text-sm font-bold">{'\u20B9'}</span>
             </div>
             <div>
-              <p className="text-xs text-[#8C8C8C]" style={{ fontFamily: 'var(--font-roboto)' }}>Monthly Estimate</p>
-              <p className="text-lg font-bold text-white">&#8377;{totalMonthlyEstimate.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</p>
+              <p className="text-xs text-[#8C8C8C]" style={{ fontFamily: 'var(--font-roboto)', marginBottom: '2px' }}>Monthly Estimate</p>
+              <p className="text-lg font-bold text-white">{'\u20B9'}{totalMonthlyEstimate.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</p>
             </div>
           </div>
         </GlowCard>
@@ -242,9 +242,11 @@ export default function BillsClient({ bills }: { bills: Bill[] }) {
 
       {/* Bill List */}
       {bills.length === 0 ? (
-        <GlowCard glowColor="blue" className="p-10 text-center">
-          <Receipt className="w-12 h-12 text-[#8C8C8C]/50 mx-auto mb-4" />
-          <p className="text-[#8C8C8C] text-sm">No bills tracked yet. Add your first bill to get reminders.</p>
+        <GlowCard glowColor="blue" className="p-10">
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '20px 0' }}>
+            <Receipt className="w-12 h-12 text-[#8C8C8C]/50" style={{ marginBottom: '16px' }} />
+            <p className="text-[#8C8C8C] text-sm">No bills tracked yet. Add your first bill to get reminders.</p>
+          </div>
         </GlowCard>
       ) : (
         <div className="space-y-3">

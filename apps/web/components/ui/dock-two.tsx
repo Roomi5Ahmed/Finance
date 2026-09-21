@@ -81,11 +81,12 @@ const Dock = React.forwardRef<HTMLDivElement, DockProps>(
           animate="animate"
           variants={floatingAnimation}
           className={cn(
-            "flex items-center gap-2 px-4 py-2.5 rounded-[16px]",
+            "flex items-center gap-2.5 rounded-[16px]",
             "backdrop-blur-sm border border-white/10",
             "bg-[#000000]/90",
             "hover:shadow-[0_8px_40px_rgba(255,152,162,0.1)] transition-shadow duration-[0.6s]"
           )}
+          style={{ padding: '12px 20px' }}
         >
           {items.map((item) => (
             <DockIconButton key={item.label} {...item} />

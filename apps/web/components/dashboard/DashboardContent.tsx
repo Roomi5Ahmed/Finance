@@ -109,7 +109,7 @@ export default function DashboardContent({
     <div className="w-full text-[#EFEFEF] animate-in flex gap-8">
 
       {/* ─── LEFT PANEL — Hero ─────────────────────────────── */}
-      <GlowCard glowColor="purple" className="hidden lg:flex w-[280px] shrink-0 flex-col justify-between p-6">
+      <GlowCard glowColor="purple" className="hidden lg:flex w-[280px] shrink-0 flex-col p-6">
         <div className="flex flex-col gap-2">
           <h1 className="font-bold tracking-tight leading-[0.9] text-[#EFEFEF]" style={{ fontFamily: 'var(--font-inter), Inter, sans-serif', fontSize: 'clamp(28px, 3vw, 42px)' }}>
             Your financial{' '}
@@ -120,20 +120,20 @@ export default function DashboardContent({
           </p>
         </div>
 
-        {/* Budget Ring */}
-        <div className="flex flex-col items-center gap-3 mt-auto">
-          <div className="relative w-20 h-20 flex items-center justify-center">
+        {/* Budget Ring — centered in the hero panel */}
+        <div className="flex flex-col items-center gap-4" style={{ marginTop: '100px' }}>
+          <div className="relative w-24 h-24 flex items-center justify-center">
             <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
               <path className="text-white/5" strokeWidth="2.5" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
               <path className={`${budgetPercentage > 90 ? 'text-[#FF98A2]' : 'text-[#EFEFEF]'}`} strokeWidth="2.5" strokeDasharray={strokeDasharray} strokeLinecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
             </svg>
-            <span className="absolute text-lg font-bold text-[#EFEFEF]">{budgetPercentage}%</span>
+            <span className="absolute text-xl font-bold text-[#EFEFEF]">{budgetPercentage}%</span>
           </div>
           <div className="text-center">
-            <p className="text-xs font-medium text-[#EFEFEF]">Budget Used</p>
-            <p className="text-[10px] text-[#8C8C8C] mt-0.5">₹{thisMonthExpenses.toLocaleString('en-IN')} / ₹{monthlyBudget.toLocaleString('en-IN')}</p>
+            <p className="text-sm font-medium text-[#EFEFEF]">Budget Used</p>
+            <p className="text-xs text-[#8C8C8C] mt-1">₹{thisMonthExpenses.toLocaleString('en-IN')} / ₹{monthlyBudget.toLocaleString('en-IN')}</p>
           </div>
-          <span className={`px-2.5 py-0.5 rounded-[4px] text-[10px] font-medium ${budgetPercentage > 80 ? 'bg-[#FF98A2]/10 text-[#FF98A2]' : 'bg-white/5 text-[#EFEFEF]'}`}>
+          <span className={`px-3 py-1 rounded-[4px] text-xs font-medium ${budgetPercentage > 80 ? 'bg-[#FF98A2]/10 text-[#FF98A2]' : 'bg-white/5 text-[#EFEFEF]'}`}>
             {budgetPercentage > 80 ? 'Over Budget' : 'On Track'}
           </span>
         </div>
