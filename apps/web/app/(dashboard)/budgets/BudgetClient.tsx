@@ -100,7 +100,7 @@ export default function BudgetClient({
     try {
       await deleteBudget(budgetId)
     } catch (error: any) {
-      alert(error.message || 'Failed to delete budget')
+      setMessage(error.message || 'Failed to delete budget')
     }
   }
 
@@ -222,7 +222,7 @@ export default function BudgetClient({
           <h3 className="text-sm font-semibold text-white mb-5" style={{ fontFamily: 'var(--font-inter)' }}>
             {editingBudget ? 'Edit Budget' : 'Create New Budget'}
           </h3>
-          <form onSubmit={editingBudget ? handleUpdateBudget : handleCreateBudget} className="space-y-4">
+          <form onSubmit={editingBudget ? handleUpdateBudget : handleCreateBudget} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="category_id" className="text-xs" style={{ fontFamily: 'var(--font-roboto)' }}>Category (leave empty for overall)</Label>
@@ -270,13 +270,28 @@ export default function BudgetClient({
                 <span className="text-xs text-[#EFEFEF]" style={{ fontFamily: 'var(--font-roboto)' }}>Auto-renew next month</span>
               </label>
             </div>
-            <div className="flex gap-2">
-              <GlowButton type="submit" glowColor="purple" disabled={isLoading}>
+            <div style={{ display: 'flex', gap: '10px', paddingTop: '4px' }}>
+              <GlowButton type="submit" glowColor="purple" disabled={isLoading}
+                style={{
+                  padding: '10px 24px', borderRadius: '11px', fontSize: '13px', fontWeight: 600,
+                  backgroundColor: '#FF98A2', color: '#000000', border: 'none',
+                  cursor: isLoading ? 'not-allowed' : 'pointer', opacity: isLoading ? 0.5 : 1,
+                  boxShadow: isLoading ? 'none' : '0 4px 16px rgba(255,152,162,0.3)',
+                  transition: 'all 0.3s',
+                }}>
                 {isLoading ? 'Saving...' : editingBudget ? 'Update Budget' : 'Create Budget'}
               </GlowButton>
-              <Button type="button" variant="ghost" onClick={() => { setIsAddingBudget(false); setEditingBudget(null) }}>
+              <button type="button" onClick={() => { setIsAddingBudget(false); setEditingBudget(null) }}
+                style={{
+                  padding: '10px 20px', borderRadius: '11px', border: '1px solid rgba(255,255,255,0.08)',
+                  backgroundColor: 'transparent', color: '#8C8C8C', fontSize: '13px', fontWeight: 500,
+                  cursor: 'pointer', transition: 'all 0.3s',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = '#EFEFEF' }}
+                onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#8C8C8C' }}
+              >
                 Cancel
-              </Button>
+              </button>
             </div>
           </form>
         </GlowCard>

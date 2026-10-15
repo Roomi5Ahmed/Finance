@@ -1,6 +1,7 @@
 ﻿'use client'
 
 import React, { useState, useMemo } from 'react'
+import { useRouter } from 'next/navigation'
 import AddExpenseModal from '@/components/transactions/AddExpenseModal'
 import CSVImportModal from '@/components/transactions/CSVImportModal'
 import { GlowButton } from '@/components/ui/glow-button'
@@ -21,10 +22,12 @@ import { MoreHorizontal, Search, ArrowUpDown, ChevronLeft, ChevronRight } from '
 type SortKey = 'date' | 'merchant' | 'category' | 'amount'
 
 export default function TransactionsClient({ initialTransactions, categories }: { initialTransactions: any[], categories: any[] }) {
+  const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isCsvModalOpen, setIsCsvModalOpen] = useState(false)
   const [isAutoCategorising, setIsAutoCategorising] = useState(false)
   const [isSyncing, setIsSyncing] = useState(false)
+  const [syncMessage, setSyncMessage] = useState('')
 
   const [searchQuery, setSearchQuery] = useState('')
   const [sortColumn, setSortColumn] = useState<SortKey | null>(null)
@@ -35,11 +38,13 @@ export default function TransactionsClient({ initialTransactions, categories }: 
 
   const handleAutoCategorise = async () => {
     setIsAutoCategorising(true)
+    setSyncMessage('')
     try {
       const result = await autoCategoriseTransactions()
-      alert(result.message)
+      setSyncMessage(result.message)
+      router.refresh()
     } catch (e: any) {
-      alert(e.message || 'Error running auto-categorisation')
+      setSyncMessage(e.message || 'Error running auto-categorisation')
     } finally {
       setIsAutoCategorising(false)
     }
@@ -47,11 +52,13 @@ export default function TransactionsClient({ initialTransactions, categories }: 
 
   const handleSyncBank = async () => {
     setIsSyncing(true)
+    setSyncMessage('')
     try {
       const result = await triggerMockWebhook()
-      alert(result.message)
+      setSyncMessage(result.message)
+      router.refresh()
     } catch (e: any) {
-      alert(e.message || 'Error syncing bank')
+      setSyncMessage(e.message || 'Error syncing bank')
     } finally {
       setIsSyncing(false)
     }
@@ -163,6 +170,20 @@ export default function TransactionsClient({ initialTransactions, categories }: 
           </GlowButton>
         </div>
       </div>
+
+      {syncMessage && (
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: '12px 16px', borderRadius: '11px',
+          backgroundColor: syncMessage.toLowerCase().includes('error') ? 'rgba(255,152,162,0.1)' : 'rgba(239,239,239,0.05)',
+          border: syncMessage.toLowerCase().includes('error') ? '1px solid rgba(255,152,162,0.2)' : '1px solid rgba(239,239,239,0.1)',
+          fontSize: '13px',
+          color: syncMessage.toLowerCase().includes('error') ? '#FF98A2' : '#EFEFEF',
+        }}>
+          <span>{syncMessage}</span>
+          <button onClick={() => setSyncMessage('')} style={{ background: 'none', border: 'none', color: '#8C8C8C', cursor: 'pointer', fontSize: '16px', padding: '0 4px' }}>&#x2715;</button>
+        </div>
+      )}
 
       <GlowCard glowColor="blue" className="p-4">
         <div className="flex flex-wrap gap-3 items-center">

@@ -83,78 +83,137 @@ export default function CSVImportModal({ isOpen, onClose }: { isOpen: boolean; o
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="bg-[#181818] border border-white/5 rounded-[0px] shadow-xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-[0.6s] ease-[cubic-bezier(0.19,1,0.22,1)]">
-        
-        <div className="flex items-center justify-between px-6 py-4 border-b border-white/5">
-          <h2
-            className="text-xl font-bold text-[#EFEFEF]"
-            style={{ fontFamily: 'var(--font-inter), Inter, sans-serif', fontWeight: 700 }}
-          >
+    <div style={{ position: 'fixed', inset: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
+      {/* Backdrop */}
+      <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }} onClick={onClose} />
+
+      {/* Modal */}
+      <div style={{
+        position: 'relative', width: '100%', maxWidth: '480px', backgroundColor: '#181818',
+        border: '1px solid rgba(255,255,255,0.06)', borderRadius: '16px', overflow: 'hidden',
+        animation: 'fadeSlideIn 0.6s cubic-bezier(0.19,1,0.22,1)',
+        boxShadow: '0 25px 60px rgba(0,0,0,0.5)',
+      }}>
+
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '24px 28px 20px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+          <h2 style={{ fontFamily: 'var(--font-inter), Inter, sans-serif', fontWeight: 700, fontSize: '20px', color: '#EFEFEF', margin: 0 }}>
             Import CSV
           </h2>
-          <button onClick={onClose} className="text-[#8C8C8C] hover:text-[#EFEFEF] transition-colors duration-[0.6s] ease-[cubic-bezier(0.19,1,0.22,1)]">
-            ✕
+          <button onClick={onClose} style={{
+            width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            borderRadius: '10px', border: '1px solid rgba(255,255,255,0.08)', backgroundColor: 'transparent',
+            color: '#8C8C8C', fontSize: '16px', cursor: 'pointer', transition: 'all 0.3s',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = '#EFEFEF' }}
+          onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#8C8C8C' }}
+          >
+            &#x2715;
           </button>
         </div>
 
-        <div className="p-6 space-y-6">
-          <div>
-            <label
-              className="block text-sm font-medium text-[#EFEFEF]"
-              style={{ fontFamily: 'var(--font-roboto), Roboto, sans-serif', fontWeight: 900 }}
-            >
+        {/* Body */}
+        <div style={{ padding: '24px 28px' }}>
+          {/* Bank Template */}
+          <div style={{ marginBottom: '24px' }}>
+            <label style={{ display: 'block', fontFamily: 'var(--font-roboto), Roboto, sans-serif', fontWeight: 900, fontSize: '11px', color: '#8C8C8C', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '10px' }}>
               Bank Template
             </label>
-            <select 
-              value={template} 
+            <select
+              value={template}
               onChange={e => setTemplate(e.target.value)}
-              className="mt-1 block w-full rounded-[11px] border border-white/5 bg-[#000000] py-2 pl-3 pr-10 text-base text-[#EFEFEF] focus:border-[#FF98A2] outline-none sm:text-sm transition-colors duration-[0.6s] ease-[cubic-bezier(0.19,1,0.22,1)]"
+              style={{
+                width: '100%', padding: '10px 14px', borderRadius: '11px',
+                border: '1px solid rgba(255,255,255,0.08)', backgroundColor: '#000000',
+                color: '#EFEFEF', fontSize: '14px', outline: 'none', cursor: 'pointer',
+                appearance: 'none' as const,
+                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%238C8C8C' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E")`,
+                backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center',
+              }}
             >
               <option value="HDFC">HDFC Bank</option>
               <option value="SBI">SBI</option>
             </select>
-            <p className="mt-2 text-xs text-[#8C8C8C]">Select the bank template so we can map the columns automatically.</p>
+            <p style={{ fontFamily: 'var(--font-roboto), Roboto, sans-serif', fontSize: '12px', color: '#666', marginTop: '8px', margin: '8px 0 0' }}>
+              Select the bank template so we can map the columns automatically.
+            </p>
           </div>
 
+          {/* Upload Area */}
           <div>
-            <label
-              className="block text-sm font-medium text-[#EFEFEF]"
-              style={{ fontFamily: 'var(--font-roboto), Roboto, sans-serif', fontWeight: 900 }}
-            >
+            <label style={{ display: 'block', fontFamily: 'var(--font-roboto), Roboto, sans-serif', fontWeight: 900, fontSize: '11px', color: '#8C8C8C', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '10px' }}>
               Upload File
             </label>
-            <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-white/5 border-dashed rounded-[11px] bg-[#000000]">
-              <div className="space-y-1 text-center">
-                <svg className="mx-auto h-12 w-12 text-[#8C8C8C]" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                  <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-                <div className="flex text-sm text-[#8C8C8C] justify-center">
-                  <label htmlFor="file-upload" className="relative cursor-pointer rounded-[11px] font-medium text-[#FF98A2] hover:text-[#FF98A2]/80 focus-within:outline-none transition-colors duration-[0.6s] ease-[cubic-bezier(0.19,1,0.22,1)]">
-                    <span>Upload a file</span>
-                    <input id="file-upload" name="file-upload" type="file" className="sr-only" accept=".csv" onChange={e => setFile(e.target.files?.[0] || null)} />
-                  </label>
-                  <p className="pl-1">or drag and drop</p>
-                </div>
-                <p className="text-xs text-[#8C8C8C]">{file ? file.name : 'CSV up to 10MB'}</p>
+            <div style={{
+              border: '2px dashed rgba(255,255,255,0.08)', borderRadius: '14px',
+              backgroundColor: '#000000', padding: '36px 24px', textAlign: 'center',
+              transition: 'border-color 0.3s',
+              cursor: 'pointer',
+            }}
+              onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(255,152,162,0.3)'}
+              onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'}
+            >
+              {/* Upload icon */}
+              <svg width="40" height="40" viewBox="0 0 48 48" fill="none" style={{ margin: '0 auto 16px', display: 'block' }}>
+                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                  stroke="#8C8C8C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              <div style={{ fontSize: '14px', color: '#8C8C8C', marginBottom: '8px' }}>
+                <label htmlFor="file-upload" style={{ cursor: 'pointer', color: '#FF98A2', fontWeight: 600, transition: 'color 0.3s' }}
+                  onMouseEnter={e => e.currentTarget.style.color = '#FFB3BB'}
+                  onMouseLeave={e => e.currentTarget.style.color = '#FF98A2'}
+                >
+                  Upload a file
+                </label>
+                <span> or drag and drop</span>
               </div>
+              <p style={{ fontSize: '12px', color: '#555', margin: 0 }}>
+                {file ? (
+                  <span style={{ color: '#FF98A2', fontWeight: 600 }}>{file.name}</span>
+                ) : (
+                  'CSV up to 10MB'
+                )}
+              </p>
+              <input id="file-upload" name="file-upload" type="file" accept=".csv"
+                onChange={e => setFile(e.target.files?.[0] || null)}
+                style={{ position: 'absolute', width: '1px', height: '1px', opacity: 0, overflow: 'hidden' }}
+              />
             </div>
           </div>
         </div>
 
-        <div className="bg-[#000000] px-6 py-4 flex items-center justify-end space-x-3 border-t border-white/5">
-          <button onClick={onClose} className="rounded-[11px] border border-white/5 bg-transparent px-4 py-2 text-sm font-medium text-[#EFEFEF] hover:bg-white/5 focus:outline-none transition-colors duration-[0.6s] ease-[cubic-bezier(0.19,1,0.22,1)]">
+        {/* Footer */}
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '10px',
+          padding: '16px 28px 24px',
+        }}>
+          <button onClick={onClose} style={{
+            padding: '10px 20px', borderRadius: '11px', border: '1px solid rgba(255,255,255,0.08)',
+            backgroundColor: 'transparent', color: '#8C8C8C', fontSize: '13px', fontWeight: 500,
+            cursor: 'pointer', transition: 'all 0.3s',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = '#EFEFEF' }}
+          onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#8C8C8C' }}
+          >
             Cancel
           </button>
-          <button 
-            onClick={handleUpload} 
-            disabled={!file || isUploading} 
-            className="rounded-[11px] border border-transparent bg-[#FF98A2] px-4 py-2 text-sm font-medium text-[#000000] shadow-sm hover:bg-[#FF98A2]/90 focus:outline-none transition-colors duration-[0.6s] ease-[cubic-bezier(0.19,1,0.22,1)] disabled:opacity-50"
+          <button
+            onClick={handleUpload}
+            disabled={!file || isUploading}
+            style={{
+              padding: '10px 24px', borderRadius: '11px', border: 'none',
+              backgroundColor: '#FF98A2', color: '#000000', fontSize: '13px', fontWeight: 600,
+              cursor: !file || isUploading ? 'not-allowed' : 'pointer',
+              opacity: !file || isUploading ? 0.4 : 1,
+              transition: 'all 0.3s',
+              boxShadow: !file || isUploading ? 'none' : '0 4px 16px rgba(255,152,162,0.3)',
+            }}
+            onMouseEnter={e => { if (file && !isUploading) e.currentTarget.style.boxShadow = '0 6px 24px rgba(255,152,162,0.45)' }}
+            onMouseLeave={e => { e.currentTarget.style.boxShadow = !file || isUploading ? 'none' : '0 4px 16px rgba(255,152,162,0.3)' }}
           >
             {isUploading ? 'Importing...' : 'Import Data'}
           </button>
         </div>
-
       </div>
     </div>
   )

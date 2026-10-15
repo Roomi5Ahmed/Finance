@@ -9,8 +9,8 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { RefreshCw, MoreHorizontal, Trash2, XCircle, AlertTriangle, CreditCard, TrendingUp, Calendar } from 'lucide-react'
-import { detectSubscriptions, updateSubscriptionStatus, deleteSubscription } from '@/app/(dashboard)/subscriptions/actions'
+import { RefreshCw, MoreHorizontal, Trash2, XCircle, AlertTriangle, CreditCard, TrendingUp, Calendar, Plus } from 'lucide-react'
+import { detectSubscriptions, updateSubscriptionStatus, deleteSubscription, createSubscription } from '@/app/(dashboard)/subscriptions/actions'
 import { AreaChart, Area, ResponsiveContainer, Tooltip } from 'recharts'
 
 interface Subscription {
@@ -37,6 +37,9 @@ export default function SubscriptionsClient({
 }) {
   const [isScanning, setIsScanning] = useState(false)
   const [message, setMessage] = useState('')
+  const [showAddForm, setShowAddForm] = useState(false)
+  const [addForm, setAddForm] = useState({ merchant: '', amount: '', cadence: 'monthly' })
+  const [isAdding, setIsAdding] = useState(false)
 
   const handleScan = async () => {
     setIsScanning(true)
@@ -48,6 +51,26 @@ export default function SubscriptionsClient({
       setMessage(e.message || 'Error scanning for subscriptions')
     } finally {
       setIsScanning(false)
+    }
+  }
+
+  const handleAdd = async () => {
+    if (!addForm.merchant.trim() || !addForm.amount) return
+    setIsAdding(true)
+    setMessage('')
+    try {
+      await createSubscription({
+        merchant: addForm.merchant.trim(),
+        amount: parseFloat(addForm.amount),
+        cadence: addForm.cadence,
+      })
+      setAddForm({ merchant: '', amount: '', cadence: 'monthly' })
+      setShowAddForm(false)
+      setMessage(`Subscription "${addForm.merchant.trim()}" added!`)
+    } catch (e: any) {
+      setMessage(e.message || 'Failed to add subscription')
+    } finally {
+      setIsAdding(false)
     }
   }
 
@@ -93,19 +116,66 @@ export default function SubscriptionsClient({
 
   return (
     <div className="animate-in" style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
         <div>
           <h1 className="text-2xl font-bold text-white tracking-tight" style={{ fontFamily: 'var(--font-inter)' }}>Subscriptions</h1>
           <p className="mt-1.5 text-sm text-[#8C8C8C]">
             Auto-detected recurring payments from your transaction history.
           </p>
         </div>
-        <GlowButton onClick={handleScan} disabled={isScanning} glowColor="purple"
-          className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium">
-          <RefreshCw className={`w-4 h-4 mr-2 ${isScanning ? 'animate-spin' : ''}`} />
-          {isScanning ? 'Scanning...' : 'Scan for Subscriptions'}
-        </GlowButton>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <GlowButton onClick={handleScan} disabled={isScanning} glowColor="purple"
+            className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium">
+            <RefreshCw className={`w-4 h-4 mr-2 ${isScanning ? 'animate-spin' : ''}`} />
+            {isScanning ? 'Scanning...' : 'Scan for Subscriptions'}
+          </GlowButton>
+          <GlowButton onClick={() => setShowAddForm(!showAddForm)} glowColor="green"
+            className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium">
+            <Plus className="w-4 h-4 mr-2" />
+            Add Subscription
+          </GlowButton>
+        </div>
       </div>
+
+      {showAddForm && (
+        <GlowCard glowColor="green" className="p-5">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <input
+                type="text"
+                placeholder="Service name (e.g. Netflix)"
+                value={addForm.merchant}
+                onChange={e => setAddForm(p => ({ ...p, merchant: e.target.value }))}
+                style={{ flex: 1, padding: '8px 12px', borderRadius: '11px', backgroundColor: '#181818', border: '1px solid #333', color: '#EFEFEF', fontSize: '14px', outline: 'none' }}
+              />
+              <input
+                type="number"
+                placeholder="Amount"
+                value={addForm.amount}
+                onChange={e => setAddForm(p => ({ ...p, amount: e.target.value }))}
+                style={{ width: '120px', padding: '8px 12px', borderRadius: '11px', backgroundColor: '#181818', border: '1px solid #333', color: '#EFEFEF', fontSize: '14px', outline: 'none' }}
+              />
+              <select
+                value={addForm.cadence}
+                onChange={e => setAddForm(p => ({ ...p, cadence: e.target.value }))}
+                style={{ padding: '8px 12px', borderRadius: '11px', backgroundColor: '#181818', border: '1px solid #333', color: '#EFEFEF', fontSize: '14px', outline: 'none' }}
+              >
+                <option value="weekly">Weekly</option>
+                <option value="monthly">Monthly</option>
+                <option value="quarterly">Quarterly</option>
+                <option value="annual">Annual</option>
+              </select>
+            </div>
+            <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+              <button onClick={() => setShowAddForm(false)} style={{ padding: '8px 16px', borderRadius: '11px', backgroundColor: 'transparent', border: '1px solid #333', color: '#8C8C8C', fontSize: '13px', cursor: 'pointer' }}>Cancel</button>
+              <GlowButton onClick={handleAdd} disabled={isAdding || !addForm.merchant.trim() || !addForm.amount} glowColor="green"
+                className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium">
+                {isAdding ? 'Adding...' : 'Add'}
+              </GlowButton>
+            </div>
+          </div>
+        </GlowCard>
+      )}
 
       {message && (
         <div className={`p-3 rounded-[0px] text-sm ${message.includes('Detected') ? 'bg-[#EFEFEF]/10 text-[#EFEFEF] border border-[#EFEFEF]/20' : 'bg-[#FF98A2]/10 text-[#FF98A2] border border-[#FF98A2]/20'}`}>
@@ -155,16 +225,16 @@ export default function SubscriptionsClient({
         <GlowCard glowColor="blue" className="p-10">
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '20px 0' }}>
             <CreditCard className="w-12 h-12 text-[#8C8C8C]/50" style={{ marginBottom: '16px' }} />
-            <p className="text-[#8C8C8C] text-sm" style={{ marginBottom: '8px' }}>No subscriptions detected yet.</p>
-            <p className="text-[#8C8C8C]/50 text-xs">Click &quot;Scan for Subscriptions&quot; to analyze your transactions for recurring patterns.</p>
+            <p className="text-[#8C8C8C] text-sm" style={{ marginBottom: '8px' }}>No subscriptions yet.</p>
+            <p className="text-[#8C8C8C]/50 text-xs">Click &quot;Scan for Subscriptions&quot; to auto-detect from transactions, or &quot;Add Subscription&quot; to add one manually.</p>
           </div>
         </GlowCard>
       ) : (
-        <div className="space-y-3">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {activeSubs.length > 0 && (
             <div>
-              <h3 className="text-xs font-semibold text-[#8C8C8C] uppercase tracking-wider mb-2" style={{ fontFamily: 'var(--font-roboto)' }}>Active ({activeSubs.length})</h3>
-              <div className="space-y-2">
+              <h3 className="text-xs font-semibold text-[#8C8C8C] uppercase tracking-wider" style={{ fontFamily: 'var(--font-roboto)', marginBottom: '8px' }}>Active ({activeSubs.length})</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {activeSubs.map(sub => (
                   <SubscriptionRow key={sub.id} sub={sub} onStatusUpdate={handleStatusUpdate} onDelete={handleDelete} getCadenceLabel={getCadenceLabel} getMonthlyAmount={getMonthlyAmount} />
                 ))}
@@ -174,8 +244,8 @@ export default function SubscriptionsClient({
 
           {lapsedSubs.length > 0 && (
             <div>
-              <h3 className="text-xs font-semibold text-[#FF98A2]/70 uppercase tracking-wider mb-2" style={{ fontFamily: 'var(--font-roboto)' }}>Lapsed ({lapsedSubs.length})</h3>
-              <div className="space-y-2">
+              <h3 className="text-xs font-semibold text-[#FF98A2]/70 uppercase tracking-wider" style={{ fontFamily: 'var(--font-roboto)', marginBottom: '8px' }}>Lapsed ({lapsedSubs.length})</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {lapsedSubs.map(sub => (
                   <SubscriptionRow key={sub.id} sub={sub} onStatusUpdate={handleStatusUpdate} onDelete={handleDelete} getCadenceLabel={getCadenceLabel} getMonthlyAmount={getMonthlyAmount} />
                 ))}
@@ -185,8 +255,8 @@ export default function SubscriptionsClient({
 
           {cancelledSubs.length > 0 && (
             <div>
-              <h3 className="text-xs font-semibold text-[#8C8C8C]/50 uppercase tracking-wider mb-2" style={{ fontFamily: 'var(--font-roboto)' }}>Cancelled ({cancelledSubs.length})</h3>
-              <div className="space-y-2">
+              <h3 className="text-xs font-semibold text-[#8C8C8C]/50 uppercase tracking-wider" style={{ fontFamily: 'var(--font-roboto)', marginBottom: '8px' }}>Cancelled ({cancelledSubs.length})</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {cancelledSubs.map(sub => (
                   <SubscriptionRow key={sub.id} sub={sub} onStatusUpdate={handleStatusUpdate} onDelete={handleDelete} getCadenceLabel={getCadenceLabel} getMonthlyAmount={getMonthlyAmount} />
                 ))}
