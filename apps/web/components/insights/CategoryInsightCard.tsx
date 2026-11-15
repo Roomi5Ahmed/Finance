@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState } from 'react'
 import { generateCategoryInsights } from '@/app/(dashboard)/insights/actions'
@@ -66,26 +66,26 @@ export default function CategoryInsightCard({ category, globalBudget }: { catego
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div 
-              className="w-11 h-11 rounded-[0px] flex items-center justify-center text-xl border border-white/5 shrink-0"
+              className="w-11 h-11 rounded-[0px] flex items-center justify-center text-xl border border-[#dde3d0] shrink-0"
               style={{ backgroundColor: category.color + '15' }}
             >
               {category.icon}
             </div>
             <div className="min-w-0">
-              <h3 className="text-sm font-bold text-white tracking-wide truncate" style={{ fontFamily: 'var(--font-inter)' }}>{category.name}</h3>
-              <p className="text-[#8C8C8C] text-xs" style={{ fontFamily: 'var(--font-roboto)' }}>
+              <h3 className="text-sm font-bold text-[#01472e] tracking-wide truncate" style={{ fontFamily: 'var(--font-inter)' }}>{category.name}</h3>
+              <p className="text-[#64705f] text-xs" style={{ fontFamily: 'var(--font-roboto)' }}>
                 {category.transactionCount} transaction{category.transactionCount !== 1 ? 's' : ''} · {category.merchants.length} merchant{category.merchants.length !== 1 ? 's' : ''}
               </p>
             </div>
           </div>
           <div className="text-right shrink-0 ml-3">
-            <p className="text-base font-bold text-white">{'\u20B9'}{category.totalSpent.toLocaleString('en-IN')}</p>
-            <p className="text-[#8C8C8C] text-xs">{category.budgetPercentage}% of budget</p>
+            <p className="text-base font-bold text-[#01472e]">{'\u20B9'}{category.totalSpent.toLocaleString('en-IN')}</p>
+            <p className="text-[#64705f] text-xs">{category.budgetPercentage}% of budget</p>
           </div>
         </div>
 
         {/* Progress Bar */}
-        <div className="mt-3 w-full bg-white/5 rounded-full h-1 overflow-hidden">
+        <div className="mt-3 w-full bg-[#f6f8f1] rounded-full h-1 overflow-hidden">
           <div 
             className="h-1 rounded-full transition-all duration-[0.6s] ease-[cubic-bezier(0.19,1,0.22,1)]"
             style={{ width: Math.min(100, category.budgetPercentage) + '%', backgroundColor: category.color }}
@@ -93,11 +93,11 @@ export default function CategoryInsightCard({ category, globalBudget }: { catego
         </div>
 
         {/* Stats Row */}
-        <div className="flex items-center gap-4 mt-3 text-[10px] text-[#8C8C8C]" style={{ fontFamily: 'var(--font-roboto)' }}>
+        <div className="flex items-center gap-4 mt-3 text-[10px] text-[#64705f]" style={{ fontFamily: 'var(--font-roboto)' }}>
           <span>Avg {'\u20B9'}{category.avgTransactionSize.toLocaleString('en-IN')}/txn</span>
-          <span className="text-white/10">|</span>
+          <span className="text-[#dde3d0]">|</span>
           {category.momChange !== null ? (
-            <span className={`flex items-center gap-0.5 ${category.momChange > 0 ? 'text-[#FF98A2]' : 'text-[#EFEFEF]'}`}>
+            <span className={`flex items-center gap-0.5 ${category.momChange > 0 ? 'text-[#01472e]' : 'text-[#01472e]'}`}>
               {category.momChange > 0 ? (
                 <TrendingUp className="w-2.5 h-2.5" />
               ) : category.momChange < 0 ? (
@@ -108,7 +108,7 @@ export default function CategoryInsightCard({ category, globalBudget }: { catego
               {category.momChange > 0 ? '+' : ''}{category.momChange}% MoM
             </span>
           ) : (
-            <span className="text-[#8C8C8C]/50">New category</span>
+            <span className="text-[#64705f]/50">New category</span>
           )}
         </div>
       </div>
@@ -116,18 +116,18 @@ export default function CategoryInsightCard({ category, globalBudget }: { catego
       {/* Top Merchants */}
       {category.merchantSpend.length > 0 && (
         <div className="px-6 pt-3">
-          <p className="text-[9px] text-[#8C8C8C] uppercase tracking-wider mb-1.5" style={{ fontFamily: 'var(--font-roboto)' }}>Top Merchants</p>
+          <p className="text-[9px] text-[#64705f] uppercase tracking-wider mb-1.5" style={{ fontFamily: 'var(--font-roboto)' }}>Top Merchants</p>
           <div className="space-y-1">
             {category.merchantSpend.slice(0, 3).map((m) => {
               const pct = Math.round((m.spend / category.totalSpent) * 100)
               return (
                 <div key={m.name} className="flex items-center justify-between text-[10px]">
-                  <span className="text-[#EFEFEF] truncate max-w-[60%]">{m.name}</span>
+                  <span className="text-[#01472e] truncate max-w-[60%]">{m.name}</span>
                   <div className="flex items-center gap-2">
-                    <div className="w-16 h-1 bg-white/5 rounded-full overflow-hidden">
+                    <div className="w-16 h-1 bg-[#f6f8f1] rounded-full overflow-hidden">
                       <div className="h-full rounded-full" style={{ width: pct + '%', backgroundColor: category.color + 'AA' }} />
                     </div>
-                    <span className="text-[#8C8C8C] w-16 text-right">{'\u20B9'}{m.spend.toLocaleString('en-IN')}</span>
+                    <span className="text-[#64705f] w-16 text-right">{'\u20B9'}{m.spend.toLocaleString('en-IN')}</span>
                   </div>
                 </div>
               )
@@ -147,10 +147,10 @@ export default function CategoryInsightCard({ category, globalBudget }: { catego
               </linearGradient>
             </defs>
             <Tooltip 
-              contentStyle={{ backgroundColor: '#181818', borderColor: 'rgba(255,255,255,0.1)', borderRadius: '11px', color: '#EFEFEF', fontSize: '12px', padding: '6px 10px' }}
-              itemStyle={{ color: '#EFEFEF' }}
+              contentStyle={{ backgroundColor: '#ffffff', borderColor: 'rgba(1,71,46,0.12)', borderRadius: '11px', color: '#01472e', fontSize: '12px', padding: '6px 10px' }}
+              itemStyle={{ color: '#01472e' }}
               formatter={(value: any) => ['\u20B9' + Number(value).toLocaleString('en-IN'), 'Spent']}
-              labelStyle={{ color: '#8C8C8C', fontSize: '11px' }}
+              labelStyle={{ color: '#64705f', fontSize: '11px' }}
             />
             <Area 
               type="monotone" 
@@ -165,11 +165,11 @@ export default function CategoryInsightCard({ category, globalBudget }: { catego
       </div>
 
       {/* AI Tips Section */}
-      <div className="p-6 pt-4 bg-[#181818]/50 flex-1 flex flex-col justify-end border-t border-white/5">
+      <div className="p-6 pt-4 bg-[#ffffff]/50 flex-1 flex flex-col justify-end border-t border-[#dde3d0]">
         {!hasGenerated && !loading && (
           <button
             onClick={handleGenerate}
-            className="w-full flex items-center justify-center px-3 py-2.5 text-[#FF98A2] text-xs font-medium bg-[#181818] rounded-[0px] border border-white/5 hover:bg-white/5 transition-colors duration-[0.6s] ease-[cubic-bezier(0.19,1,0.22,1)]"
+            className="w-full flex items-center justify-center px-3 py-2.5 text-[#01472e] text-xs font-medium bg-[#ffffff] rounded-[0px] border border-[#dde3d0] hover:bg-[#f6f8f1] transition-colors duration-[0.6s] ease-[cubic-bezier(0.19,1,0.22,1)]"
           >
             <span className="mr-1.5">{'\u2728'}</span> Generate AI Insights
           </button>
@@ -177,24 +177,24 @@ export default function CategoryInsightCard({ category, globalBudget }: { catego
 
         {loading && (
           <div className="space-y-2.5 animate-pulse">
-            <div className="h-12 bg-[#FF98A2]/10 rounded-[0px]" />
-            <div className="h-12 bg-[#FF98A2]/10 rounded-[0px]" />
-            <div className="h-12 bg-[#FF98A2]/10 rounded-[0px]" />
+            <div className="h-12 bg-[#01472e]/10 rounded-[0px]" />
+            <div className="h-12 bg-[#01472e]/10 rounded-[0px]" />
+            <div className="h-12 bg-[#01472e]/10 rounded-[0px]" />
           </div>
         )}
 
         {hasGenerated && !loading && tips.length > 0 && (
           <div className="space-y-2 animate-in">
             {tips.map((tip, idx) => (
-              <div key={idx} className="flex items-start bg-[#FF98A2]/5 border border-[#FF98A2]/10 rounded-[0px] p-3">
-                <span className="text-[#FF98A2] mr-2 mt-0.5 text-sm shrink-0">{'\uD83D\uDCA1'}</span>
-                <p className="text-[11px] text-[#EFEFEF] leading-relaxed flex-1">{tip}</p>
+              <div key={idx} className="flex items-start bg-[#01472e]/5 border border-[#01472e]/10 rounded-[0px] p-3">
+                <span className="text-[#01472e] mr-2 mt-0.5 text-sm shrink-0">{'\uD83D\uDCA1'}</span>
+                <p className="text-[11px] text-[#01472e] leading-relaxed flex-1">{tip}</p>
               </div>
             ))}
             
             <button 
               onClick={handleGenerate}
-              className="text-[10px] text-[#8C8C8C]/50 hover:text-[#FF98A2] transition-colors duration-[0.6s] ease-[cubic-bezier(0.19,1,0.22,1)] flex items-center pt-1 justify-end w-full"
+              className="text-[10px] text-[#64705f]/50 hover:text-[#01472e] transition-colors duration-[0.6s] ease-[cubic-bezier(0.19,1,0.22,1)] flex items-center pt-1 justify-end w-full"
             >
               <svg className="w-2.5 h-2.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
               Regenerate

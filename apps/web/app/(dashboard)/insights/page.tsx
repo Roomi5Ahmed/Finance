@@ -1,4 +1,4 @@
-﻿import { createClient } from '@/utils/supabase/server'
+import { createClient } from '@/utils/supabase/server'
 import CategoryInsightCard from '@/components/insights/CategoryInsightCard'
 
 export default async function InsightsPage() {
@@ -121,35 +121,35 @@ export default async function InsightsPage() {
     })
 
   return (
-    <div className="animate-in" style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
+    <div className="animate-in text-[#01472e]" style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
       <div className="mb-2">
-        <h1 className="text-2xl font-bold text-white tracking-tight" style={{ fontFamily: 'var(--font-inter)' }}>AI Insights</h1>
-        <p className="mt-1.5 text-sm text-[#8C8C8C]">
+        <h1 className="text-2xl font-bold text-[#fefae0] tracking-tight" style={{ fontFamily: 'var(--font-inter)' }}>AI Insights</h1>
+        <p className="mt-1.5 text-sm text-[#ccd5ae]">
           Analyze your spending habits category by category and get personalized AI advice.
         </p>
       </div>
 
       {sortedCategories.length > 0 && (
-        <div className="bg-[#181818] rounded-[0px] border border-white/5" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 24px' }}>
+        <div className="bg-[#ffffff] rounded-[0px] border border-[#dde3d0]" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 24px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <div className="w-10 h-10 rounded-[0px] bg-[#FF98A2]/10 flex items-center justify-center shrink-0">
-              <svg className="w-5 h-5 text-[#FF98A2]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+            <div className="w-10 h-10 rounded-[0px] bg-[#01472e]/10 flex items-center justify-center shrink-0">
+              <svg className="w-5 h-5 text-[#01472e]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
             </div>
             <div>
-              <p className="text-xs text-[#8C8C8C]" style={{ fontFamily: 'var(--font-roboto)', marginBottom: '4px' }}>Total Expenses This Month</p>
-              <p className="text-xl font-bold text-white">{'\u20B9'}{totalMonthlyExpenses.toLocaleString('en-IN')}</p>
+              <p className="text-xs text-[#64705f]" style={{ fontFamily: 'var(--font-roboto)', marginBottom: '4px' }}>Total Expenses This Month</p>
+              <p className="text-xl font-bold text-[#01472e]">{'\u20B9'}{totalMonthlyExpenses.toLocaleString('en-IN')}</p>
             </div>
           </div>
           <div className="text-right">
-            <p className="text-xs text-[#8C8C8C]" style={{ fontFamily: 'var(--font-roboto)', marginBottom: '4px' }}>Active Categories</p>
-            <p className="text-xl font-bold text-white">{sortedCategories.length}</p>
+            <p className="text-xs text-[#64705f]" style={{ fontFamily: 'var(--font-roboto)', marginBottom: '4px' }}>Active Categories</p>
+            <p className="text-xl font-bold text-[#01472e]">{sortedCategories.length}</p>
           </div>
         </div>
       )}
 
       {sortedCategories.length === 0 ? (
-        <div className="bg-[#181818] rounded-[0px] border border-white/5 p-8 text-center">
-          <p className="text-[#8C8C8C] text-sm">You have no expenses this month to analyze.</p>
+        <div className="bg-[#ffffff] rounded-[0px] border border-[#dde3d0] p-8 text-center">
+          <p className="text-[#64705f] text-sm">You have no expenses this month to analyze.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">

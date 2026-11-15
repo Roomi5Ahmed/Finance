@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import { headers } from 'next/headers'
 import { createClient } from '@/utils/supabase/server'
 
 export async function login(formData: FormData) {
@@ -22,6 +23,22 @@ export async function login(formData: FormData) {
 
   revalidatePath('/', 'layout')
   redirect('/dashboard')
+}
+
+export async function loginWithOAuth(provider: 'google' | 'github') {
+  const supabase = await createClient()
+  const origin = (await headers()).get('origin') ?? 'http://localhost:3000'
+
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider,
+    options: { redirectTo: `${origin}/auth/callback` },
+  })
+
+  if (error || !data?.url) {
+    redirect('/auth/signin?message=Could not sign in with this provider')
+  }
+
+  redirect(data.url)
 }
 
 export async function signup(formData: FormData) {

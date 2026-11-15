@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import React, { useState } from 'react'
 import { GlowCard } from '@/components/ui/spotlight-card'
@@ -120,22 +120,22 @@ export default function BillsClient({ bills }: { bills: Bill[] }) {
   }
 
   return (
-    <div className="animate-in" style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
+    <div className="animate-in text-[#01472e]" style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight" style={{ fontFamily: 'var(--font-inter)' }}>Bill Reminders</h1>
-          <p className="mt-1.5 text-sm text-[#8C8C8C]">
+          <h1 className="text-2xl font-bold text-[#fefae0] tracking-tight" style={{ fontFamily: 'var(--font-inter)' }}>Bill Reminders</h1>
+          <p className="mt-1.5 text-sm text-[#ccd5ae]">
             Never miss a payment. Track rent, EMIs, premiums, and more.
           </p>
         </div>
         <GlowButton onClick={() => { setIsAddingBill(true); setEditingBill(null) }} glowColor="purple"
-          className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium">
+          className="glow-on-shell inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-[#fefae0]">
           <Plus className="w-4 h-4 mr-2" /> Add Bill
         </GlowButton>
       </div>
 
       {message && (
-        <div className={`p-3 rounded-[0px] text-sm ${message.includes('success') || message.includes('paid') || message.includes('created') ? 'bg-[#EFEFEF]/10 text-[#EFEFEF] border border-[#EFEFEF]/20' : 'bg-[#FF98A2]/10 text-[#FF98A2] border border-[#FF98A2]/20'}`}>
+        <div className={`p-3 text-sm border ${message.includes('success') || message.includes('paid') || message.includes('created') ? 'bg-[rgba(254,250,224,0.1)] text-[#fefae0] border-[rgba(254,250,224,0.25)]' : 'bg-[rgba(254,250,224,0.1)] text-[#fefae0] border-[rgba(254,250,224,0.25)]'}`}>
           {message}
         </div>
       )}
@@ -144,45 +144,45 @@ export default function BillsClient({ bills }: { bills: Bill[] }) {
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
         <GlowCard glowColor="blue" className="p-5">
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div className="p-2.5 rounded-[0px] bg-[#FF98A2]/10">
-              <Receipt className="w-4 h-4 text-[#FF98A2]" />
+            <div className="p-2.5 rounded-[0px] bg-[#01472e]/10">
+              <Receipt className="w-4 h-4 text-[#01472e]" />
             </div>
             <div>
-              <p className="text-xs text-[#8C8C8C]" style={{ fontFamily: 'var(--font-roboto)', marginBottom: '2px' }}>Active Bills</p>
-              <p className="text-lg font-bold text-white">{activeBills.length}</p>
+              <p className="text-xs text-[#64705f]" style={{ fontFamily: 'var(--font-roboto)', marginBottom: '2px' }}>Active Bills</p>
+              <p className="text-lg font-bold text-[#01472e]">{activeBills.length}</p>
             </div>
           </div>
         </GlowCard>
         <GlowCard glowColor="orange" className="p-5">
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div className="p-2.5 rounded-[0px] bg-[#FF98A2]/10">
-              <Clock className="w-4 h-4 text-[#FF98A2]/70" />
+            <div className="p-2.5 rounded-[0px] bg-[#01472e]/10">
+              <Clock className="w-4 h-4 text-[#01472e]/70" />
             </div>
             <div>
-              <p className="text-xs text-[#8C8C8C]" style={{ fontFamily: 'var(--font-roboto)', marginBottom: '2px' }}>Due Soon</p>
-              <p className="text-lg font-bold text-white">{dueSoonBills.length}</p>
+              <p className="text-xs text-[#64705f]" style={{ fontFamily: 'var(--font-roboto)', marginBottom: '2px' }}>Due Soon</p>
+              <p className="text-lg font-bold text-[#01472e]">{dueSoonBills.length}</p>
             </div>
           </div>
         </GlowCard>
         <GlowCard glowColor="red" className="p-5">
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div className="p-2.5 rounded-[0px] bg-[#FF98A2]/10">
-              <AlertTriangle className="w-4 h-4 text-[#FF98A2]" />
+            <div className="p-2.5 rounded-[0px] bg-[#01472e]/10">
+              <AlertTriangle className="w-4 h-4 text-[#01472e]" />
             </div>
             <div>
-              <p className="text-xs text-[#8C8C8C]" style={{ fontFamily: 'var(--font-roboto)', marginBottom: '2px' }}>Overdue</p>
-              <p className="text-lg font-bold text-white">{overdueBills.length}</p>
+              <p className="text-xs text-[#64705f]" style={{ fontFamily: 'var(--font-roboto)', marginBottom: '2px' }}>Overdue</p>
+              <p className="text-lg font-bold text-[#01472e]">{overdueBills.length}</p>
             </div>
           </div>
         </GlowCard>
         <GlowCard glowColor="green" className="p-5">
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div className="p-2.5 rounded-[0px] bg-[#EFEFEF]/10">
-              <span className="text-[#EFEFEF] text-sm font-bold">{'\u20B9'}</span>
+            <div className="p-2.5 rounded-[0px] bg-[#01472e]/10">
+              <span className="text-[#01472e] text-sm font-bold">{'\u20B9'}</span>
             </div>
             <div>
-              <p className="text-xs text-[#8C8C8C]" style={{ fontFamily: 'var(--font-roboto)', marginBottom: '2px' }}>Monthly Estimate</p>
-              <p className="text-lg font-bold text-white">{'\u20B9'}{totalMonthlyEstimate.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</p>
+              <p className="text-xs text-[#64705f]" style={{ fontFamily: 'var(--font-roboto)', marginBottom: '2px' }}>Monthly Estimate</p>
+              <p className="text-lg font-bold text-[#01472e]">{'\u20B9'}{totalMonthlyEstimate.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</p>
             </div>
           </div>
         </GlowCard>
@@ -191,7 +191,7 @@ export default function BillsClient({ bills }: { bills: Bill[] }) {
       {/* Add / Edit Bill Form */}
       {(isAddingBill || editingBill) && (
         <GlowCard glowColor="blue" className="p-6">
-          <h3 className="text-sm font-semibold text-white mb-5" style={{ fontFamily: 'var(--font-inter)' }}>
+          <h3 className="text-sm font-semibold text-[#01472e] mb-5" style={{ fontFamily: 'var(--font-inter)' }}>
             {editingBill ? 'Edit Bill' : 'Add New Bill'}
           </h3>
           <form onSubmit={editingBill ? handleUpdateBill : handleCreateBill} className="space-y-4">
@@ -210,7 +210,7 @@ export default function BillsClient({ bills }: { bills: Bill[] }) {
                 <Label htmlFor="recurrence" className="text-xs" style={{ fontFamily: 'var(--font-roboto)' }}>Recurrence</Label>
                 <select name="recurrence" id="recurrence"
                   defaultValue={editingBill?.due_rule?.recurrence || 'monthly'}
-                  className="rounded-[0px] border border-white/10 bg-[#000000] h-9 pl-3 pr-8 text-sm text-white focus:border-[#FF98A2] outline-none">
+                  className="rounded-[0px] border border-[#dde3d0] bg-[#f6f8f1] h-9 pl-3 pr-8 text-sm text-[#01472e] focus:border-[#01472e] outline-none">
                   <option value="monthly">Monthly</option>
                   <option value="weekly">Weekly</option>
                   <option value="quarterly">Quarterly</option>
@@ -244,8 +244,8 @@ export default function BillsClient({ bills }: { bills: Bill[] }) {
       {bills.length === 0 ? (
         <GlowCard glowColor="blue" className="p-10">
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '20px 0' }}>
-            <Receipt className="w-12 h-12 text-[#8C8C8C]/50" style={{ marginBottom: '16px' }} />
-            <p className="text-[#8C8C8C] text-sm">No bills tracked yet. Add your first bill to get reminders.</p>
+            <Receipt className="w-12 h-12 text-[#64705f]/50" style={{ marginBottom: '16px' }} />
+            <p className="text-[#64705f] text-sm">No bills tracked yet. Add your first bill to get reminders.</p>
           </div>
         </GlowCard>
       ) : (
@@ -253,7 +253,7 @@ export default function BillsClient({ bills }: { bills: Bill[] }) {
           {/* Overdue Section */}
           {overdueBills.length > 0 && (
             <div>
-              <h3 className="text-xs font-semibold text-[#FF98A2] uppercase tracking-wider mb-2" style={{ fontFamily: 'var(--font-roboto)' }}>Overdue</h3>
+              <h3 className="text-xs font-semibold text-[#fefae0] uppercase tracking-wider mb-2" style={{ fontFamily: 'var(--font-roboto)' }}>Overdue</h3>
               <div className="space-y-2">
                 {overdueBills.map(bill => (
                   <BillRow key={bill.id} bill={bill} onPay={handleMarkPaid} onEdit={(b) => { setEditingBill(b); setIsAddingBill(false) }} onDelete={handleDeleteBill} getRecurrenceLabel={getRecurrenceLabel} />
@@ -265,7 +265,7 @@ export default function BillsClient({ bills }: { bills: Bill[] }) {
           {/* Due Soon Section */}
           {dueSoonBills.length > 0 && (
             <div>
-              <h3 className="text-xs font-semibold text-[#FF98A2]/70 uppercase tracking-wider mb-2" style={{ fontFamily: 'var(--font-roboto)' }}>Due Soon</h3>
+              <h3 className="text-xs font-semibold text-[#fefae0]/80 uppercase tracking-wider mb-2" style={{ fontFamily: 'var(--font-roboto)' }}>Due Soon</h3>
               <div className="space-y-2">
                 {dueSoonBills.map(bill => (
                   <BillRow key={bill.id} bill={bill} onPay={handleMarkPaid} onEdit={(b) => { setEditingBill(b); setIsAddingBill(false) }} onDelete={handleDeleteBill} getRecurrenceLabel={getRecurrenceLabel} />
@@ -277,7 +277,7 @@ export default function BillsClient({ bills }: { bills: Bill[] }) {
           {/* Upcoming Section */}
           {upcomingBills.length > 0 && (
             <div>
-              <h3 className="text-xs font-semibold text-[#8C8C8C] uppercase tracking-wider mb-2" style={{ fontFamily: 'var(--font-roboto)' }}>Upcoming</h3>
+              <h3 className="text-xs font-semibold text-[#ccd5ae] uppercase tracking-wider mb-2" style={{ fontFamily: 'var(--font-roboto)' }}>Upcoming</h3>
               <div className="space-y-2">
                 {upcomingBills.map(bill => (
                   <BillRow key={bill.id} bill={bill} onPay={handleMarkPaid} onEdit={(b) => { setEditingBill(b); setIsAddingBill(false) }} onDelete={handleDeleteBill} getRecurrenceLabel={getRecurrenceLabel} />
@@ -311,20 +311,20 @@ function BillRow({
     <GlowCard glowColor={bill.isOverdue ? 'red' : bill.isDueSoon ? 'orange' : 'blue'} className="p-5">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className={`w-11 h-11 rounded-[0px] flex items-center justify-center border border-white/5 ${
-            bill.isOverdue ? 'bg-[#FF98A2]/10' : bill.isDueSoon ? 'bg-[#FF98A2]/10' : 'bg-[#FF98A2]/10'
+          <div className={`w-11 h-11 rounded-[0px] flex items-center justify-center border border-[#dde3d0] ${
+            bill.isOverdue ? 'bg-[#01472e]/10' : bill.isDueSoon ? 'bg-[#01472e]/10' : 'bg-[#01472e]/10'
           }`}>
             {bill.isOverdue ? (
-              <AlertTriangle className="w-5 h-5 text-[#FF98A2]" />
+              <AlertTriangle className="w-5 h-5 text-[#01472e]" />
             ) : bill.isDueSoon ? (
-              <Clock className="w-5 h-5 text-[#FF98A2]/70" />
+              <Clock className="w-5 h-5 text-[#01472e]/70" />
             ) : (
-              <Receipt className="w-5 h-5 text-[#FF98A2]" />
+              <Receipt className="w-5 h-5 text-[#01472e]" />
             )}
           </div>
           <div>
-            <h4 className="text-sm font-semibold text-white" style={{ fontFamily: 'var(--font-inter)' }}>{bill.name}</h4>
-            <p className="text-xs text-[#8C8C8C]" style={{ fontFamily: 'var(--font-roboto)' }}>
+            <h4 className="text-sm font-semibold text-[#01472e]" style={{ fontFamily: 'var(--font-inter)' }}>{bill.name}</h4>
+            <p className="text-xs text-[#64705f]" style={{ fontFamily: 'var(--font-roboto)' }}>
               {getRecurrenceLabel(bill.due_rule?.recurrence)} · Due {formattedDate}
               {bill.amount_estimate ? ` · &#8377;${bill.amount_estimate.toLocaleString('en-IN')}` : ''}
             </p>
@@ -335,7 +335,7 @@ function BillRow({
             {bill.isOverdue ? `${Math.abs(bill.daysUntilDue)}d overdue` : bill.isDueSoon ? `${bill.daysUntilDue}d left` : `${bill.daysUntilDue}d`}
           </Badge>
           <GlowButton onClick={() => onPay(bill.id)} glowColor="green"
-            className="inline-flex items-center px-2.5 py-1 text-xs font-medium text-[#EFEFEF]">
+            className="inline-flex items-center px-2.5 py-1 text-xs font-medium text-[#01472e]">
             <CheckCircle className="w-3.5 h-3.5 mr-1" /> Paid
           </GlowButton>
           <DropdownMenu>
@@ -350,7 +350,7 @@ function BillRow({
                 <Pencil className="w-3.5 h-3.5 mr-2" /> Edit
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => onDelete(bill.id)} className="text-[#FF98A2] focus:text-[#FF98A2]">
+              <DropdownMenuItem onClick={() => onDelete(bill.id)} className="text-[#01472e] focus:text-[#01472e]">
                 <Trash2 className="w-3.5 h-3.5 mr-2" /> Delete
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -358,8 +358,8 @@ function BillRow({
         </div>
       </div>
       {bill.payments.length > 0 && bill.payments[0] && (
-        <div className="mt-2 pt-2 border-t border-white/5">
-          <p className="text-[10px] text-[#8C8C8C]/50">
+        <div className="mt-2 pt-2 border-t border-[#dde3d0]">
+          <p className="text-[10px] text-[#64705f]/50">
             Last paid: {new Date(bill.payments[0].paid_at).toLocaleDateString('en-IN')}
             {(bill.payments[0].amount || 0) > 0 ? ` · &#8377;${(bill.payments[0].amount || 0).toLocaleString('en-IN')}` : ''}
           </p>

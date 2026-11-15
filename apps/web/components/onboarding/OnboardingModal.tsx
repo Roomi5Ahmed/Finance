@@ -36,13 +36,13 @@ export default function OnboardingModal() {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-      <div className="bg-[#181818] border border-white/10 rounded-[11px] shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(8,26,17,0.6)] p-4">
+      <div className="bg-[#ffffff] text-[#01472e] border border-[#dde3d0] rounded-[11px] shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
 
         {/* Progress Bar */}
-        <div className="w-full bg-white/5 h-1">
+        <div className="w-full bg-[#f6f8f1] h-1">
           <div
-            className="bg-[#FF98A2] h-1 transition-all duration-[0.6s] ease-[cubic-bezier(0.19,1,0.22,1)]"
+            className="bg-[#01472e] h-1 transition-all duration-[0.6s] ease-[cubic-bezier(0.19,1,0.22,1)]"
             style={{ width: `${(step / 3) * 100}%` }}
           />
         </div>
@@ -52,18 +52,18 @@ export default function OnboardingModal() {
             <div className="space-y-6">
               <div>
                 <h2
-                  className="text-2xl font-bold text-[#EFEFEF]"
+                  className="text-2xl font-bold text-[#01472e]"
                   style={{ fontFamily: 'var(--font-inter), Inter, sans-serif' }}
                 >
                   Welcome!
                 </h2>
-                <p className="text-[#8C8C8C] mt-2">Let&apos;s personalize your experience. What&apos;s your primary currency?</p>
+                <p className="text-[#64705f] mt-2">Let&apos;s personalize your experience. What&apos;s your primary currency?</p>
               </div>
               <div>
                 <select
                   value={currency}
                   onChange={(e) => setCurrency(e.target.value)}
-                  className="mt-1 block w-full pl-3 pr-10 py-3 text-base bg-[#000000] border border-white/10 rounded-[11px] text-[#EFEFEF] focus:outline-none focus:border-[#FF98A2] focus:ring-1 focus:ring-[#FF98A2]/20 transition-all duration-[0.6s] ease-[cubic-bezier(0.19,1,0.22,1)]"
+                  className="mt-1 block w-full pl-3 pr-10 py-3 text-base bg-[#f6f8f1] border border-[#dde3d0] rounded-[11px] text-[#01472e] focus:outline-none focus:border-[#01472e] focus:ring-1 focus:ring-[#01472e]/20 transition-all duration-[0.6s] ease-[cubic-bezier(0.19,1,0.22,1)]"
                 >
                   <option value="INR">🇮🇳 INR - Indian Rupee</option>
                   <option value="USD">🇺🇸 USD - US Dollar</option>
@@ -78,23 +78,23 @@ export default function OnboardingModal() {
             <div className="space-y-6">
               <div>
                 <h2
-                  className="text-2xl font-bold text-[#EFEFEF]"
+                  className="text-2xl font-bold text-[#01472e]"
                   style={{ fontFamily: 'var(--font-inter), Inter, sans-serif' }}
                 >
                   Monthly Income
                 </h2>
-                <p className="text-[#8C8C8C] mt-2">This helps us calculate your budget targets. (Optional)</p>
+                <p className="text-[#64705f] mt-2">This helps us calculate your budget targets. (Optional)</p>
               </div>
               <div>
                 <div className="relative mt-1 rounded-[11px] shadow-sm">
                   <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                    <span className="text-[#8C8C8C] sm:text-sm">{currency === 'INR' ? '₹' : '$'}</span>
+                    <span className="text-[#64705f] sm:text-sm">{currency === 'INR' ? '₹' : '$'}</span>
                   </div>
                   <input
                     type="number"
                     value={income}
                     onChange={(e) => setIncome(e.target.value)}
-                    className="block w-full rounded-[11px] border border-white/10 bg-[#000000] pl-7 pr-12 focus:border-[#FF98A2] focus:ring-1 focus:ring-[#FF98A2]/20 focus:outline-none text-[#EFEFEF] sm:text-sm py-3 transition-all duration-[0.6s] ease-[cubic-bezier(0.19,1,0.22,1)]"
+                    className="block w-full rounded-[11px] border border-[#dde3d0] bg-[#f6f8f1] pl-7 pr-12 focus:border-[#01472e] focus:ring-1 focus:ring-[#01472e]/20 focus:outline-none text-[#01472e] sm:text-sm py-3 transition-all duration-[0.6s] ease-[cubic-bezier(0.19,1,0.22,1)]"
                     placeholder="0.00"
                   />
                 </div>
@@ -106,12 +106,12 @@ export default function OnboardingModal() {
             <div className="space-y-6">
               <div>
                 <h2
-                  className="text-2xl font-bold text-[#EFEFEF]"
+                  className="text-2xl font-bold text-[#01472e]"
                   style={{ fontFamily: 'var(--font-inter), Inter, sans-serif' }}
                 >
                   Your Goal
                 </h2>
-                <p className="text-[#8C8C8C] mt-2">What do you want to achieve the most?</p>
+                <p className="text-[#64705f] mt-2">What do you want to achieve the most?</p>
               </div>
               <div className="space-y-3">
                 {['Save money', 'Reduce subscriptions', 'Track spending', 'Debt paydown'].map((g) => (
@@ -119,8 +119,8 @@ export default function OnboardingModal() {
                     key={g}
                     className={`flex items-center p-4 border rounded-[11px] cursor-pointer transition-all duration-[0.6s] ease-[cubic-bezier(0.19,1,0.22,1)] ${
                       goal === g
-                        ? 'border-[#FF98A2] bg-[#FF98A2]/10'
-                        : 'border-white/10 hover:bg-white/5'
+                        ? 'border-[#01472e] bg-[#01472e]/10'
+                        : 'border-[#dde3d0] hover:bg-[#f6f8f1]'
                     }`}
                   >
                     <input
@@ -131,7 +131,7 @@ export default function OnboardingModal() {
                       onChange={() => setGoal(g)}
                       className="sr-only"
                     />
-                    <span className={`text-sm font-medium ${goal === g ? 'text-[#FF98A2]' : 'text-[#EFEFEF]'}`}>
+                    <span className={`text-sm font-medium ${goal === g ? 'text-[#01472e]' : 'text-[#01472e]'}`}>
                       {g}
                     </span>
                   </label>
@@ -144,14 +144,14 @@ export default function OnboardingModal() {
             {step === 1 ? (
               <button
                 onClick={handleSkip}
-                className="text-sm font-medium text-[#8C8C8C] hover:text-[#EFEFEF] transition-colors duration-[0.6s]"
+                className="text-sm font-medium text-[#64705f] hover:text-[#01472e] transition-colors duration-[0.6s]"
               >
                 Skip for now
               </button>
             ) : (
               <button
                 onClick={handleBack}
-                className="text-sm font-medium text-[#8C8C8C] hover:text-[#EFEFEF] transition-colors duration-[0.6s]"
+                className="text-sm font-medium text-[#64705f] hover:text-[#01472e] transition-colors duration-[0.6s]"
               >
                 Back
               </button>
@@ -160,7 +160,7 @@ export default function OnboardingModal() {
             {step < 3 ? (
               <button
                 onClick={handleNext}
-                className="inline-flex justify-center rounded-[16px] border border-[#FF98A2] bg-[#FF98A2] py-2 px-6 text-sm font-medium text-[#000000] hover:bg-[#FF98A2]/90 focus:outline-none focus:ring-2 focus:ring-[#FF98A2] focus:ring-offset-2 focus:ring-offset-[#181818] transition-all duration-[0.6s] ease-[cubic-bezier(0.19,1,0.22,1)]"
+                className="inline-flex justify-center rounded-[16px] border border-[#01472e] bg-[#01472e] py-2 px-6 text-sm font-medium text-white hover:bg-[#01472e]/90 focus:outline-none focus:ring-2 focus:ring-[#01472e] focus:ring-offset-2 focus:ring-offset-[#ffffff] transition-all duration-[0.6s] ease-[cubic-bezier(0.19,1,0.22,1)]"
               >
                 Next
               </button>
@@ -168,7 +168,7 @@ export default function OnboardingModal() {
               <button
                 onClick={handleFinish}
                 disabled={!goal}
-                className="inline-flex justify-center rounded-[16px] border border-[#FF98A2] bg-[#FF98A2] py-2 px-6 text-sm font-medium text-[#000000] hover:bg-[#FF98A2]/90 focus:outline-none focus:ring-2 focus:ring-[#FF98A2] focus:ring-offset-2 focus:ring-offset-[#181818] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-[0.6s] ease-[cubic-bezier(0.19,1,0.22,1)]"
+                className="inline-flex justify-center rounded-[16px] border border-[#01472e] bg-[#01472e] py-2 px-6 text-sm font-medium text-white hover:bg-[#01472e]/90 focus:outline-none focus:ring-2 focus:ring-[#01472e] focus:ring-offset-2 focus:ring-offset-[#ffffff] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-[0.6s] ease-[cubic-bezier(0.19,1,0.22,1)]"
               >
                 Get Started
               </button>

@@ -1,9 +1,10 @@
-﻿'use client'
+'use client'
 
 import React, { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import AddExpenseModal from '@/components/transactions/AddExpenseModal'
 import CSVImportModal from '@/components/transactions/CSVImportModal'
+import PDFImportModal from '@/components/transactions/PDFImportModal'
 import { GlowButton } from '@/components/ui/glow-button'
 import { GlowCard } from '@/components/ui/spotlight-card'
 import { autoCategoriseTransactions, triggerMockWebhook } from '@/app/(dashboard)/transactions/actions'
@@ -25,6 +26,7 @@ export default function TransactionsClient({ initialTransactions, categories }: 
   const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isCsvModalOpen, setIsCsvModalOpen] = useState(false)
+  const [isPdfModalOpen, setIsPdfModalOpen] = useState(false)
   const [isAutoCategorising, setIsAutoCategorising] = useState(false)
   const [isSyncing, setIsSyncing] = useState(false)
   const [syncMessage, setSyncMessage] = useState('')
@@ -129,43 +131,47 @@ export default function TransactionsClient({ initialTransactions, categories }: 
     <Button
       variant="ghost"
       onClick={() => handleSort(column)}
-      className="h-8 px-2 text-xs uppercase tracking-wider font-semibold text-[#8C8C8C] hover:text-[#EFEFEF] transition-colors duration-[0.6s] ease-[cubic-bezier(0.19,1,0.22,1)]"
+      className="h-8 px-2 text-xs uppercase tracking-wider font-semibold text-[#64705f] hover:text-[#01472e] transition-colors duration-[0.6s] ease-[cubic-bezier(0.19,1,0.22,1)]"
       style={{ fontFamily: 'var(--font-roboto), Roboto, sans-serif', fontWeight: 900 }}
     >
       {children}
-      <ArrowUpDown className={`ml-1.5 h-3 w-3 ${sortColumn === column ? 'text-[#FF98A2]' : 'text-[#8C8C8C]/50'}`} />
+      <ArrowUpDown className={`ml-1.5 h-3 w-3 ${sortColumn === column ? 'text-[#01472e]' : 'text-[#64705f]/50'}`} />
     </Button>
   )
 
   return (
-    <div className="animate-in" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+    <div className="animate-in text-[#01472e]" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1
-            className="text-2xl font-bold text-[#EFEFEF] tracking-tight"
+            className="text-2xl font-bold text-[#fefae0] tracking-tight"
             style={{ fontFamily: 'var(--font-inter), Inter, sans-serif', fontWeight: 700 }}
           >
             Transactions
           </h1>
-          <p className="mt-1.5 text-sm text-[#8C8C8C]">
+          <p className="mt-1.5 text-sm text-[#ccd5ae]">
             Manage your income and expenses.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
           <GlowButton onClick={handleSyncBank} disabled={isSyncing} glowColor="green"
-            className="inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium text-emerald-400">
+            className="glow-on-shell inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium text-[#ccd5ae]">
             <span className="mr-1.5">🏦</span> {isSyncing ? 'Syncing...' : 'Sync Bank'}
           </GlowButton>
           <GlowButton onClick={handleAutoCategorise} disabled={isAutoCategorising} glowColor="purple"
-            className="inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium text-[#FF98A2]">
+            className="glow-on-shell inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium text-[#fefae0]">
             <span className="mr-1.5">✨</span> {isAutoCategorising ? 'Categorising...' : 'Auto Categorise'}
           </GlowButton>
           <GlowButton onClick={() => setIsCsvModalOpen(true)} glowColor="blue"
-            className="inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium text-[#EFEFEF]">
+            className="glow-on-shell inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium text-[#fefae0]">
             <span className="mr-1.5">📄</span> Import CSV
           </GlowButton>
+          <GlowButton onClick={() => setIsPdfModalOpen(true)} glowColor="orange"
+            className="glow-on-shell inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium text-[#fefae0]">
+            <span className="mr-1.5">📑</span> Import PDF
+          </GlowButton>
           <GlowButton onClick={() => setIsModalOpen(true)} glowColor="purple"
-            className="inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium text-[#EFEFEF] bg-[#FF98A2]/30">
+            className="inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium text-[#01472e] bg-[#fefae0]">
             <span className="mr-1.5">➕</span> Add Transaction
           </GlowButton>
         </div>
@@ -175,20 +181,20 @@ export default function TransactionsClient({ initialTransactions, categories }: 
         <div style={{
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           padding: '12px 16px', borderRadius: '11px',
-          backgroundColor: syncMessage.toLowerCase().includes('error') ? 'rgba(255,152,162,0.1)' : 'rgba(239,239,239,0.05)',
-          border: syncMessage.toLowerCase().includes('error') ? '1px solid rgba(255,152,162,0.2)' : '1px solid rgba(239,239,239,0.1)',
+          backgroundColor: syncMessage.toLowerCase().includes('error') ? 'rgba(254,250,224,0.12)' : 'rgba(254,250,224,0.08)',
+          border: syncMessage.toLowerCase().includes('error') ? '1px solid rgba(254,250,224,0.35)' : '1px solid rgba(254,250,224,0.18)',
           fontSize: '13px',
-          color: syncMessage.toLowerCase().includes('error') ? '#FF98A2' : '#EFEFEF',
+          color: syncMessage.toLowerCase().includes('error') ? '#fefae0' : '#fefae0',
         }}>
           <span>{syncMessage}</span>
-          <button onClick={() => setSyncMessage('')} style={{ background: 'none', border: 'none', color: '#8C8C8C', cursor: 'pointer', fontSize: '16px', padding: '0 4px' }}>&#x2715;</button>
+          <button onClick={() => setSyncMessage('')} style={{ background: 'none', border: 'none', color: '#ccd5ae', cursor: 'pointer', fontSize: '16px', padding: '0 4px' }}>&#x2715;</button>
         </div>
       )}
 
       <GlowCard glowColor="blue" className="p-4">
         <div className="flex flex-wrap gap-3 items-center">
           <div className="relative flex-1 min-w-[200px]">
-            <Search className="absolute text-[#8C8C8C]" style={{ left: '12px', top: '50%', transform: 'translateY(-50%)', height: '16px', width: '16px', pointerEvents: 'none' }} />
+            <Search className="absolute text-[#64705f]" style={{ left: '12px', top: '50%', transform: 'translateY(-50%)', height: '16px', width: '16px', pointerEvents: 'none' }} />
             <Input
               placeholder="Search by merchant, category, or tag..."
               value={searchQuery}
@@ -199,7 +205,7 @@ export default function TransactionsClient({ initialTransactions, categories }: 
           <select
             value={selectedCategory}
             onChange={(e) => { setSelectedCategory(e.target.value); setCurrentPage(1) }}
-            className="rounded-[11px] border border-white/5 bg-[#000000] h-9 pl-3 pr-8 text-sm text-[#EFEFEF] focus:border-[#FF98A2] outline-none transition-colors duration-[0.6s] ease-[cubic-bezier(0.19,1,0.22,1)]"
+            className="rounded-[11px] border border-[#dde3d0] bg-[#f6f8f1] h-9 pl-3 pr-8 text-sm text-[#01472e] focus:border-[#01472e] outline-none transition-colors duration-[0.6s] ease-[cubic-bezier(0.19,1,0.22,1)]"
             style={{ fontFamily: 'var(--font-roboto), Roboto, sans-serif' }}
           >
             <option value="all">All Categories</option>
@@ -212,7 +218,7 @@ export default function TransactionsClient({ initialTransactions, categories }: 
         <div className="overflow-x-auto">
         <Table>
           <TableHeader>
-            <TableRow className="bg-[#181818]/50 hover:bg-[#181818]/50">
+            <TableRow className="bg-[#ffffff]/50 hover:bg-[#ffffff]/50">
               <TableHead>
                 <SortableHeader column="date">Date</SortableHeader>
               </TableHead>
@@ -232,7 +238,7 @@ export default function TransactionsClient({ initialTransactions, categories }: 
           <TableBody>
             {paginatedData.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center h-24 text-[#8C8C8C]">
+                <TableCell colSpan={6} className="text-center h-24 text-[#64705f]">
                   {searchQuery || selectedCategory !== 'all'
                     ? 'No transactions match your filters.'
                     : 'No transactions found. Add one to get started!'}
@@ -240,10 +246,10 @@ export default function TransactionsClient({ initialTransactions, categories }: 
               </TableRow>
             ) : paginatedData.map((tx: any) => (
               <TableRow key={tx.id}>
-                <TableCell className="text-[#8C8C8C] text-xs">
+                <TableCell className="text-[#64705f] text-xs">
                   {new Date(tx.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
                 </TableCell>
-                <TableCell className="font-medium text-[#EFEFEF] text-sm">
+                <TableCell className="font-medium text-[#01472e] text-sm">
                   {tx.merchant}
                 </TableCell>
                 <TableCell>
@@ -251,14 +257,14 @@ export default function TransactionsClient({ initialTransactions, categories }: 
                     <Badge variant="outline" className="gap-1">
                       <span>{tx.categories.icon}</span> {tx.categories.name}
                     </Badge>
-                  ) : <span className="text-[#8C8C8C]/50">—</span>}
+                  ) : <span className="text-[#64705f]/50">—</span>}
                 </TableCell>
                 <TableCell className="text-xs">
                   {tx.tags?.length > 0
                     ? tx.tags.map((t: string, i: number) => (
                         <Badge key={i} variant="secondary" className="mr-1 text-[10px]">#{t}</Badge>
                       ))
-                    : <span className="text-[#8C8C8C]/50">—</span>
+                    : <span className="text-[#64705f]/50">—</span>
                   }
                 </TableCell>
                 <TableCell className="text-right">
@@ -295,7 +301,7 @@ export default function TransactionsClient({ initialTransactions, categories }: 
         </div>
       </GlowCard>
 
-      <div className="flex items-center justify-between text-sm text-[#8C8C8C] pt-1">
+      <div className="flex items-center justify-between text-sm text-[#ccd5ae] pt-1">
         <div>
           Showing {filteredAndSorted.length === 0 ? 0 : (currentPage - 1) * pageSize + 1}–{Math.min(currentPage * pageSize, filteredAndSorted.length)} of {filteredAndSorted.length} transaction{filteredAndSorted.length !== 1 ? 's' : ''}
         </div>
@@ -305,10 +311,11 @@ export default function TransactionsClient({ initialTransactions, categories }: 
             size="sm"
             disabled={currentPage <= 1}
             onClick={() => setCurrentPage(p => p - 1)}
+            className="border-[rgba(254,250,224,0.35)] text-[#fefae0] hover:bg-[rgba(254,250,224,0.1)] hover:border-[rgba(254,250,224,0.5)]"
           >
             <ChevronLeft className="h-4 w-4" /> Previous
           </Button>
-          <span className="text-xs text-[#8C8C8C] px-2">
+          <span className="text-xs text-[#ccd5ae] px-2">
             Page {currentPage} of {totalPages}
           </span>
           <Button
@@ -316,6 +323,7 @@ export default function TransactionsClient({ initialTransactions, categories }: 
             size="sm"
             disabled={currentPage >= totalPages}
             onClick={() => setCurrentPage(p => p + 1)}
+            className="border-[rgba(254,250,224,0.35)] text-[#fefae0] hover:bg-[rgba(254,250,224,0.1)] hover:border-[rgba(254,250,224,0.5)]"
           >
             Next <ChevronRight className="h-4 w-4" />
           </Button>
@@ -324,6 +332,7 @@ export default function TransactionsClient({ initialTransactions, categories }: 
 
       <AddExpenseModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} categories={categories} />
       <CSVImportModal isOpen={isCsvModalOpen} onClose={() => setIsCsvModalOpen(false)} />
+      <PDFImportModal isOpen={isPdfModalOpen} onClose={() => setIsPdfModalOpen(false)} />
     </div>
   )
 }

@@ -29,10 +29,10 @@ export default function Sidebar() {
   const router = useRouter()
 
   return (
-    <aside className="hidden md:flex flex-col w-64 h-full bg-[#000000] border-r border-white/5 p-5 pt-6">
+    <aside className="hidden md:flex flex-col w-64 h-full bg-[#f6f8f1] border-r border-[#dde3d0] p-5 pt-6">
       <div className="flex items-center gap-2 mb-10 px-3">
-        <span className="text-lg font-bold text-[#EFEFEF] tracking-wide">
-          Smart <span className="text-[#FF98A2]">Finance</span>
+        <span className="text-lg font-bold text-[#01472e] tracking-wide">
+          Smart <span className="text-[#01472e]">Finance</span>
         </span>
       </div>
 
@@ -47,8 +47,8 @@ export default function Sidebar() {
               className={cn(
                 "w-full flex items-center gap-3 px-3 py-2.5 rounded-[11px] text-sm font-medium transition-all duration-[0.6s] ease-[cubic-bezier(0.19,1,0.22,1)]",
                 isActive
-                  ? "bg-[#FF98A2]/10 text-[#FF98A2]"
-                  : "text-[#8C8C8C] hover:bg-white/5 hover:text-[#EFEFEF]"
+                  ? "bg-[#01472e]/10 text-[#01472e]"
+                  : "text-[#64705f] hover:bg-[#f6f8f1] hover:text-[#01472e]"
               )}
             >
               <Icon className="w-4 h-4" />

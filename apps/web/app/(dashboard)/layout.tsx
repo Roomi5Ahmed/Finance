@@ -20,7 +20,7 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', backgroundColor: '#000000', overflow: 'hidden', color: '#8C8C8C' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', backgroundColor: '#01472e', overflow: 'hidden', color: '#ccd5ae' }}>
       <OnboardingModal />
       <Header />
       <main style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', position: 'relative', zIndex: 10 }}>

@@ -120,36 +120,36 @@ export default function BudgetClient({
   }
 
   const getProgressColor = (percentage: number) => {
-    if (percentage >= 100) return 'bg-[#FF98A2]'
-    if (percentage >= 80) return 'bg-[#FF98A2]/50'
-    return 'bg-[#EFEFEF]'
+    if (percentage >= 100) return 'bg-[#01472e]'
+    if (percentage >= 80) return 'bg-[#a3b18a]'
+    return 'bg-[#ccd5ae]'
   }
 
   const getProgressText = (percentage: number) => {
-    if (percentage >= 100) return 'text-[#FF98A2]'
-    if (percentage >= 80) return 'text-[#FF98A2]/70'
-    return 'text-[#EFEFEF]'
+    if (percentage >= 100) return 'text-[#01472e]'
+    if (percentage >= 80) return 'text-[#01472e]'
+    return 'text-[#64705f]'
   }
 
   const usedCategories = new Set(budgets.filter(b => b.category_id).map(b => b.category_id))
 
   return (
-    <div className="animate-in" style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
+    <div className="animate-in text-[#01472e]" style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight" style={{ fontFamily: 'var(--font-inter)' }}>Budgets</h1>
-          <p className="mt-1.5 text-sm text-[#8C8C8C]">
+          <h1 className="text-2xl font-bold text-[#fefae0] tracking-tight" style={{ fontFamily: 'var(--font-inter)' }}>Budgets</h1>
+          <p className="mt-1.5 text-sm text-[#ccd5ae]">
             Set spending limits per category and track your progress in real-time.
           </p>
         </div>
         <GlowButton onClick={() => { setIsAddingBudget(true); setEditingBudget(null) }} glowColor="purple"
-          className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium">
+          className="glow-on-shell inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-[#fefae0]">
           <Plus className="w-4 h-4 mr-2" /> Add Budget
         </GlowButton>
       </div>
 
       {message && (
-        <div className={`p-3 rounded-[0px] text-sm ${message.includes('success') || message.includes('created') ? 'bg-[#EFEFEF]/10 text-[#EFEFEF] border border-[#EFEFEF]/20' : 'bg-[#FF98A2]/10 text-[#FF98A2] border border-[#FF98A2]/20'}`}>
+        <div className={`p-3 text-sm border ${message.includes('success') || message.includes('created') ? 'bg-[rgba(254,250,224,0.1)] text-[#fefae0] border-[rgba(254,250,224,0.25)]' : 'bg-[rgba(254,250,224,0.1)] text-[#fefae0] border-[rgba(254,250,224,0.25)]'}`}>
           {message}
         </div>
       )}
@@ -158,34 +158,34 @@ export default function BudgetClient({
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <GlowCard glowColor="blue" className="p-5">
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div className="p-2.5 rounded-[0px] bg-[#FF98A2]/10">
-              <WalletCards className="w-4 h-4 text-[#FF98A2]" />
+            <div className="p-2.5 rounded-[0px] bg-[#01472e]/10">
+              <WalletCards className="w-4 h-4 text-[#01472e]" />
             </div>
             <div>
-              <p className="text-xs text-[#8C8C8C]" style={{ fontFamily: 'var(--font-roboto)', marginBottom: '2px' }}>Monthly Income</p>
-              <p className="text-lg font-bold text-white">{'\u20B9'}{(profile?.monthly_income || 0).toLocaleString('en-IN')}</p>
+              <p className="text-xs text-[#64705f]" style={{ fontFamily: 'var(--font-roboto)', marginBottom: '2px' }}>Monthly Income</p>
+              <p className="text-lg font-bold text-[#01472e]">{'\u20B9'}{(profile?.monthly_income || 0).toLocaleString('en-IN')}</p>
             </div>
           </div>
         </GlowCard>
         <GlowCard glowColor="green" className="p-5">
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div className="p-2.5 rounded-[0px] bg-[#EFEFEF]/10">
-              <PieChart className="w-4 h-4 text-[#EFEFEF]" />
+            <div className="p-2.5 rounded-[0px] bg-[#01472e]/10">
+              <PieChart className="w-4 h-4 text-[#01472e]" />
             </div>
             <div>
-              <p className="text-xs text-[#8C8C8C]" style={{ fontFamily: 'var(--font-roboto)', marginBottom: '2px' }}>Spent This Month</p>
-              <p className="text-lg font-bold text-white">{'\u20B9'}{totalMonthlySpend.toLocaleString('en-IN')}</p>
+              <p className="text-xs text-[#64705f]" style={{ fontFamily: 'var(--font-roboto)', marginBottom: '2px' }}>Spent This Month</p>
+              <p className="text-lg font-bold text-[#01472e]">{'\u20B9'}{totalMonthlySpend.toLocaleString('en-IN')}</p>
             </div>
           </div>
         </GlowCard>
         <GlowCard glowColor="orange" className="p-5">
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div className="p-2.5 rounded-[0px] bg-[#FF98A2]/10">
-              <Calendar className="w-4 h-4 text-[#FF98A2]/70" />
+            <div className="p-2.5 rounded-[0px] bg-[#01472e]/10">
+              <Calendar className="w-4 h-4 text-[#01472e]/70" />
             </div>
             <div>
-              <p className="text-xs text-[#8C8C8C]" style={{ fontFamily: 'var(--font-roboto)', marginBottom: '2px' }}>Active Budgets</p>
-              <p className="text-lg font-bold text-white">{budgets.length}</p>
+              <p className="text-xs text-[#64705f]" style={{ fontFamily: 'var(--font-roboto)', marginBottom: '2px' }}>Active Budgets</p>
+              <p className="text-lg font-bold text-[#01472e]">{budgets.length}</p>
             </div>
           </div>
         </GlowCard>
@@ -193,7 +193,7 @@ export default function BudgetClient({
 
       {/* Profile Settings (inline) */}
       <GlowCard glowColor="purple" className="p-6">
-        <h3 className="text-sm font-semibold text-white mb-5" style={{ fontFamily: 'var(--font-inter)' }}>Income & Overall Budget</h3>
+        <h3 className="text-sm font-semibold text-[#01472e] mb-5" style={{ fontFamily: 'var(--font-inter)' }}>Income & Overall Budget</h3>
         <form onSubmit={handleProfileSubmit} className="flex flex-wrap items-end gap-5">
           <div className="flex flex-col gap-1.5 flex-1 min-w-[150px]">
             <Label htmlFor="monthly_income" className="text-xs" style={{ fontFamily: 'var(--font-roboto)' }}>Monthly Income (₹)</Label>
@@ -210,7 +210,7 @@ export default function BudgetClient({
           </GlowButton>
         </form>
         {profileMessage && (
-          <p className={`text-xs mt-2 ${profileMessage.includes('success') ? 'text-[#EFEFEF]' : 'text-[#FF98A2]'}`}>
+          <p className={`text-xs mt-2 ${profileMessage.includes('success') ? 'text-[#01472e]' : 'text-[#01472e]'}`}>
             {profileMessage}
           </p>
         )}
@@ -219,7 +219,7 @@ export default function BudgetClient({
       {/* Add / Edit Budget Form */}
       {(isAddingBudget || editingBudget) && (
         <GlowCard glowColor="blue" className="p-6">
-          <h3 className="text-sm font-semibold text-white mb-5" style={{ fontFamily: 'var(--font-inter)' }}>
+          <h3 className="text-sm font-semibold text-[#01472e] mb-5" style={{ fontFamily: 'var(--font-inter)' }}>
             {editingBudget ? 'Edit Budget' : 'Create New Budget'}
           </h3>
           <form onSubmit={editingBudget ? handleUpdateBudget : handleCreateBudget} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -228,7 +228,7 @@ export default function BudgetClient({
                 <Label htmlFor="category_id" className="text-xs" style={{ fontFamily: 'var(--font-roboto)' }}>Category (leave empty for overall)</Label>
                 <select name="category_id" id="category_id"
                   defaultValue={editingBudget?.category_id || ''}
-                  className="rounded-[0px] border border-white/10 bg-[#000000] h-9 pl-3 pr-8 text-sm text-white focus:border-[#FF98A2] outline-none">
+                  className="rounded-[0px] border border-[#dde3d0] bg-[#f6f8f1] h-9 pl-3 pr-8 text-sm text-[#01472e] focus:border-[#01472e] outline-none">
                   <option value="">Overall Budget</option>
                   {categories.map(c => (
                     <option key={c.id} value={c.id} disabled={usedCategories.has(c.id) && editingBudget?.category_id !== c.id}>
@@ -245,7 +245,7 @@ export default function BudgetClient({
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="period" className="text-xs" style={{ fontFamily: 'var(--font-roboto)' }}>Period</Label>
                 <select name="period" id="period" defaultValue={editingBudget?.period || 'monthly'}
-                  className="rounded-[0px] border border-white/10 bg-[#000000] h-9 pl-3 pr-8 text-sm text-white focus:border-[#FF98A2] outline-none">
+                  className="rounded-[0px] border border-[#dde3d0] bg-[#f6f8f1] h-9 pl-3 pr-8 text-sm text-[#01472e] focus:border-[#01472e] outline-none">
                   <option value="monthly">Monthly</option>
                   <option value="weekly">Weekly</option>
                 </select>
@@ -265,30 +265,30 @@ export default function BudgetClient({
                     const hidden = (e.target.closest('form')?.querySelector('input[name="auto_renew"]') as HTMLInputElement)
                     if (hidden) hidden.value = e.target.checked ? 'true' : 'false'
                   }}
-                  className="rounded border-white/20 bg-[#000000] text-[#FF98A2] focus:ring-[#FF98A2]"
+                  className="rounded border-[#d5dbc6] bg-[#f6f8f1] text-[#01472e] focus:ring-[#01472e]"
                 />
-                <span className="text-xs text-[#EFEFEF]" style={{ fontFamily: 'var(--font-roboto)' }}>Auto-renew next month</span>
+                <span className="text-xs text-[#01472e]" style={{ fontFamily: 'var(--font-roboto)' }}>Auto-renew next month</span>
               </label>
             </div>
             <div style={{ display: 'flex', gap: '10px', paddingTop: '4px' }}>
               <GlowButton type="submit" glowColor="purple" disabled={isLoading}
                 style={{
                   padding: '10px 24px', borderRadius: '11px', fontSize: '13px', fontWeight: 600,
-                  backgroundColor: '#FF98A2', color: '#000000', border: 'none',
+                  backgroundColor: '#01472e', color: '#ffffff', border: 'none',
                   cursor: isLoading ? 'not-allowed' : 'pointer', opacity: isLoading ? 0.5 : 1,
-                  boxShadow: isLoading ? 'none' : '0 4px 16px rgba(255,152,162,0.3)',
+                  boxShadow: isLoading ? 'none' : '0 4px 16px rgba(1,71,46,0.25)',
                   transition: 'all 0.3s',
                 }}>
                 {isLoading ? 'Saving...' : editingBudget ? 'Update Budget' : 'Create Budget'}
               </GlowButton>
               <button type="button" onClick={() => { setIsAddingBudget(false); setEditingBudget(null) }}
                 style={{
-                  padding: '10px 20px', borderRadius: '11px', border: '1px solid rgba(255,255,255,0.08)',
-                  backgroundColor: 'transparent', color: '#8C8C8C', fontSize: '13px', fontWeight: 500,
+                  padding: '10px 20px', borderRadius: '11px', border: '1px solid rgba(1,71,46,0.12)',
+                  backgroundColor: 'transparent', color: '#64705f', fontSize: '13px', fontWeight: 500,
                   cursor: 'pointer', transition: 'all 0.3s',
                 }}
-                onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = '#EFEFEF' }}
-                onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#8C8C8C' }}
+                onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'rgba(1,71,46,0.08)'; e.currentTarget.style.color = '#01472e' }}
+                onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#64705f' }}
               >
                 Cancel
               </button>
@@ -301,8 +301,8 @@ export default function BudgetClient({
       {budgets.length === 0 ? (
         <GlowCard glowColor="blue" className="p-10">
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '20px 0' }}>
-            <PieChart className="w-12 h-12 text-[#8C8C8C]/50" style={{ marginBottom: '16px' }} />
-            <p className="text-[#8C8C8C] text-sm">No budgets set yet. Create one to start tracking your spending limits.</p>
+            <PieChart className="w-12 h-12 text-[#64705f]/50" style={{ marginBottom: '16px' }} />
+            <p className="text-[#64705f] text-sm">No budgets set yet. Create one to start tracking your spending limits.</p>
           </div>
         </GlowCard>
       ) : (
@@ -312,20 +312,20 @@ export default function BudgetClient({
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
                   {budget.categories ? (
-                    <div className="w-11 h-11 rounded-[0px] flex items-center justify-center text-xl border border-white/5"
+                    <div className="w-11 h-11 rounded-[0px] flex items-center justify-center text-xl border border-[#dde3d0]"
                       style={{ backgroundColor: `${budget.categories.color}15` }}>
                       {budget.categories.icon}
                     </div>
                   ) : (
-                    <div className="w-11 h-11 rounded-[0px] flex items-center justify-center bg-[#FF98A2]/10 border border-white/5">
-                      <PieChart className="w-5 h-5 text-[#FF98A2]" />
+                    <div className="w-11 h-11 rounded-[0px] flex items-center justify-center bg-[#01472e]/10 border border-[#dde3d0]">
+                      <PieChart className="w-5 h-5 text-[#01472e]" />
                     </div>
                   )}
                   <div>
-                    <h3 className="text-sm font-bold text-white" style={{ fontFamily: 'var(--font-inter)' }}>
+                    <h3 className="text-sm font-bold text-[#01472e]" style={{ fontFamily: 'var(--font-inter)' }}>
                       {budget.categories?.name || 'Overall Budget'}
                     </h3>
-                    <p className="text-xs text-[#8C8C8C]">
+                    <p className="text-xs text-[#64705f]">
                       {budget.period === 'monthly' ? 'Monthly' : 'Weekly'} · {budget.daysLeft} days left
                     </p>
                   </div>
@@ -342,7 +342,7 @@ export default function BudgetClient({
                       <Pencil className="w-3.5 h-3.5 mr-2" /> Edit
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => handleDeleteBudget(budget.id)} className="text-[#FF98A2] focus:text-[#FF98A2]">
+                    <DropdownMenuItem onClick={() => handleDeleteBudget(budget.id)} className="text-[#01472e] focus:text-[#01472e]">
                       <Trash2 className="w-3.5 h-3.5 mr-2" /> Delete
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -352,18 +352,18 @@ export default function BudgetClient({
               {/* Progress Bar */}
               <div className="mb-2">
                 <div className="flex justify-between text-xs mb-1">
-                  <span className="text-[#8C8C8C]" style={{ fontFamily: 'var(--font-roboto)' }}>
+                  <span className="text-[#64705f]" style={{ fontFamily: 'var(--font-roboto)' }}>
                     ₹{budget.spent.toLocaleString('en-IN')} spent
                   </span>
                   <span className={`font-semibold ${getProgressText(budget.percentage)}`}>
                     {budget.percentage}%
                   </span>
                 </div>
-                <div className="w-full bg-white/5 rounded-full h-2 overflow-hidden">
+                <div className="w-full bg-[#f6f8f1] rounded-full h-2 overflow-hidden">
                   <div className={`h-2 rounded-full transition-all duration-[0.6s] ease-[cubic-bezier(0.19,1,0.22,1)] ${getProgressColor(budget.percentage)}`}
                     style={{ width: `${Math.min(100, budget.percentage)}%` }} />
                 </div>
-                <div className="flex justify-between text-[10px] text-[#8C8C8C]/50 mt-1">
+                <div className="flex justify-between text-[10px] text-[#64705f]/50 mt-1">
                   <span>₹{budget.remaining.toLocaleString('en-IN')} remaining</span>
                   <span>of ₹{budget.amount.toLocaleString('en-IN')}</span>
                 </div>
@@ -377,7 +377,7 @@ export default function BudgetClient({
                   </Badge>
                 ))}
                 {budget.auto_renew && (
-                  <Badge variant="outline" className="text-[9px] px-1.5 py-0 text-[#EFEFEF] border-[#EFEFEF]/30">
+                  <Badge variant="outline" className="text-[9px] px-1.5 py-0 text-[#01472e] border-[#01472e]/30">
                     Auto-renew
                   </Badge>
                 )}

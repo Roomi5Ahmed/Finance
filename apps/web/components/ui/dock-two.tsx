@@ -1,5 +1,5 @@
 import * as React from "react"
-import { motion } from "framer-motion"
+import { motion, type Variants } from "framer-motion"
 import { cn } from "@/lib/utils"
 import { LucideIcon } from "lucide-react"
 
@@ -21,7 +21,7 @@ interface DockIconButtonProps {
   className?: string
 }
 
-const floatingAnimation = {
+const floatingAnimation: Variants = {
   initial: { y: 0 },
   animate: {
     y: [-2, 2, -2],
@@ -44,8 +44,8 @@ const DockIconButton = React.forwardRef<HTMLButtonElement, DockIconButtonProps>(
           className={cn(
             "relative group p-3.5 rounded-[11px] transition-all duration-[0.6s] ease-[cubic-bezier(0.19,1,0.22,1)]",
           isActive
-            ? "bg-[#FF98A2]/10 text-[#FF98A2]"
-            : "hover:bg-white/5 text-[#8C8C8C] hover:text-[#EFEFEF]",
+            ? "bg-[#fefae0]/15 text-[#fefae0]"
+            : "hover:bg-[rgba(254,250,224,0.1)] text-[#ccd5ae] hover:text-[#fefae0]",
           className
         )}
       >
@@ -53,7 +53,7 @@ const DockIconButton = React.forwardRef<HTMLButtonElement, DockIconButtonProps>(
         <span className={cn(
           "absolute -top-9 left-1/2 -translate-x-1/2",
           "px-2.5 py-1 rounded-[4px] text-[11px] font-medium",
-          "bg-[#181818] text-[#EFEFEF] border border-white/10 shadow-lg",
+          "bg-[#ffffff] text-[#01472e] border border-[#dde3d0] shadow-lg",
           "opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100",
           "transition-all duration-200 whitespace-nowrap pointer-events-none"
         )}>
@@ -62,7 +62,7 @@ const DockIconButton = React.forwardRef<HTMLButtonElement, DockIconButtonProps>(
         {isActive && (
           <motion.div
             layoutId="dock-active"
-            className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#FF98A2]"
+            className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#fefae0]"
             transition={{ type: "spring", stiffness: 500, damping: 30 }}
           />
         )}
@@ -82,9 +82,9 @@ const Dock = React.forwardRef<HTMLDivElement, DockProps>(
           variants={floatingAnimation}
           className={cn(
             "flex items-center gap-2.5 rounded-[16px]",
-            "backdrop-blur-sm border border-white/10",
-            "bg-[#000000]/90",
-            "hover:shadow-[0_8px_40px_rgba(255,152,162,0.1)] transition-shadow duration-[0.6s]"
+            "backdrop-blur-sm border border-[rgba(254,250,224,0.22)]",
+            "bg-[#01331f]/95",
+            "hover:shadow-[0_8px_40px_rgba(0,0,0,0.4)] transition-shadow duration-[0.6s]"
           )}
           style={{ padding: '12px 20px' }}
         >

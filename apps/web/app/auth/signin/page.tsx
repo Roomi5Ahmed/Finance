@@ -1,87 +1,72 @@
-import { login } from '../actions'
+import Link from 'next/link'
+import SignInForm from './SignInForm'
 
-export default async function SignInPage(props: { searchParams: Promise<{ message: string }> }) {
-  const searchParams = await props.searchParams;
+export default async function SignInPage(props: { searchParams: Promise<{ message?: string }> }) {
+  const searchParams = await props.searchParams
+
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-[#000000] py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <h2
-          className="mt-6 text-center text-3xl font-bold text-[#EFEFEF]"
-          style={{ fontFamily: 'var(--font-inter), Inter, sans-serif' }}
-        >
-          Sign in to your account
-        </h2>
-        <p className="mt-2 text-center text-sm text-[#8C8C8C]" style={{ fontFamily: 'var(--font-roboto), Roboto, sans-serif', fontWeight: 900 }}>
-          Smart <span className="text-[#FF98A2]">Finance</span>
-        </p>
-      </div>
+    <div className="auth-page">
+      <header className="auth-nav">
+        <div className="auth-nav-inner">
+          <Link href="/" className="auth-brand">
+            <span className="auth-tile auth-tile-sm" aria-hidden="true">
+              <span className="auth-monogram">S</span>
+              <span className="auth-tile-dot" />
+            </span>
+            <span className="auth-wordmark">Smart Finance</span>
+          </Link>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-[#181818] border border-white/5 px-4 py-8 sm:px-10">
-          <form className="space-y-6" action={login}>
-            {searchParams?.message && (
-              <p className="mt-4 p-4 bg-[#FF98A2]/10 text-[#FF98A2] text-center text-sm rounded-[11px] border border-[#FF98A2]/20">
-                {searchParams.message}
-              </p>
-            )}
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-[#8C8C8C]"
-                style={{ fontFamily: 'var(--font-roboto), Roboto, sans-serif', fontWeight: 900 }}
-              >
-                Email address
-              </label>
-              <div className="mt-1">
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  className="block w-full appearance-none rounded-[11px] border border-white/10 bg-[#000000] px-3 py-2 placeholder-[#8C8C8C] text-[#EFEFEF] focus:border-[#FF98A2] focus:outline-none focus:ring-1 focus:ring-[#FF98A2]/20 sm:text-sm transition-all duration-[0.6s] ease-[cubic-bezier(0.19,1,0.22,1)]"
-                />
-              </div>
-            </div>
+          <nav className="auth-nav-links" aria-label="Primary">
+            <Link href="/#features">Features</Link>
+            <Link href="/#how">How It Works</Link>
+            <Link href="/#insights">Insights</Link>
+          </nav>
 
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-[#8C8C8C]"
-                style={{ fontFamily: 'var(--font-roboto), Roboto, sans-serif', fontWeight: 900 }}
-              >
-                Password
-              </label>
-              <div className="mt-1">
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  autoComplete="current-password"
-                  required
-                  className="block w-full appearance-none rounded-[11px] border border-white/10 bg-[#000000] px-3 py-2 placeholder-[#8C8C8C] text-[#EFEFEF] focus:border-[#FF98A2] focus:outline-none focus:ring-1 focus:ring-[#FF98A2]/20 sm:text-sm transition-all duration-[0.6s] ease-[cubic-bezier(0.19,1,0.22,1)]"
-                />
-              </div>
-            </div>
-
-            <div>
-              <button
-                type="submit"
-                className="flex w-full justify-center rounded-[16px] border border-[#FF98A2] bg-[#FF98A2] px-4 py-2 text-sm font-medium text-[#000000] hover:bg-[#FF98A2]/90 focus:outline-none focus:ring-2 focus:ring-[#FF98A2] focus:ring-offset-2 focus:ring-offset-[#181818] transition-all duration-[0.6s] ease-[cubic-bezier(0.19,1,0.22,1)]"
-              >
-                Sign in
-              </button>
-            </div>
-
-            <div className="mt-6 text-center text-sm">
-              <span className="text-[#8C8C8C]">Don&apos;t have an account? </span>
-              <a href="/auth/signup" className="font-medium text-[#FF98A2] hover:text-[#FF98A2]/80 transition-colors duration-[0.6s]">
-                Sign up
-              </a>
-            </div>
-          </form>
+          <div className="auth-nav-right">
+            <Link className="auth-help" href="/#how">
+              Need help?
+            </Link>
+            <Link className="auth-start" href="/auth/signup">
+              Start free
+            </Link>
+          </div>
         </div>
-      </div>
+      </header>
+
+      <main className="auth-main">
+        <div className="auth-grid-layer" aria-hidden="true" />
+        <div className="auth-card-wrap">
+          <div className="auth-card text-[#01472e]">
+            <div className="auth-rail" aria-hidden="true" />
+            <div className="auth-card-head">
+              <span className="auth-tile auth-tile-lg" aria-hidden="true">
+                <span className="auth-monogram">S</span>
+                <span className="auth-tile-dot" />
+              </span>
+              <h1 className="auth-title">Welcome back</h1>
+              <p className="auth-sub">Sign in to keep tracking your money.</p>
+            </div>
+            <div className="auth-card-body">
+              <SignInForm message={searchParams?.message} />
+            </div>
+          </div>
+
+          <div className="auth-below">
+            <p>
+              New to Smart Finance? <Link href="/auth/signup">Create an account</Link>
+            </p>
+            <p className="auth-trust">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+              </svg>
+              <span>
+                Protected by Smart Finance security. By continuing you agree to our{' '}
+                <Link href="/">Terms</Link>.
+              </span>
+            </p>
+          </div>
+        </div>
+      </main>
     </div>
   )
 }

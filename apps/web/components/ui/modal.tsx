@@ -39,9 +39,9 @@ export function Modal({ isOpen, onClose, children }: ModalProps) {
     <div
       ref={overlayRef}
       onClick={handleOverlayClick}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(8,26,17,0.6)] p-4"
     >
-      <div className="bg-[#181818] border border-white/10 w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-200">
+      <div className="bg-[#ffffff] border border-[#dde3d0] w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-200">
         {children}
       </div>
     </div>

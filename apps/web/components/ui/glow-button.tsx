@@ -10,14 +10,15 @@ interface GlowButtonProps {
   disabled?: boolean
   type?: 'button' | 'submit'
   glowColor?: 'blue' | 'purple' | 'green' | 'red' | 'orange'
+  style?: React.CSSProperties
 }
 
 const glowColorMap = {
-  blue:   { base: 220, spread: 200 },
-  purple: { base: 350, spread: 200 },
-  green:  { base: 120, spread: 200 },
-  red:    { base: 0,   spread: 200 },
-  orange: { base: 30,  spread: 200 },
+  blue:   { base: 155, spread: 200 },
+  purple: { base: 155, spread: 200 },
+  green:  { base: 155, spread: 200 },
+  red:    { base: 155, spread: 200 },
+  orange: { base: 155, spread: 200 },
 }
 
 const GlowButton: React.FC<GlowButtonProps> = ({
@@ -27,6 +28,7 @@ const GlowButton: React.FC<GlowButtonProps> = ({
   disabled,
   type = 'button',
   glowColor = 'purple',
+  style,
 }) => {
   const { base, spread } = glowColorMap[glowColor]
   const btnRef = useRef<HTMLButtonElement>(null)
@@ -65,6 +67,7 @@ const GlowButton: React.FC<GlowButtonProps> = ({
         '--radius': '0',
         '--border': '1',
         '--size': '150',
+        ...style,
       } as React.CSSProperties}
       className={cn(
         'relative transition-all duration-[0.6s] ease-[cubic-bezier(0.19,1,0.22,1)] disabled:opacity-50',

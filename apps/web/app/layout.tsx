@@ -10,9 +10,23 @@ const roboto = Roboto({
 });
 
 const inter = Inter({
-  weight: ["700"],
+  weight: "700",
   subsets: ["latin"],
   variable: "--font-inter",
+  display: "swap",
+});
+
+const interRegular = Inter({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-inter-400",
+  display: "swap",
+});
+
+const interExtra = Inter({
+  weight: "800",
+  subsets: ["latin"],
+  variable: "--font-inter-800",
   display: "swap",
 });
 
@@ -35,9 +49,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${roboto.variable} ${inter.variable} ${anton.variable}`}>
-        <div className="starfield" />
-        <div className="ember-glow" />
+      <body className={`${roboto.variable} ${inter.variable} ${interRegular.variable} ${interExtra.variable} ${anton.variable}`}>
         {children}
       </body>
     </html>

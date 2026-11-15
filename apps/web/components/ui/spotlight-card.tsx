@@ -10,11 +10,11 @@ interface GlowCardProps {
 }
 
 const glowColorMap = {
-  blue:   { base: 220, spread: 200 },
-  purple: { base: 350, spread: 200 },
-  green:  { base: 120, spread: 200 },
-  red:    { base: 0,   spread: 200 },
-  orange: { base: 30,  spread: 200 },
+  blue:   { base: 155, spread: 200 },
+  purple: { base: 155, spread: 200 },
+  green:  { base: 155, spread: 200 },
+  red:    { base: 155, spread: 200 },
+  orange: { base: 155, spread: 200 },
 }
 
 const GlowCard: React.FC<GlowCardProps> = ({
@@ -53,8 +53,9 @@ const GlowCard: React.FC<GlowCardProps> = ({
       style={{
         '--base': base,
         '--spread': spread,
+        '--radius': '16',
       } as React.CSSProperties}
-      className={cn('relative overflow-hidden', className)}
+      className={cn('relative overflow-hidden bg-[#ffffff] rounded-[16px]', className)}
     >
       <div data-glow className="pointer-events-none" />
       {children}

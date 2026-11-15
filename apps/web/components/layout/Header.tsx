@@ -86,10 +86,10 @@ export default function Header() {
   }
 
   return (
-    <header style={{ height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingLeft: '48px', paddingRight: '48px', position: 'sticky', top: 0, zIndex: 20, backgroundColor: 'rgba(0,0,0,0.9)', backdropFilter: 'blur(4px)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+    <header style={{ height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingLeft: '48px', paddingRight: '48px', position: 'sticky', top: 0, zIndex: 20, backgroundColor: 'rgba(1,71,46,0.88)', backdropFilter: 'blur(4px)', borderBottom: '1px solid rgba(254,250,224,0.12)' }}>
       {/* Brand */}
-      <span className="text-lg font-bold text-[#EFEFEF] tracking-wide shrink-0">
-        Smart <span className="text-[#FF98A2]">Finance</span>
+      <span className="text-lg font-bold text-[#fefae0] tracking-wide shrink-0">
+        Smart <span className="text-[#fefae0]">Finance</span>
       </span>
 
       {/* Search & Actions */}
@@ -98,7 +98,7 @@ export default function Header() {
           <Input
             type="text"
             placeholder="Search transactions..."
-            className="bg-[#181818] border-white/5 h-9"
+            className="bg-[#ffffff] border-[#dde3d0] h-9"
           />
         </div>
 
@@ -106,51 +106,51 @@ export default function Header() {
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={() => setShowNotifications(!showNotifications)}
-            className="text-[#8C8C8C] hover:text-[#EFEFEF] transition-all duration-[0.6s] ease-[cubic-bezier(0.19,1,0.22,1)] relative p-1"
+            className="text-[#ccd5ae] hover:text-[#fefae0] transition-all duration-[0.6s] ease-[cubic-bezier(0.19,1,0.22,1)] relative p-1"
           >
             <Bell className="w-5 h-5" />
             {unreadCount > 0 && (
-              <span className="absolute -top-1 -right-1 h-4 w-4 rounded-[4px] bg-[#FF98A2] text-[#000000] text-[9px] font-bold flex items-center justify-center">
+              <span className="absolute -top-1 -right-1 h-4 w-4 rounded-[4px] bg-[#fefae0] text-[#01472e] text-[9px] font-bold flex items-center justify-center">
                 {unreadCount > 9 ? '9+' : unreadCount}
               </span>
             )}
           </button>
 
           {showNotifications && (
-            <div className="absolute right-0 mt-2 w-80 bg-[#181818] border border-white/10 rounded-[11px] shadow-2xl overflow-hidden z-50">
-              <div className="flex items-center justify-between px-4 py-3 border-b border-white/5">
-                <h3 className="text-sm font-semibold text-[#EFEFEF]">Notifications</h3>
+            <div className="absolute right-0 mt-2 w-80 bg-[#ffffff] border border-[#dde3d0] rounded-[11px] shadow-2xl overflow-hidden z-50">
+              <div className="flex items-center justify-between px-4 py-3 border-b border-[#dde3d0]">
+                <h3 className="text-sm font-semibold text-[#01472e]">Notifications</h3>
                 {unreadCount > 0 && (
-                  <button onClick={handleMarkAllRead} className="text-[10px] text-[#FF98A2] hover:text-[#FF98A2]/80">
+                  <button onClick={handleMarkAllRead} className="text-[10px] text-[#01472e] hover:text-[#01472e]/80">
                     Mark all read
                   </button>
                 )}
               </div>
               <div className="max-h-80 overflow-y-auto">
                 {notifications.length === 0 ? (
-                  <div className="p-6 text-center text-[#8C8C8C] text-xs">
+                  <div className="p-6 text-center text-[#64705f] text-xs">
                     No notifications yet.
                   </div>
                 ) : (
                   notifications.map(n => (
                     <div
                       key={n.id}
-                      className={`px-4 py-3 border-b border-white/[0.03] hover:bg-white/[0.02] transition-all duration-[0.6s] ease-[cubic-bezier(0.19,1,0.22,1)] ${!n.read ? 'bg-[#FF98A2]/5' : ''}`}
+                      className={`px-4 py-3 border-b border-[#dde3d0]/70 hover:bg-[#f6f8f1] transition-all duration-[0.6s] ease-[cubic-bezier(0.19,1,0.22,1)] ${!n.read ? 'bg-[#01472e]/5' : ''}`}
                     >
                       <div className="flex items-start gap-2.5">
                         <span className="text-sm shrink-0 mt-0.5">{getNotifIcon(n.type)}</span>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
-                            <p className="text-xs font-medium text-[#EFEFEF] truncate">{n.title}</p>
-                            {!n.read && <div className="w-1.5 h-1.5 rounded-full bg-[#FF98A2] shrink-0" />}
+                            <p className="text-xs font-medium text-[#01472e] truncate">{n.title}</p>
+                            {!n.read && <div className="w-1.5 h-1.5 rounded-full bg-[#01472e] shrink-0" />}
                           </div>
-                          <p className="text-[10px] text-[#8C8C8C] mt-0.5 line-clamp-2">{n.body}</p>
-                          <p className="text-[9px] text-[#8C8C8C]/50 mt-1">{formatTime(n.created_at)}</p>
+                          <p className="text-[10px] text-[#64705f] mt-0.5 line-clamp-2">{n.body}</p>
+                          <p className="text-[9px] text-[#64705f]/50 mt-1">{formatTime(n.created_at)}</p>
                         </div>
                         {!n.read && (
                           <button
                             onClick={() => handleMarkRead(n.id)}
-                            className="text-[#8C8C8C] hover:text-[#FF98A2] shrink-0 mt-0.5 transition-colors duration-[0.6s]"
+                            className="text-[#64705f] hover:text-[#01472e] shrink-0 mt-0.5 transition-colors duration-[0.6s]"
                             title="Mark as read"
                           >
                             <Check className="w-3 h-3" />
@@ -165,13 +165,13 @@ export default function Header() {
           )}
         </div>
 
-        <div className="flex items-center gap-2.5 bg-[#181818] px-3 py-1.5 rounded-[8px] border border-white/5">
-          <div className="h-7 w-7 rounded-[6px] bg-[#FF98A2] flex items-center justify-center text-[#000000] text-[11px] font-bold">
+        <div className="flex items-center gap-2.5 bg-[#ffffff] px-3 py-1.5 rounded-[8px] border border-[#dde3d0]">
+          <div className="h-7 w-7 rounded-[6px] bg-[#01472e] flex items-center justify-center text-white text-[11px] font-bold">
             U
           </div>
           <button
             onClick={handleSignOut}
-            className="text-xs font-medium text-[#8C8C8C] hover:text-[#EFEFEF] transition-colors duration-[0.6s]"
+            className="text-xs font-medium text-[#64705f] hover:text-[#01472e] transition-colors duration-[0.6s]"
           >
             Sign out
           </button>

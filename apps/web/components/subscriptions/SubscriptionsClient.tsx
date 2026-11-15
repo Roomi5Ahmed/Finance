@@ -115,22 +115,22 @@ export default function SubscriptionsClient({
   }
 
   return (
-    <div className="animate-in" style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
+    <div className="animate-in text-[#01472e]" style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
         <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight" style={{ fontFamily: 'var(--font-inter)' }}>Subscriptions</h1>
-          <p className="mt-1.5 text-sm text-[#8C8C8C]">
+          <h1 className="text-2xl font-bold text-[#fefae0] tracking-tight" style={{ fontFamily: 'var(--font-inter)' }}>Subscriptions</h1>
+          <p className="mt-1.5 text-sm text-[#ccd5ae]">
             Auto-detected recurring payments from your transaction history.
           </p>
         </div>
         <div style={{ display: 'flex', gap: '8px' }}>
           <GlowButton onClick={handleScan} disabled={isScanning} glowColor="purple"
-            className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium">
+            className="glow-on-shell inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-[#fefae0]">
             <RefreshCw className={`w-4 h-4 mr-2 ${isScanning ? 'animate-spin' : ''}`} />
             {isScanning ? 'Scanning...' : 'Scan for Subscriptions'}
           </GlowButton>
           <GlowButton onClick={() => setShowAddForm(!showAddForm)} glowColor="green"
-            className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium">
+            className="glow-on-shell inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-[#fefae0]">
             <Plus className="w-4 h-4 mr-2" />
             Add Subscription
           </GlowButton>
@@ -146,19 +146,19 @@ export default function SubscriptionsClient({
                 placeholder="Service name (e.g. Netflix)"
                 value={addForm.merchant}
                 onChange={e => setAddForm(p => ({ ...p, merchant: e.target.value }))}
-                style={{ flex: 1, padding: '8px 12px', borderRadius: '11px', backgroundColor: '#181818', border: '1px solid #333', color: '#EFEFEF', fontSize: '14px', outline: 'none' }}
+                style={{ flex: 1, padding: '8px 12px', borderRadius: '11px', backgroundColor: '#ffffff', border: '1px solid #333', color: '#01472e', fontSize: '14px', outline: 'none' }}
               />
               <input
                 type="number"
                 placeholder="Amount"
                 value={addForm.amount}
                 onChange={e => setAddForm(p => ({ ...p, amount: e.target.value }))}
-                style={{ width: '120px', padding: '8px 12px', borderRadius: '11px', backgroundColor: '#181818', border: '1px solid #333', color: '#EFEFEF', fontSize: '14px', outline: 'none' }}
+                style={{ width: '120px', padding: '8px 12px', borderRadius: '11px', backgroundColor: '#ffffff', border: '1px solid #333', color: '#01472e', fontSize: '14px', outline: 'none' }}
               />
               <select
                 value={addForm.cadence}
                 onChange={e => setAddForm(p => ({ ...p, cadence: e.target.value }))}
-                style={{ padding: '8px 12px', borderRadius: '11px', backgroundColor: '#181818', border: '1px solid #333', color: '#EFEFEF', fontSize: '14px', outline: 'none' }}
+                style={{ padding: '8px 12px', borderRadius: '11px', backgroundColor: '#ffffff', border: '1px solid #333', color: '#01472e', fontSize: '14px', outline: 'none' }}
               >
                 <option value="weekly">Weekly</option>
                 <option value="monthly">Monthly</option>
@@ -167,7 +167,7 @@ export default function SubscriptionsClient({
               </select>
             </div>
             <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-              <button onClick={() => setShowAddForm(false)} style={{ padding: '8px 16px', borderRadius: '11px', backgroundColor: 'transparent', border: '1px solid #333', color: '#8C8C8C', fontSize: '13px', cursor: 'pointer' }}>Cancel</button>
+              <button onClick={() => setShowAddForm(false)} style={{ padding: '8px 16px', borderRadius: '11px', backgroundColor: 'transparent', border: '1px solid #333', color: '#64705f', fontSize: '13px', cursor: 'pointer' }}>Cancel</button>
               <GlowButton onClick={handleAdd} disabled={isAdding || !addForm.merchant.trim() || !addForm.amount} glowColor="green"
                 className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium">
                 {isAdding ? 'Adding...' : 'Add'}
@@ -178,7 +178,7 @@ export default function SubscriptionsClient({
       )}
 
       {message && (
-        <div className={`p-3 rounded-[0px] text-sm ${message.includes('Detected') ? 'bg-[#EFEFEF]/10 text-[#EFEFEF] border border-[#EFEFEF]/20' : 'bg-[#FF98A2]/10 text-[#FF98A2] border border-[#FF98A2]/20'}`}>
+        <div className={`p-3 rounded-[0px] text-sm ${message.includes('Detected') ? 'bg-[#01472e]/10 text-[#01472e] border border-[#01472e]/20' : 'bg-[#01472e]/10 text-[#01472e] border border-[#01472e]/20'}`}>
           {message}
         </div>
       )}
@@ -187,34 +187,34 @@ export default function SubscriptionsClient({
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <GlowCard glowColor="purple" className="p-5">
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div className="p-2.5 rounded-[0px] bg-[#FF98A2]/10">
-              <CreditCard className="w-4 h-4 text-[#FF98A2]" />
+            <div className="p-2.5 rounded-[0px] bg-[#01472e]/10">
+              <CreditCard className="w-4 h-4 text-[#01472e]" />
             </div>
             <div>
-              <p className="text-xs text-[#8C8C8C]" style={{ fontFamily: 'var(--font-roboto)', marginBottom: '2px' }}>Monthly Cost</p>
-              <p className="text-lg font-bold text-white">{'\u20B9'}{totalMonthly.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</p>
+              <p className="text-xs text-[#64705f]" style={{ fontFamily: 'var(--font-roboto)', marginBottom: '2px' }}>Monthly Cost</p>
+              <p className="text-lg font-bold text-[#01472e]">{'\u20B9'}{totalMonthly.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</p>
             </div>
           </div>
         </GlowCard>
         <GlowCard glowColor="blue" className="p-5">
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div className="p-2.5 rounded-[0px] bg-[#FF98A2]/10">
-              <TrendingUp className="w-4 h-4 text-[#FF98A2]" />
+            <div className="p-2.5 rounded-[0px] bg-[#01472e]/10">
+              <TrendingUp className="w-4 h-4 text-[#01472e]" />
             </div>
             <div>
-              <p className="text-xs text-[#8C8C8C]" style={{ fontFamily: 'var(--font-roboto)', marginBottom: '2px' }}>Annual Cost</p>
-              <p className="text-lg font-bold text-white">{'\u20B9'}{totalAnnual.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</p>
+              <p className="text-xs text-[#64705f]" style={{ fontFamily: 'var(--font-roboto)', marginBottom: '2px' }}>Annual Cost</p>
+              <p className="text-lg font-bold text-[#01472e]">{'\u20B9'}{totalAnnual.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</p>
             </div>
           </div>
         </GlowCard>
         <GlowCard glowColor="green" className="p-5">
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div className="p-2.5 rounded-[0px] bg-[#EFEFEF]/10">
-              <Calendar className="w-4 h-4 text-[#EFEFEF]" />
+            <div className="p-2.5 rounded-[0px] bg-[#01472e]/10">
+              <Calendar className="w-4 h-4 text-[#01472e]" />
             </div>
             <div>
-              <p className="text-xs text-[#8C8C8C]" style={{ fontFamily: 'var(--font-roboto)', marginBottom: '2px' }}>Active Subscriptions</p>
-              <p className="text-lg font-bold text-white">{activeSubs.length}</p>
+              <p className="text-xs text-[#64705f]" style={{ fontFamily: 'var(--font-roboto)', marginBottom: '2px' }}>Active Subscriptions</p>
+              <p className="text-lg font-bold text-[#01472e]">{activeSubs.length}</p>
             </div>
           </div>
         </GlowCard>
@@ -224,16 +224,16 @@ export default function SubscriptionsClient({
       {subscriptions.length === 0 ? (
         <GlowCard glowColor="blue" className="p-10">
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '20px 0' }}>
-            <CreditCard className="w-12 h-12 text-[#8C8C8C]/50" style={{ marginBottom: '16px' }} />
-            <p className="text-[#8C8C8C] text-sm" style={{ marginBottom: '8px' }}>No subscriptions yet.</p>
-            <p className="text-[#8C8C8C]/50 text-xs">Click &quot;Scan for Subscriptions&quot; to auto-detect from transactions, or &quot;Add Subscription&quot; to add one manually.</p>
+            <CreditCard className="w-12 h-12 text-[#64705f]/50" style={{ marginBottom: '16px' }} />
+            <p className="text-[#64705f] text-sm" style={{ marginBottom: '8px' }}>No subscriptions yet.</p>
+            <p className="text-[#64705f]/50 text-xs">Click &quot;Scan for Subscriptions&quot; to auto-detect from transactions, or &quot;Add Subscription&quot; to add one manually.</p>
           </div>
         </GlowCard>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {activeSubs.length > 0 && (
             <div>
-              <h3 className="text-xs font-semibold text-[#8C8C8C] uppercase tracking-wider" style={{ fontFamily: 'var(--font-roboto)', marginBottom: '8px' }}>Active ({activeSubs.length})</h3>
+              <h3 className="text-xs font-semibold text-[#ccd5ae] uppercase tracking-wider" style={{ fontFamily: 'var(--font-roboto)', marginBottom: '8px' }}>Active ({activeSubs.length})</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {activeSubs.map(sub => (
                   <SubscriptionRow key={sub.id} sub={sub} onStatusUpdate={handleStatusUpdate} onDelete={handleDelete} getCadenceLabel={getCadenceLabel} getMonthlyAmount={getMonthlyAmount} />
@@ -244,7 +244,7 @@ export default function SubscriptionsClient({
 
           {lapsedSubs.length > 0 && (
             <div>
-              <h3 className="text-xs font-semibold text-[#FF98A2]/70 uppercase tracking-wider" style={{ fontFamily: 'var(--font-roboto)', marginBottom: '8px' }}>Lapsed ({lapsedSubs.length})</h3>
+              <h3 className="text-xs font-semibold text-[#fefae0]/75 uppercase tracking-wider" style={{ fontFamily: 'var(--font-roboto)', marginBottom: '8px' }}>Lapsed ({lapsedSubs.length})</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {lapsedSubs.map(sub => (
                   <SubscriptionRow key={sub.id} sub={sub} onStatusUpdate={handleStatusUpdate} onDelete={handleDelete} getCadenceLabel={getCadenceLabel} getMonthlyAmount={getMonthlyAmount} />
@@ -255,7 +255,7 @@ export default function SubscriptionsClient({
 
           {cancelledSubs.length > 0 && (
             <div>
-              <h3 className="text-xs font-semibold text-[#8C8C8C]/50 uppercase tracking-wider" style={{ fontFamily: 'var(--font-roboto)', marginBottom: '8px' }}>Cancelled ({cancelledSubs.length})</h3>
+              <h3 className="text-xs font-semibold text-[#ccd5ae]/60 uppercase tracking-wider" style={{ fontFamily: 'var(--font-roboto)', marginBottom: '8px' }}>Cancelled ({cancelledSubs.length})</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {cancelledSubs.map(sub => (
                   <SubscriptionRow key={sub.id} sub={sub} onStatusUpdate={handleStatusUpdate} onDelete={handleDelete} getCadenceLabel={getCadenceLabel} getMonthlyAmount={getMonthlyAmount} />
@@ -304,28 +304,28 @@ function SubscriptionRow({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           {sub.categories ? (
-            <div className="w-11 h-11 rounded-[0px] flex items-center justify-center text-xl border border-white/5"
+            <div className="w-11 h-11 rounded-[0px] flex items-center justify-center text-xl border border-[#dde3d0]"
               style={{ backgroundColor: `${sub.categories.color}15` }}>
               {sub.categories.icon}
             </div>
           ) : (
-            <div className="w-11 h-11 rounded-[0px] flex items-center justify-center bg-[#FF98A2]/10 border border-white/5">
-              <CreditCard className="w-5 h-5 text-[#FF98A2]" />
+            <div className="w-11 h-11 rounded-[0px] flex items-center justify-center bg-[#01472e]/10 border border-[#dde3d0]">
+              <CreditCard className="w-5 h-5 text-[#01472e]" />
             </div>
           )}
           <div>
             <div className="flex items-center gap-2">
-              <h4 className="text-sm font-semibold text-white capitalize" style={{ fontFamily: 'var(--font-inter)' }}>{sub.merchant_normalized}</h4>
+              <h4 className="text-sm font-semibold text-[#01472e] capitalize" style={{ fontFamily: 'var(--font-inter)' }}>{sub.merchant_normalized}</h4>
               {sub.status === 'candidate' && (
-                <Badge variant="outline" className="text-[9px] px-1.5 py-0 text-[#FF98A2]/70 border-[#FF98A2]/30">Candidate</Badge>
+                <Badge variant="outline" className="text-[9px] px-1.5 py-0 text-[#01472e]/70 border-[#01472e]/30">Candidate</Badge>
               )}
               {hasPriceChange && (
-                <Badge variant="outline" className="text-[9px] px-1.5 py-0 text-[#FF98A2] border-[#FF98A2]/30">
+                <Badge variant="outline" className="text-[9px] px-1.5 py-0 text-[#01472e] border-[#01472e]/30">
                   <TrendingUp className="w-2.5 h-2.5 mr-0.5" /> Price change
                 </Badge>
               )}
             </div>
-            <p className="text-xs text-[#8C8C8C]" style={{ fontFamily: 'var(--font-roboto)' }}>
+            <p className="text-xs text-[#64705f]" style={{ fontFamily: 'var(--font-roboto)' }}>
               ₹{Number(sub.avg_amount).toLocaleString('en-IN')}{getCadenceLabel(sub.cadence)} · {sub.categories?.name || 'Uncategorized'}
             </p>
           </div>
@@ -339,23 +339,23 @@ function SubscriptionRow({
                 <AreaChart data={chartData}>
                   <defs>
                     <linearGradient id={`subgrad-${sub.id}`} x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#FF98A2" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="#FF98A2" stopOpacity={0} />
+                      <stop offset="5%" stopColor="#01472e" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#01472e" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <Tooltip
-                    contentStyle={{ backgroundColor: '#181818', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '11px', color: '#EFEFEF', fontSize: '10px' }}
+                    contentStyle={{ backgroundColor: '#ffffff', border: '1px solid rgba(1,71,46,0.12)', borderRadius: '11px', color: '#01472e', fontSize: '10px' }}
                     formatter={(v: any) => [`₹${v}`, 'Amount']}
                   />
-                  <Area type="monotone" dataKey="amount" stroke="#FF98A2" fill={`url(#subgrad-${sub.id})`} strokeWidth={1.5} />
+                  <Area type="monotone" dataKey="amount" stroke="#01472e" fill={`url(#subgrad-${sub.id})`} strokeWidth={1.5} />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
           )}
 
           <div className="text-right">
-            <p className="text-base font-bold text-white">₹{monthlyAmount.toLocaleString('en-IN', { maximumFractionDigits: 0 })}<span className="text-xs font-normal text-[#8C8C8C]">/mo</span></p>
-            <p className="text-[10px] text-[#8C8C8C]/50">
+            <p className="text-base font-bold text-[#01472e]">₹{monthlyAmount.toLocaleString('en-IN', { maximumFractionDigits: 0 })}<span className="text-xs font-normal text-[#64705f]">/mo</span></p>
+            <p className="text-[10px] text-[#64705f]/50">
               {lastCharged}{nextExpected ? ` · Next: ${nextExpected}` : ''}
             </p>
           </div>
@@ -385,7 +385,7 @@ function SubscriptionRow({
                 <span className="mr-2">🚫</span> Not Recurring
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => onDelete(sub.id)} className="text-[#FF98A2] focus:text-[#FF98A2]">
+              <DropdownMenuItem onClick={() => onDelete(sub.id)} className="text-[#01472e] focus:text-[#01472e]">
                 <Trash2 className="w-3.5 h-3.5 mr-2" /> Remove
               </DropdownMenuItem>
             </DropdownMenuContent>
