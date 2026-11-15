@@ -1,7 +1,9 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { checkAndFireBudgetAlerts } from './budgets'
 import { detectSubscriptions } from './subscriptions'
-import { categorizeMerchantsWithGemini } from '@/utils/gemini'
+import { normalizePayee } from '@/lib/categorisation/payee'
+import { isMissingColumn, runCategorisationPipeline } from '@/lib/categorisation/pipeline'
+import { TZ_OFFSET_MINUTES } from '@/lib/api/dashboard'
 
 export async function getCategories(supabase: SupabaseClient) {
   const { data, error } = await supabase
@@ -20,6 +22,17 @@ export interface AddTransactionInput {
   categoryId?: string | null
   tags?: string[]
   notes?: string
+}
+
+export interface BulkImportResult {
+  imported: number
+  categorised: number
+  flagged: number
+  pendingReview: number
+  insertedIds: string[]
+  message: string
+  /** Distinct YYYY-MM months covered by the imported rows (app timezone). */
+  months: string[]
 }
 
 async function ensureAccount(supabase: SupabaseClient, userId: string): Promise<string> {
@@ -45,21 +58,26 @@ async function ensureAccount(supabase: SupabaseClient, userId: string): Promise<
 export async function addTransaction(supabase: SupabaseClient, userId: string, input: AddTransactionInput) {
   const accountId = await ensureAccount(supabase, userId)
 
-  let amount = input.amount
-  if (amount > 0 && input.amount > 0) {
-    // sign already provided by caller
-  }
-
-  const { error } = await supabase.from('transactions').insert({
+  const payload: Record<string, unknown> = {
     user_id: userId,
     account_id: accountId,
     category_id: input.categoryId || null,
-    amount,
+    amount: input.amount,
     date: new Date(input.date).toISOString(),
     merchant: input.merchant,
     notes: input.notes || '',
     tags: input.tags || [],
-  })
+    // A category chosen by hand is a user rule the pipeline must never overwrite.
+    category_source: input.categoryId ? 'user' : null,
+    category_confidence: input.categoryId ? 1 : null,
+  }
+
+  let { error } = await supabase.from('transactions').insert(payload)
+  if (error && isMissingColumn(error)) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars -- strip new columns for the pre-migration fallback insert
+    const { category_source: _s, category_confidence: _c, ...legacy } = payload
+    ;({ error } = await supabase.from('transactions').insert(legacy))
+  }
 
   if (error) {
     console.error('Insert error:', error)
@@ -69,19 +87,42 @@ export async function addTransaction(supabase: SupabaseClient, userId: string, i
   checkAndFireBudgetAlerts(supabase, userId).catch(console.error)
 }
 
-export async function bulkAddTransactions(supabase: SupabaseClient, userId: string, transactions: any[]) {
+export interface BulkImportTxn {
+  amount: number | string
+  date: string
+  merchant: string
+  notes?: string | null
+  txn_time?: string | null
+}
+
+export async function bulkAddTransactions(
+  supabase: SupabaseClient,
+  userId: string,
+  transactions: BulkImportTxn[]
+): Promise<BulkImportResult> {
   const accountId = await ensureAccount(supabase, userId)
 
-  const payload = transactions.map(tx => ({
-    user_id: userId,
-    account_id: accountId,
-    amount: tx.amount,
-    date: new Date(tx.date).toISOString(),
-    merchant: tx.merchant,
-    notes: tx.notes || '',
-  }))
+  const buildPayload = (): Record<string, unknown>[] =>
+    transactions.map(tx => ({
+      user_id: userId,
+      account_id: accountId,
+      amount: tx.amount,
+      date: new Date(tx.date).toISOString(),
+      merchant: tx.merchant,
+      notes: tx.notes || '',
+      // Keep time-of-day from the statement (PRD 4.6) + mark as imported.
+      txn_time: tx.txn_time || null,
+      category_source: 'import',
+    }))
 
-  const { data: inserted, error } = await supabase.from('transactions').insert(payload).select('*')
+  let payload = buildPayload()
+  let { data: inserted, error } = await supabase.from('transactions').insert(payload).select('*')
+  if (error && isMissingColumn(error)) {
+    // Migration not applied yet: insert what the legacy schema supports.
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars -- strip new columns for the pre-migration fallback insert
+    payload = payload.map(({ txn_time: _t, category_source: _s, ...rest }) => rest)
+    ;({ data: inserted, error } = await supabase.from('transactions').insert(payload).select('*'))
+  }
 
   if (error) {
     console.error('Bulk insert error:', error)
@@ -91,7 +132,86 @@ export async function bulkAddTransactions(supabase: SupabaseClient, userId: stri
   checkAndFireBudgetAlerts(supabase, userId).catch(console.error)
   detectSubscriptions(supabase, userId).catch(console.error)
 
-  return inserted || []
+  // Run the 4-layer categorisation pipeline over the fresh rows (PRD 4.6).
+  const pipeline = await runCategorisationPipeline(supabase, userId)
+  const imported = inserted?.length ?? 0
+
+  const monthKeys = new Set<string>()
+  for (const tx of transactions) {
+    const d = new Date(tx.date)
+    if (Number.isNaN(d.getTime())) continue
+    const shifted = new Date(d.getTime() + TZ_OFFSET_MINUTES * 60_000)
+    monthKeys.add(
+      `${shifted.getUTCFullYear()}-${String(shifted.getUTCMonth() + 1).padStart(2, '0')}`
+    )
+  }
+
+  return {
+    imported,
+    categorised: pipeline.categorised,
+    flagged: pipeline.flagged,
+    pendingReview: pipeline.pendingReview,
+    insertedIds: (inserted || []).map((row: { id: string }) => row.id),
+    message: `${imported} imported, ${pipeline.categorised} auto-categorised, ${pipeline.pendingReview} need review`,
+    months: [...monthKeys].sort(),
+  }
+}
+
+/**
+ * Change one transaction's category (user action, source='user').
+ * Returns the payee + how many transactions share it so the UI can offer
+ * "Apply to all transactions from this payee?" (PRD 4.5).
+ */
+export async function setTransactionCategory(
+  supabase: SupabaseClient,
+  userId: string,
+  txnId: string,
+  categoryId: string | null
+): Promise<{ payee: string | null; count: number }> {
+  if (categoryId) {
+    // RLS-scoped: only global or own categories are visible.
+    const { data: category } = await supabase
+      .from('categories')
+      .select('id')
+      .eq('id', categoryId)
+      .maybeSingle()
+    if (!category) throw new Error('Unknown category')
+  }
+
+  const { data: txn } = await supabase
+    .from('transactions')
+    .select('*')
+    .eq('id', txnId)
+    .eq('user_id', userId)
+    .maybeSingle()
+  if (!txn) throw new Error('Transaction not found')
+
+  const payload: Record<string, unknown> = {
+    category_id: categoryId,
+    category_source: categoryId ? 'user' : null,
+    category_confidence: categoryId ? 1 : null,
+    needs_review: false,
+    updated_at: new Date().toISOString(),
+  }
+
+  let { error } = await supabase.from('transactions').update(payload).eq('id', txnId)
+  if (error && isMissingColumn(error)) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars -- strip new columns for the pre-migration fallback update
+    const { category_source: _s, category_confidence: _c, needs_review: _n, ...legacy } = payload
+    ;({ error } = await supabase.from('transactions').update(legacy).eq('id', txnId))
+  }
+  if (error) throw new Error(`DB Error: ${error.message}`)
+
+  const { data: all } = await supabase
+    .from('transactions')
+    .select('id, merchant')
+    .eq('user_id', userId)
+
+  const payee = txn.merchant as string | null
+  const payeeKey = normalizePayee(payee || '')
+  const count = (all || []).filter(t => normalizePayee(t.merchant || '') === payeeKey).length
+
+  return { payee, count }
 }
 
 export async function triggerMockWebhook(supabase: SupabaseClient, userId: string) {
@@ -104,93 +224,62 @@ export async function triggerMockWebhook(supabase: SupabaseClient, userId: strin
     { merchant: 'Amazon India', amount: -1299, date: new Date(now - day).toISOString() },
     { merchant: 'Salary NEFT', amount: 85000, date: new Date(now - day * 2).toISOString() },
     { merchant: 'Zomato', amount: -650, date: new Date(now - day * 3).toISOString() },
-    { merchant: 'Netflix', amount: -649, date: new Date(now - day * 4).toISOString() },
     { merchant: 'Swiggy', amount: -380, date: new Date(now - day * 5).toISOString() },
+    { merchant: 'Netflix', amount: -649, date: new Date(now - day * 4).toISOString() },
     { merchant: 'Electricity Bill', amount: -2100, date: new Date(now - day * 6).toISOString() },
     { merchant: 'Flipkart', amount: -1899, date: new Date(now - day * 7).toISOString() },
     { merchant: 'ATM Withdrawal', amount: -5000, date: new Date(now - day * 8).toISOString() },
     { merchant: 'Freelance Payment', amount: 15000, date: new Date(now - day * 9).toISOString() },
   ]
 
-  const inserted = await bulkAddTransactions(supabase, userId, mockTransactions)
+  const result = await bulkAddTransactions(supabase, userId, mockTransactions)
 
-  autoCategoriseTransactions(supabase, userId).catch(err => console.error('Auto-categorise failed:', err))
-
-  return { success: true, inserted, message: `Mock Bank Sync completed! ${inserted.length} transactions imported.` }
+  return {
+    success: true,
+    inserted: result.imported,
+    message: `Mock Bank Sync completed! ${result.imported} transactions imported — ${result.categorised} auto-categorised, ${result.pendingReview} need review.`,
+  }
 }
 
 export async function autoCategoriseTransactions(supabase: SupabaseClient, userId: string) {
-  const { data: uncategorized } = await supabase
+  const result = await runCategorisationPipeline(supabase, userId)
+  const pendingReview = await countPendingReview(supabase, userId)
+
+  if (result.categorised === 0 && result.flagged === 0 && pendingReview === 0) {
+    return {
+      count: 0,
+      categorised: 0,
+      flagged: 0,
+      pendingReview: 0,
+      updatedIds: [] as string[],
+      message: 'All transactions are already categorized!',
+    }
+  }
+
+  let message = `Successfully auto-categorised ${result.categorised} transactions!`
+  if (pendingReview > 0) message += ` ${pendingReview} need review.`
+
+  return {
+    count: result.categorised,
+    categorised: result.categorised,
+    flagged: result.flagged,
+    pendingReview,
+    updatedIds: result.updatedIds,
+    message,
+  }
+}
+
+async function countPendingReview(supabase: SupabaseClient, userId: string): Promise<number> {
+  const { count, error } = await supabase
     .from('transactions')
-    .select('id, merchant')
+    .select('id', { count: 'exact', head: true })
     .eq('user_id', userId)
-    .is('category_id', null)
+    .eq('needs_review', true)
 
-  if (!uncategorized || uncategorized.length === 0) return { count: 0, updated: [], message: 'All transactions are already categorized!' }
-
-  const { data: cache } = await supabase
-    .from('merchant_category_cache')
-    .select('merchant_name, category_id')
-    .eq('user_id', userId)
-
-  const cacheMap = new Map((cache || []).map(c => [c.merchant_name.toLowerCase(), c.category_id]))
-  const toUpdate: { id: string, category_id: string }[] = []
-  const uniqueUnknownMerchants = new Set<string>()
-
-  for (const tx of uncategorized) {
-    const merchantLower = tx.merchant.toLowerCase()
-    if (cacheMap.has(merchantLower)) {
-      toUpdate.push({ id: tx.id, category_id: cacheMap.get(merchantLower)! })
-    } else {
-      uniqueUnknownMerchants.add(tx.merchant)
-    }
+  if (error) {
+    if (isMissingColumn(error)) return 0
+    console.error('Failed to count review queue:', error)
+    return 0
   }
-
-  if (uniqueUnknownMerchants.size > 0) {
-    const categories = await getCategories(supabase)
-    const merchantsArray = Array.from(uniqueUnknownMerchants)
-
-    const geminiResults = await categorizeMerchantsWithGemini(merchantsArray.slice(0, 50), categories)
-
-    const newCacheEntries = []
-
-    for (const [merchant, categoryId] of Object.entries(geminiResults)) {
-      if (!categoryId || !categoryId.includes('-')) continue
-
-      newCacheEntries.push({
-        user_id: userId,
-        merchant_name: merchant,
-        category_id: categoryId,
-        confidence: 0.85
-      })
-
-      for (const tx of uncategorized) {
-        if (tx.merchant === merchant) {
-          toUpdate.push({ id: tx.id, category_id: categoryId })
-        }
-      }
-    }
-
-    if (newCacheEntries.length > 0) {
-      await supabase.from('merchant_category_cache').upsert(newCacheEntries, { onConflict: 'user_id, merchant_name' })
-    }
-  }
-
-  let updatedCount = 0
-  const updatedIds: string[] = []
-  if (toUpdate.length > 0) {
-    for (const update of toUpdate) {
-      const { error } = await supabase
-        .from('transactions')
-        .update({ category_id: update.category_id })
-        .eq('id', update.id)
-
-      if (!error) {
-        updatedCount++
-        updatedIds.push(update.id)
-      }
-    }
-  }
-
-  return { count: updatedCount, updatedIds, message: `Successfully auto-categorised ${updatedCount} transactions!` }
+  return count ?? 0
 }

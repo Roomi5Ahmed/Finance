@@ -1,83 +1,96 @@
 "use client"
 
-import { Card, CardContent } from "@/components/ui/card"
+import { CardContent } from "@/components/ui/card"
 import { GlowCard } from "@/components/ui/spotlight-card"
 import { TrendingUp, TrendingDown, Wallet, PieChart, ArrowUpRight, Sparkles, CreditCard, Receipt } from "lucide-react"
 import {
   AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell
 } from 'recharts'
 import Link from 'next/link'
+import MonthSelector, { type SelectorMonth } from '@/components/dashboard/MonthSelector'
+import ComparisonCard from '@/components/dashboard/ComparisonCard'
+import { buildCategoryBreakdown, summarize, type DailyPoint, type MonthComparison, type MonthTxnRow } from '@/lib/api/dashboard'
+import type { BudgetWithSpend } from '@/lib/api/budgets'
+import type { DashboardBill } from '@/lib/api/dashboard'
 
 export default function DashboardContent({
+  month,
+  monthLabel,
+  shortLabel,
+  isCurrentMonth,
+  partial,
+  availableMonths,
   transactions,
   userEmail,
   monthlyBudget,
-  monthlyIncome,
   budgets = [],
   upcomingBills = [],
   subscriptionCount = 0,
   subscriptionMonthlyCost = 0,
+  subscriptionsCharged = null,
+  comparison = null,
+  dailySeries = [],
 }: {
-  transactions: any[]
+  month: string
+  monthLabel: string
+  shortLabel: string
+  isCurrentMonth: boolean
+  partial: boolean
+  availableMonths: SelectorMonth[]
+  transactions: MonthTxnRow[]
   userEmail: string
   monthlyBudget: number
-  monthlyIncome: number
-  budgets?: any[]
-  upcomingBills?: any[]
+  budgets?: BudgetWithSpend[]
+  upcomingBills?: DashboardBill[]
   subscriptionCount?: number
   subscriptionMonthlyCost?: number
+  subscriptionsCharged?: { count: number; total: number } | null
+  comparison?: MonthComparison | null
+  dailySeries?: DailyPoint[]
 }) {
-  const totalBalance = transactions.reduce((sum: number, tx: any) => sum + tx.amount, 0)
+  const totals = summarize(transactions)
+  const thisMonthExpenses = totals.expenses
+  const thisMonthIncome = totals.income
+  const savingsRate =
+    totals.income > 0 ? Math.round(((totals.income - totals.expenses) / totals.income) * 1000) / 10 : null
 
-  const now = new Date()
-  const thisMonthTxs = transactions.filter((tx: any) => {
-    const d = new Date(tx.date)
-    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
-  })
-
-  const thisMonthExpenses = Math.abs(
-    thisMonthTxs.filter((tx: any) => tx.amount < 0).reduce((sum: number, tx: any) => sum + tx.amount, 0)
-  )
-  const thisMonthIncome = thisMonthTxs
-    .filter((tx: any) => tx.amount > 0)
-    .reduce((sum: number, tx: any) => sum + tx.amount, 0)
-
-  const budgetPercentage = Math.min(100, Math.round((thisMonthExpenses / monthlyBudget) * 100))
+  const budgetPercentage = monthlyBudget > 0 ? Math.min(100, Math.round((thisMonthExpenses / monthlyBudget) * 100)) : 0
   const strokeDasharray = `${budgetPercentage}, 100`
 
   const recentTxs = transactions.slice(0, 6)
 
-  const last7Days = new Map()
-  for (let i = 6; i >= 0; i--) {
-    const d = new Date(now)
-    d.setDate(d.getDate() - i)
-    last7Days.set(d.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' }), 0)
+  let lineChartData: { name: string; value: number }[]
+  if (isCurrentMonth) {
+    const now = new Date()
+    const last7Days = new Map<string, number>()
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(now)
+      d.setDate(d.getDate() - i)
+      last7Days.set(d.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' }), 0)
+    }
+    transactions.forEach(tx => {
+      if (tx.amount >= 0) return
+      const dateStr = new Date(tx.date).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })
+      if (last7Days.has(dateStr)) last7Days.set(dateStr, (last7Days.get(dateStr) ?? 0) + Math.abs(tx.amount))
+    })
+    lineChartData = Array.from(last7Days, ([name, value]) => ({ name, value }))
+  } else {
+    lineChartData = dailySeries.map(p => ({ name: String(p.day), value: p.value }))
   }
-  transactions.forEach((tx: any) => {
-    if (tx.amount >= 0) return
-    const dateStr = new Date(tx.date).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })
-    if (last7Days.has(dateStr)) last7Days.set(dateStr, last7Days.get(dateStr) + Math.abs(tx.amount))
-  })
-  const lineChartData = Array.from(last7Days, ([name, value]) => ({ name, value }))
 
-  const categoryTotals = new Map<string, number>()
-  transactions.forEach((tx: any) => {
-    if (tx.amount >= 0) return
-    const cat = tx.categories?.name || 'Uncategorised'
-    categoryTotals.set(cat, (categoryTotals.get(cat) || 0) + Math.abs(tx.amount))
-  })
-  const barChartData = Array.from(categoryTotals, ([name, value]) => ({ name, value }))
-    .sort((a, b) => b.value - a.value).slice(0, 5)
+  const barChartData = buildCategoryBreakdown(transactions)
+    .slice(0, 5)
+    .map(c => ({ name: c.name, value: c.value }))
   const COLORS = ['#01472e', '#64705f', '#a3b18a', '#ccd5ae', '#e9edc9']
 
   const featureCards = [
     {
-      title: "Total Balance",
-      value: `₹${totalBalance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`,
-      subtitle: "Calculated from all transactions",
+      title: "Net Savings",
+      value: `₹${totals.net.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`,
+      subtitle: savingsRate !== null ? `${savingsRate}% of income saved` : thisMonthIncome > 0 ? 'No expenses yet' : 'No income this month',
       icon: Wallet,
       color: "text-[#01472e]",
-      trend: totalBalance >= 0 ? "positive" : "negative"
+      trend: totals.net >= 0 ? "positive" : "negative"
     },
     {
       title: "Monthly Budget",
@@ -88,17 +101,17 @@ export default function DashboardContent({
       trend: budgetPercentage > 80 ? "negative" : "positive"
     },
     {
-      title: "Income This Month",
+      title: `Income in ${shortLabel}`,
       value: `₹${thisMonthIncome.toLocaleString('en-IN')}`,
-      subtitle: "Credits received this month",
+      subtitle: "Credits received",
       icon: TrendingUp,
       color: "text-[#01472e]",
       trend: "positive"
     },
     {
-      title: "Expenses This Month",
+      title: `Expenses in ${shortLabel}`,
       value: `₹${thisMonthExpenses.toLocaleString('en-IN')}`,
-      subtitle: "Total debits this month",
+      subtitle: "Total debits",
       icon: TrendingDown,
       color: "text-[#01472e]",
       trend: "negative"
@@ -132,6 +145,7 @@ export default function DashboardContent({
           <div className="text-center">
             <p className="text-sm font-medium text-[#01472e]">Budget Used</p>
             <p className="text-xs text-[#64705f] mt-1">₹{thisMonthExpenses.toLocaleString('en-IN')} / ₹{monthlyBudget.toLocaleString('en-IN')}</p>
+            {!isCurrentMonth && <p className="text-[10px] text-[#64705f] mt-0.5">{monthLabel}</p>}
           </div>
           <span className={`px-3 py-1 rounded-[4px] text-xs font-medium ${budgetPercentage > 80 ? 'bg-[#01472e]/10 text-[#01472e]' : 'bg-[#f6f8f1] text-[#01472e]'}`}>
             {budgetPercentage > 80 ? 'Over Budget' : 'On Track'}
@@ -152,244 +166,311 @@ export default function DashboardContent({
           </p>
         </div>
 
-        {/* Row 1: Spending Chart + 4 KPIs */}
-        <div className="flex gap-6 flex-col lg:flex-row">
-          <GlowCard glowColor="purple" className="lg:flex-[2] flex flex-col min-h-[340px]">
-            <CardContent className="p-6 flex-grow flex flex-col">
-              <div className="flex items-center justify-between mb-5">
-                <h3 className="text-xs text-[#64705f] font-semibold tracking-wider uppercase" style={{ fontFamily: 'var(--font-roboto), Roboto, sans-serif' }}>
-                  Spending Trend
-                </h3>
-                <span className="text-[10px] text-[#64705f]">
-                  {new Date().toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })}
-                </span>
-              </div>
-              <div className="flex-1 w-full min-h-0">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={lineChartData} margin={{ top: 5, right: 10, bottom: 5, left: -10 }}>
-                    <defs>
-                      <linearGradient id="spendGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#01472e" stopOpacity={0.2}/>
-                        <stop offset="95%" stopColor="#01472e" stopOpacity={0}/>
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(1,71,46,0.05)" vertical={false} />
-                    <XAxis dataKey="name" stroke="#64705f" tick={{ fill: '#64705f', fontSize: 10 }} tickLine={false} axisLine={false} />
-                    <YAxis stroke="#64705f" tick={{ fill: '#64705f', fontSize: 10 }} tickLine={false} axisLine={false} tickFormatter={(v) => `₹${v}`} width={50} />
-                    <Tooltip contentStyle={{ backgroundColor: '#ffffff', border: '1px solid rgba(1,71,46,0.12)', borderRadius: '11px', color: '#01472e', fontSize: '11px' }} formatter={(value: any) => [`₹${value.toLocaleString()}`, 'Spent']} />
-                    <Area type="monotone" dataKey="value" stroke="#01472e" strokeWidth={1.5} fillOpacity={1} fill="url(#spendGradient)" dot={{ fill: '#01472e', r: 2 }} activeDot={{ r: 4, fill: '#01472e', stroke: '#01472e', strokeWidth: 2 }} />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </GlowCard>
-
-          <div className="lg:flex-1 grid grid-cols-2 gap-4">
-            {featureCards.map((feature, i) => {
-              const Icon = feature.icon
-              return (
-                <GlowCard
-                  key={i}
-                  glowColor="purple"
-                  className="flex flex-col p-6 cursor-pointer transition-all duration-[0.6s] ease-[cubic-bezier(0.19,1,0.22,1)] group"
-                >
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="p-2 bg-[#f6f8f1]">
-                      <Icon className={`w-4 h-4 ${feature.color}`} />
-                    </div>
-                    {feature.trend === "positive" ? (
-                      <TrendingUp className="w-3 h-3 text-[#01472e] opacity-30 group-hover:opacity-100 transition-opacity duration-[0.6s]" />
-                    ) : (
-                      <TrendingDown className="w-3 h-3 text-[#01472e] opacity-30 group-hover:opacity-100 transition-opacity duration-[0.6s]" />
-                    )}
-                  </div>
-                  <p className="text-lg font-bold text-[#01472e] mb-0.5 tracking-tight">{feature.value}</p>
-                  <h3 className="text-[11px] font-medium text-[#64705f]">{feature.title}</h3>
-                  <p className="text-[9px] text-[#64705f]/60 leading-relaxed mt-0.5">{feature.subtitle}</p>
-                </GlowCard>
-              )
-            })}
+        {/* Month selector + status chips */}
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <MonthSelector
+            month={month}
+            months={availableMonths}
+            isCurrentMonth={isCurrentMonth}
+            pathname="/dashboard"
+          />
+          <div className="flex items-center gap-2 flex-wrap">
+            {partial && (
+              <span className="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-[#b45309]/10 text-[#b45309] border border-[#b45309]/20">
+                {isCurrentMonth ? 'Partial month' : 'Partial data'}
+              </span>
+            )}
+            {!isCurrentMonth && (
+              <span className="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-[#f6f8f1] text-[#64705f] border border-[#dde3d0]">
+                Viewing past month — read only
+              </span>
+            )}
           </div>
         </div>
 
-        {/* Row 2: Recent Transactions + Category Breakdown */}
-        <div className="flex gap-6 flex-col md:flex-row">
-          <GlowCard glowColor="purple" className="flex-1">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-5">
-                <h3 className="text-xs text-[#64705f] font-semibold tracking-wider uppercase" style={{ fontFamily: 'var(--font-roboto), Roboto, sans-serif' }}>
-                  Recent Transactions
-                </h3>
-                <Link href="/transactions" className="text-[10px] text-[#01472e] hover:text-[#01472e]/80 transition-colors duration-[0.6s] flex items-center">
-                  View all <ArrowUpRight className="w-2.5 h-2.5 ml-0.5" />
-                </Link>
+        {transactions.length === 0 ? (
+          /* ─── Empty state ──────────────────────────────────── */
+          <GlowCard glowColor="purple">
+            <CardContent className="p-10 flex flex-col items-center text-center gap-3">
+              <div className="p-3.5 bg-[#f6f8f1]">
+                <PieChart className="w-6 h-6 text-[#64705f]" />
               </div>
-              <div className="space-y-1">
-                {recentTxs.length === 0 ? (
-                  <p className="text-[#64705f] text-xs text-center py-6">No transactions yet.</p>
-                ) : recentTxs.map((tx: any) => (
-                  <div key={tx.id} className="flex items-center justify-between group hover:bg-[#f6f8f1] -mx-2 px-2 py-2 transition-all duration-[0.6s] ease-[cubic-bezier(0.19,1,0.22,1)]">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 bg-[#ffffff] flex items-center justify-center text-sm border border-[#dde3d0] shrink-0">
-                        {(tx.categories as any)?.icon || '🛒'}
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-[11px] font-medium text-[#01472e] truncate max-w-[120px] group-hover:text-[#01472e] transition-colors duration-[0.6s]">{tx.merchant}</p>
-                        <p className="text-[9px] text-[#64705f]">{new Date(tx.date).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })}</p>
-                      </div>
-                    </div>
-                    <span className={`text-[11px] font-semibold ${tx.amount < 0 ? 'text-[#01472e]' : 'text-[#01472e]'}`}>
-                      {tx.amount < 0 ? '-' : '+'}₹{Math.abs(tx.amount).toLocaleString('en-IN')}
+              <p className="text-sm font-medium text-[#01472e]">No transactions in {monthLabel}</p>
+              <p className="text-[11px] text-[#64705f]">
+                Pick another month, or import a statement to fill it in.
+              </p>
+              <Link
+                href="/transactions"
+                className="mt-1 text-[11px] text-[#01472e] font-semibold hover:text-[#01472e]/80 transition-colors duration-[0.6s] flex items-center"
+              >
+                Go to Transactions <ArrowUpRight className="w-3 h-3 ml-0.5" />
+              </Link>
+            </CardContent>
+          </GlowCard>
+        ) : (
+          <>
+            {/* Row 1: Spending Chart + 4 KPIs */}
+            <div className="flex gap-6 flex-col lg:flex-row">
+              <GlowCard glowColor="purple" className="lg:flex-[2] flex flex-col min-h-[340px]">
+                <CardContent className="p-6 flex-grow flex flex-col">
+                  <div className="flex items-center justify-between mb-5">
+                    <h3 className="text-xs text-[#64705f] font-semibold tracking-wider uppercase" style={{ fontFamily: 'var(--font-roboto), Roboto, sans-serif' }}>
+                      Spending Trend
+                    </h3>
+                    <span className="text-[10px] text-[#64705f]">
+                      {isCurrentMonth ? 'Last 7 days' : monthLabel}
                     </span>
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </GlowCard>
-
-          <GlowCard glowColor="purple" className="flex-1">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-5">
-                <h3 className="text-xs text-[#64705f] font-semibold tracking-wider uppercase" style={{ fontFamily: 'var(--font-roboto), Roboto, sans-serif' }}>
-                  Top Categories
-                </h3>
-                <Link href="/insights" className="text-[10px] text-[#01472e] hover:text-[#01472e]/80 transition-colors duration-[0.6s] flex items-center">
-                  <Sparkles className="w-2.5 h-2.5 mr-0.5" /> AI Insights <ArrowUpRight className="w-2.5 h-2.5 ml-0.5" />
-                </Link>
-              </div>
-              <div className="w-full h-52">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={barChartData} margin={{ top: 0, right: 0, bottom: 0, left: 0 }} layout="vertical">
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(1,71,46,0.05)" horizontal={false} />
-                    <XAxis type="number" stroke="#64705f" tick={{ fill: '#64705f', fontSize: 9 }} tickLine={false} axisLine={false} />
-                    <YAxis dataKey="name" type="category" stroke="#64705f" tick={{ fill: '#01472e', fontSize: 10 }} tickLine={false} axisLine={false} width={80} />
-                    <Tooltip cursor={{ fill: 'rgba(1,71,46,0.04)' }} contentStyle={{ backgroundColor: '#ffffff', border: '1px solid rgba(1,71,46,0.12)', borderRadius: '11px', color: '#01472e', fontSize: '11px' }} formatter={(value: any) => [`₹${value.toLocaleString()}`, 'Amount']} />
-                    <Bar dataKey="value" radius={[0, 4, 4, 0]}>
-                      {barChartData.map((_: any, index: number) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </GlowCard>
-        </div>
-
-        {/* Row 3: Budget Overview + Subscriptions + Upcoming Bills */}
-        <div className="flex gap-6 flex-col md:flex-row">
-          {budgets.length > 0 && (
-            <GlowCard glowColor="purple" className="flex-1">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-5">
-                  <h3 className="text-xs text-[#64705f] font-semibold tracking-wider uppercase" style={{ fontFamily: 'var(--font-roboto), Roboto, sans-serif' }}>
-                    Category Budgets
-                  </h3>
-                  <Link href="/budgets" className="text-[10px] text-[#01472e] hover:text-[#01472e]/80 transition-colors duration-[0.6s] flex items-center">
-                    Manage <ArrowUpRight className="w-2.5 h-2.5 ml-0.5" />
-                  </Link>
-                </div>
-                <div className="space-y-3">
-                  {budgets.slice(0, 4).map((budget: any) => {
-                    const pct = budget.amount > 0 ? Math.min(100, Math.round((budget.spent / budget.amount) * 100)) : 0
-                    return (
-                      <div key={budget.id}>
-                        <div className="flex justify-between text-[10px] mb-1">
-                          <span className="text-[#01472e] flex items-center gap-1">
-                            <span>{budget.categories?.icon || '📊'}</span>
-                            {budget.categories?.name || 'Overall'}
-                          </span>
-                          <span className={`font-semibold ${pct >= 100 ? 'text-[#01472e]' : pct >= 80 ? 'text-[#01472e]' : 'text-[#64705f]'}`}>
-                            {pct}%
-                          </span>
-                        </div>
-                        <div className="w-full bg-[#f6f8f1] rounded-full h-1.5 overflow-hidden">
-                          <div className={`h-1.5 rounded-full transition-all duration-700 ${pct >= 100 ? 'bg-[#01472e]' : pct >= 80 ? 'bg-[#a3b18a]' : 'bg-[#ccd5ae]'}`}
-                            style={{ width: `${Math.min(100, pct)}%` }} />
-                        </div>
-                        <div className="flex justify-between text-[9px] text-[#64705f] mt-0.5">
-                          <span>₹{budget.spent.toLocaleString('en-IN')}</span>
-                          <span>₹{budget.amount.toLocaleString('en-IN')}</span>
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              </CardContent>
-            </GlowCard>
-          )}
-
-          <GlowCard glowColor="purple" className="flex-1">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-5">
-                <h3 className="text-xs text-[#64705f] font-semibold tracking-wider uppercase" style={{ fontFamily: 'var(--font-roboto), Roboto, sans-serif' }}>
-                  Subscriptions
-                </h3>
-                <Link href="/subscriptions" className="text-[10px] text-[#01472e] hover:text-[#01472e]/80 transition-colors duration-[0.6s] flex items-center">
-                  View all <ArrowUpRight className="w-2.5 h-2.5 ml-0.5" />
-                </Link>
-              </div>
-              <div className="flex flex-col items-center justify-center py-6">
-                <div className="p-3.5 bg-[#01472e]/10 mb-4">
-                  <CreditCard className="w-6 h-6 text-[#01472e]" />
-                </div>
-                <p className="text-2xl font-bold text-[#01472e]">{subscriptionCount}</p>
-                <p className="text-[10px] text-[#64705f] mt-0.5">active subscriptions</p>
-                <p className="text-sm font-semibold text-[#01472e] mt-2">
-                  ₹{subscriptionMonthlyCost.toLocaleString('en-IN', { maximumFractionDigits: 0 })}<span className="text-[10px] font-normal text-[#64705f]">/month</span>
-                </p>
-              </div>
-            </CardContent>
-          </GlowCard>
-
-          <GlowCard glowColor="purple" className="flex-1">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-5">
-                <h3 className="text-xs text-[#64705f] font-semibold tracking-wider uppercase" style={{ fontFamily: 'var(--font-roboto), Roboto, sans-serif' }}>
-                  Upcoming Bills
-                </h3>
-                <Link href="/bills" className="text-[10px] text-[#01472e] hover:text-[#01472e]/80 transition-colors duration-[0.6s] flex items-center">
-                  View all <ArrowUpRight className="w-2.5 h-2.5 ml-0.5" />
-                </Link>
-              </div>
-              <div className="space-y-1">
-                {upcomingBills.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-6">
-                    <Receipt className="w-7 h-7 text-[#64705f]/30 mb-2" />
-                    <p className="text-[10px] text-[#64705f]">No upcoming bills</p>
+                  <div className="flex-1 w-full min-h-0">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={lineChartData} margin={{ top: 5, right: 10, bottom: 5, left: -10 }}>
+                        <defs>
+                          <linearGradient id="spendGradient" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#01472e" stopOpacity={0.2}/>
+                            <stop offset="95%" stopColor="#01472e" stopOpacity={0}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(1,71,46,0.05)" vertical={false} />
+                        <XAxis dataKey="name" stroke="#64705f" tick={{ fill: '#64705f', fontSize: 10 }} tickLine={false} axisLine={false} />
+                        <YAxis stroke="#64705f" tick={{ fill: '#64705f', fontSize: 10 }} tickLine={false} axisLine={false} tickFormatter={(v) => `₹${v}`} width={50} />
+                        <Tooltip contentStyle={{ backgroundColor: '#ffffff', border: '1px solid rgba(1,71,46,0.12)', borderRadius: '11px', color: '#01472e', fontSize: '11px' }} formatter={(value) => [`₹${Number(value).toLocaleString('en-IN')}`, 'Spent']} />
+                        <Area type="monotone" dataKey="value" stroke="#01472e" strokeWidth={1.5} fillOpacity={1} fill="url(#spendGradient)" dot={{ fill: '#01472e', r: 2 }} activeDot={{ r: 4, fill: '#01472e', stroke: '#01472e', strokeWidth: 2 }} />
+                      </AreaChart>
+                    </ResponsiveContainer>
                   </div>
-                ) : upcomingBills.map((bill: any) => {
-                  const dueDate = new Date(bill.next_due_at)
-                  const daysUntil = Math.ceil((dueDate.getTime() - Date.now()) / 86400000)
+                </CardContent>
+              </GlowCard>
+
+              <div className="lg:flex-1 grid grid-cols-2 gap-4">
+                {featureCards.map((feature, i) => {
+                  const Icon = feature.icon
                   return (
-                    <div key={bill.id} className="flex items-center justify-between hover:bg-[#f6f8f1] -mx-2 px-2 py-2 transition-all duration-[0.6s] ease-[cubic-bezier(0.19,1,0.22,1)]">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-8 h-8 flex items-center justify-center border border-[#dde3d0] ${
-                          daysUntil <= 0 ? 'bg-[#01472e]/10' : daysUntil <= 3 ? 'bg-[#01472e]/5' : 'bg-[#f6f8f1]'
-                        }`}>
-                          <Receipt className={`w-3.5 h-3.5 ${
-                            daysUntil <= 0 ? 'text-[#01472e]' : daysUntil <= 3 ? 'text-[#01472e]/70' : 'text-[#64705f]'
-                          }`} />
+                    <GlowCard
+                      key={i}
+                      glowColor="purple"
+                      className="flex flex-col p-6 cursor-pointer transition-all duration-[0.6s] ease-[cubic-bezier(0.19,1,0.22,1)] group"
+                    >
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="p-2 bg-[#f6f8f1]">
+                          <Icon className={`w-4 h-4 ${feature.color}`} />
                         </div>
-                        <div>
-                          <p className="text-[11px] font-medium text-[#01472e]">{bill.name}</p>
-                          <p className="text-[9px] text-[#64705f]">
-                            {daysUntil <= 0 ? 'Overdue' : daysUntil === 1 ? 'Due tomorrow' : `Due in ${daysUntil} days`}
-                          </p>
-                        </div>
+                        {feature.trend === "positive" ? (
+                          <TrendingUp className="w-3 h-3 text-[#01472e] opacity-30 group-hover:opacity-100 transition-opacity duration-[0.6s]" />
+                        ) : (
+                          <TrendingDown className="w-3 h-3 text-[#01472e] opacity-30 group-hover:opacity-100 transition-opacity duration-[0.6s]" />
+                        )}
                       </div>
-                      {bill.amount_estimate && (
-                        <span className="text-[11px] font-semibold text-[#01472e]">
-                          ₹{bill.amount_estimate.toLocaleString('en-IN')}
-                        </span>
-                      )}
-                    </div>
+                      <p className="text-lg font-bold text-[#01472e] mb-0.5 tracking-tight">{feature.value}</p>
+                      <h3 className="text-[11px] font-medium text-[#64705f]">{feature.title}</h3>
+                      <p className="text-[9px] text-[#64705f]/60 leading-relaxed mt-0.5">{feature.subtitle}</p>
+                    </GlowCard>
                   )
                 })}
               </div>
-            </CardContent>
-          </GlowCard>
-        </div>
+            </div>
+
+            {/* Month-over-month comparison */}
+            {comparison && <ComparisonCard comparison={comparison} />}
+
+            {/* Row 2: Recent Transactions + Category Breakdown */}
+            <div className="flex gap-6 flex-col md:flex-row">
+              <GlowCard glowColor="purple" className="flex-1">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between mb-5">
+                    <h3 className="text-xs text-[#64705f] font-semibold tracking-wider uppercase" style={{ fontFamily: 'var(--font-roboto), Roboto, sans-serif' }}>
+                      Recent Transactions
+                    </h3>
+                    <Link href="/transactions" className="text-[10px] text-[#01472e] hover:text-[#01472e]/80 transition-colors duration-[0.6s] flex items-center">
+                      View all <ArrowUpRight className="w-2.5 h-2.5 ml-0.5" />
+                    </Link>
+                  </div>
+                  <div className="space-y-1">
+                    {recentTxs.length === 0 ? (
+                      <p className="text-[#64705f] text-xs text-center py-6">No transactions yet.</p>
+                    ) : recentTxs.map(tx => (
+                      <div key={tx.id} className="flex items-center justify-between group hover:bg-[#f6f8f1] -mx-2 px-2 py-2 transition-all duration-[0.6s] ease-[cubic-bezier(0.19,1,0.22,1)]">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-8 h-8 bg-[#ffffff] flex items-center justify-center text-sm border border-[#dde3d0] shrink-0">
+                            {tx.categories?.icon || '🛒'}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-[11px] font-medium text-[#01472e] truncate max-w-[120px] group-hover:text-[#01472e] transition-colors duration-[0.6s]">{tx.merchant}</p>
+                            <p className="text-[9px] text-[#64705f]">{new Date(tx.date).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })}</p>
+                          </div>
+                        </div>
+                        <span className="text-[11px] font-semibold text-[#01472e]">
+                          {tx.amount < 0 ? '-' : '+'}₹{Math.abs(tx.amount).toLocaleString('en-IN')}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </GlowCard>
+
+              <GlowCard glowColor="purple" className="flex-1">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between mb-5">
+                    <h3 className="text-xs text-[#64705f] font-semibold tracking-wider uppercase" style={{ fontFamily: 'var(--font-roboto), Roboto, sans-serif' }}>
+                      Top Categories
+                    </h3>
+                    <Link href="/insights" className="text-[10px] text-[#01472e] hover:text-[#01472e]/80 transition-colors duration-[0.6s] flex items-center">
+                      <Sparkles className="w-2.5 h-2.5 mr-0.5" /> AI Insights <ArrowUpRight className="w-2.5 h-2.5 ml-0.5" />
+                    </Link>
+                  </div>
+                  <div className="w-full h-52">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={barChartData} margin={{ top: 0, right: 0, bottom: 0, left: 0 }} layout="vertical">
+                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(1,71,46,0.05)" horizontal={false} />
+                        <XAxis type="number" stroke="#64705f" tick={{ fill: '#64705f', fontSize: 9 }} tickLine={false} axisLine={false} />
+                        <YAxis dataKey="name" type="category" stroke="#64705f" tick={{ fill: '#01472e', fontSize: 10 }} tickLine={false} axisLine={false} width={80} />
+                        <Tooltip cursor={{ fill: 'rgba(1,71,46,0.04)' }} contentStyle={{ backgroundColor: '#ffffff', border: '1px solid rgba(1,71,46,0.12)', borderRadius: '11px', color: '#01472e', fontSize: '11px' }} formatter={(value) => [`₹${Number(value).toLocaleString('en-IN')}`, 'Amount']} />
+                        <Bar dataKey="value" radius={[0, 4, 4, 0]}>
+                          {barChartData.map((_c, index) => (
+                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </GlowCard>
+            </div>
+
+            {/* Row 3: Budget Overview + Subscriptions + Upcoming Bills */}
+            <div className="flex gap-6 flex-col md:flex-row">
+              {budgets.length > 0 && (
+                <GlowCard glowColor="purple" className="flex-1">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between mb-5">
+                      <h3 className="text-xs text-[#64705f] font-semibold tracking-wider uppercase" style={{ fontFamily: 'var(--font-roboto), Roboto, sans-serif' }}>
+                        Category Budgets
+                      </h3>
+                      {isCurrentMonth ? (
+                        <Link href="/budgets" className="text-[10px] text-[#01472e] hover:text-[#01472e]/80 transition-colors duration-[0.6s] flex items-center">
+                          Manage <ArrowUpRight className="w-2.5 h-2.5 ml-0.5" />
+                        </Link>
+                      ) : (
+                        <span className="text-[10px] text-[#64705f]">read only</span>
+                      )}
+                    </div>
+                    <div className="space-y-3">
+                      {budgets.slice(0, 4).map(budget => {
+                        const pct = budget.amount > 0 ? Math.min(100, Math.round((budget.spent / budget.amount) * 100)) : 0
+                        return (
+                          <div key={budget.id}>
+                            <div className="flex justify-between text-[10px] mb-1">
+                              <span className="text-[#01472e] flex items-center gap-1">
+                                <span>{budget.categories?.icon || '📊'}</span>
+                                {budget.categories?.name || 'Overall'}
+                              </span>
+                              <span className={`font-semibold ${pct >= 80 ? 'text-[#01472e]' : 'text-[#64705f]'}`}>
+                                {pct}%
+                              </span>
+                            </div>
+                            <div className="w-full bg-[#f6f8f1] rounded-full h-1.5 overflow-hidden">
+                              <div className={`h-1.5 rounded-full transition-all duration-700 ${pct >= 100 ? 'bg-[#01472e]' : pct >= 80 ? 'bg-[#a3b18a]' : 'bg-[#ccd5ae]'}`}
+                                style={{ width: `${Math.min(100, pct)}%` }} />
+                            </div>
+                            <div className="flex justify-between text-[9px] text-[#64705f] mt-0.5">
+                              <span>₹{budget.spent.toLocaleString('en-IN')}</span>
+                              <span>₹{budget.amount.toLocaleString('en-IN')}</span>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </CardContent>
+                </GlowCard>
+              )}
+
+              <GlowCard glowColor="purple" className="flex-1">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between mb-5">
+                    <h3 className="text-xs text-[#64705f] font-semibold tracking-wider uppercase" style={{ fontFamily: 'var(--font-roboto), Roboto, sans-serif' }}>
+                      Subscriptions
+                    </h3>
+                    <Link href="/subscriptions" className="text-[10px] text-[#01472e] hover:text-[#01472e]/80 transition-colors duration-[0.6s] flex items-center">
+                      View all <ArrowUpRight className="w-2.5 h-2.5 ml-0.5" />
+                    </Link>
+                  </div>
+                  {subscriptionsCharged ? (
+                    <div className="flex flex-col items-center justify-center py-6">
+                      <div className="p-3.5 bg-[#01472e]/10 mb-4">
+                        <CreditCard className="w-6 h-6 text-[#01472e]" />
+                      </div>
+                      <p className="text-2xl font-bold text-[#01472e]">{subscriptionsCharged.count}</p>
+                      <p className="text-[10px] text-[#64705f] mt-0.5">subscriptions charged</p>
+                      <p className="text-sm font-semibold text-[#01472e] mt-2">
+                        ₹{subscriptionsCharged.total.toLocaleString('en-IN', { maximumFractionDigits: 0 })}<span className="text-[10px] font-normal text-[#64705f]"> in {shortLabel}</span>
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center py-6">
+                      <div className="p-3.5 bg-[#01472e]/10 mb-4">
+                        <CreditCard className="w-6 h-6 text-[#01472e]" />
+                      </div>
+                      <p className="text-2xl font-bold text-[#01472e]">{subscriptionCount}</p>
+                      <p className="text-[10px] text-[#64705f] mt-0.5">active subscriptions</p>
+                      <p className="text-sm font-semibold text-[#01472e] mt-2">
+                        ₹{subscriptionMonthlyCost.toLocaleString('en-IN', { maximumFractionDigits: 0 })}<span className="text-[10px] font-normal text-[#64705f]">/month</span>
+                      </p>
+                    </div>
+                  )}
+                </CardContent>
+              </GlowCard>
+
+              {isCurrentMonth && (
+                <GlowCard glowColor="purple" className="flex-1">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between mb-5">
+                      <h3 className="text-xs text-[#64705f] font-semibold tracking-wider uppercase" style={{ fontFamily: 'var(--font-roboto), Roboto, sans-serif' }}>
+                        Upcoming Bills
+                      </h3>
+                      <Link href="/bills" className="text-[10px] text-[#01472e] hover:text-[#01472e]/80 transition-colors duration-[0.6s] flex items-center">
+                        View all <ArrowUpRight className="w-2.5 h-2.5 ml-0.5" />
+                      </Link>
+                    </div>
+                    <div className="space-y-1">
+                      {upcomingBills.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-6">
+                          <Receipt className="w-7 h-7 text-[#64705f]/30 mb-2" />
+                          <p className="text-[10px] text-[#64705f]">No upcoming bills</p>
+                        </div>
+                      ) : upcomingBills.map(bill => {
+                        const dueDate = new Date(bill.next_due_at)
+                        const daysUntil = Math.ceil((dueDate.getTime() - Date.now()) / 86400000)
+                        return (
+                          <div key={bill.id} className="flex items-center justify-between hover:bg-[#f6f8f1] -mx-2 px-2 py-2 transition-all duration-[0.6s] ease-[cubic-bezier(0.19,1,0.22,1)]">
+                            <div className="flex items-center gap-3">
+                              <div className={`w-8 h-8 flex items-center justify-center border border-[#dde3d0] ${
+                                daysUntil <= 0 ? 'bg-[#01472e]/10' : daysUntil <= 3 ? 'bg-[#01472e]/5' : 'bg-[#f6f8f1]'
+                              }`}>
+                                <Receipt className={`w-3.5 h-3.5 ${
+                                  daysUntil <= 0 ? 'text-[#01472e]' : daysUntil <= 3 ? 'text-[#01472e]/70' : 'text-[#64705f]'
+                                }`} />
+                              </div>
+                              <div>
+                                <p className="text-[11px] font-medium text-[#01472e]">{bill.name}</p>
+                                <p className="text-[9px] text-[#64705f]">
+                                  {daysUntil <= 0 ? 'Overdue' : daysUntil === 1 ? 'Due tomorrow' : `Due in ${daysUntil} days`}
+                                </p>
+                              </div>
+                            </div>
+                            {bill.amount_estimate && (
+                              <span className="text-[11px] font-semibold text-[#01472e]">
+                                ₹{bill.amount_estimate.toLocaleString('en-IN')}
+                              </span>
+                            )}
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </CardContent>
+                </GlowCard>
+              )}
+            </div>
+          </>
+        )}
 
       </div>
     </div>

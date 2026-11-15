@@ -3,20 +3,9 @@
 import { useState } from 'react'
 import * as pdfjsLib from 'pdfjs-dist'
 import { bulkAddTransactions } from '@/app/(dashboard)/transactions/actions'
+import { parseGooglePayLines } from '@/lib/pdf/gpay-parser'
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs'
-
-const MONTHS: Record<string, number> = {
-  jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5,
-  jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11,
-}
-
-const DATE_RE = /^(\d{1,2})\s+([A-Za-z]{3,9}),?\s+(\d{4})\b/
-const AMOUNT_RE = /(?:₹|INR|Rs\.?)\s*([\d,]+(?:\.\d{1,2})?)\s*(Dr|Cr)?/i
-const DETAIL_RE = /(?:^|\s)((?:Paid\s+(?:to|at|for))|(?:Received\s+from)|(?:Sent\s+to))\s+(.+?)(?=\s+(?:₹|INR|Rs\.?)|$)/i
-const TIME_RE = /^\d{1,2}:\d{2}\s*(?:AM|PM)$/i
-const JUNK_MERCHANT_RE = /^(?:sent|received|amount|date|time|total|balance)$/i
-const NUMERIC_MERCHANT_RE = /^[₹\d\s.,/:-]+$/
 
 async function extractPdfLines(file: File): Promise<string[]> {
   const data = new Uint8Array(await file.arrayBuffer())
@@ -63,76 +52,11 @@ async function extractPdfLines(file: File): Promise<string[]> {
   return lines
 }
 
-function parseGooglePayLines(lines: string[]) {
-  const out: { date: Date; merchant: string; amount: number }[] = []
-  let date: Date | null = null
-  let merchant = ''
-  let amount: number | null = null
-  let isCredit: boolean | null = null
-
-  const flush = () => {
-    if (
-      date && merchant && amount !== null && amount > 0 &&
-      !JUNK_MERCHANT_RE.test(merchant) && !NUMERIC_MERCHANT_RE.test(merchant)
-    ) {
-      out.push({ date, merchant: merchant.substring(0, 255), amount: isCredit ? amount : -amount })
-    }
-  }
-
-  for (const raw of lines) {
-    const line = raw.replace(/\s+/g, ' ').trim()
-    if (!line || TIME_RE.test(line)) continue
-
-    const dm = line.match(DATE_RE)
-    const dayStr = dm?.[1]
-    const monStr = dm?.[2]
-    const yearStr = dm?.[3]
-    if (dayStr && monStr && yearStr) {
-      const month = MONTHS[monStr.toLowerCase().substring(0, 3)]
-      if (month !== undefined) {
-        const nextDate = new Date(parseInt(yearStr, 10), month, parseInt(dayStr, 10))
-        if (!isNaN(nextDate.getTime())) {
-          flush()
-          date = nextDate
-          merchant = ''
-          amount = null
-          isCredit = null
-        }
-      }
-    }
-
-    if (amount === null) {
-      const am = line.match(AMOUNT_RE)
-      const amountStr = am?.[1]
-      if (am && amountStr) {
-        const value = parseFloat(amountStr.replace(/,/g, ''))
-        if (!isNaN(value) && value > 0) {
-          amount = value
-          const drCr = am[2]?.toLowerCase()
-          if (drCr) isCredit = drCr === 'cr'
-        }
-      }
-    }
-
-    if (!merchant) {
-      const detail = line.match(DETAIL_RE)
-      const verb = detail?.[1]
-      const rest = detail?.[2]
-      if (verb && rest) {
-        merchant = rest.trim()
-        isCredit = verb.toLowerCase().startsWith('received')
-      }
-    }
-  }
-  flush()
-
-  return out
-}
-
-export default function PDFImportModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+export default function PDFImportModal({ isOpen, onClose, onReview, onImported }: { isOpen: boolean; onClose: () => void; onReview?: () => void; onImported?: (months: string[]) => void }) {
   const [file, setFile] = useState<File | null>(null)
   const [template, setTemplate] = useState('GPAY')
   const [isUploading, setIsUploading] = useState(false)
+  const [summary, setSummary] = useState<{ imported: number; categorised: number; pendingReview: number } | null>(null)
 
   if (!isOpen) return null
 
@@ -156,6 +80,7 @@ export default function PDFImportModal({ isOpen, onClose }: { isOpen: boolean; o
             date: row.date,
             merchant: row.merchant,
             amount: row.amount,
+            txn_time: row.txn_time,
             notes: 'Imported via PDF',
           })
         }
@@ -166,9 +91,14 @@ export default function PDFImportModal({ isOpen, onClose }: { isOpen: boolean; o
         return
       }
 
-      await bulkAddTransactions(parsedTransactions)
-      alert(`Successfully imported ${parsedTransactions.length} transactions!`)
-      onClose()
+      const result = await bulkAddTransactions(parsedTransactions)
+      onImported?.(result.months)
+      // Post-import summary with a path into the review queue (PRD 4.6).
+      setSummary({
+        imported: result.imported,
+        categorised: result.categorised,
+        pendingReview: result.pendingReview,
+      })
     } catch (err) {
       console.error(err)
       alert('Failed to parse PDF file.')
@@ -177,10 +107,16 @@ export default function PDFImportModal({ isOpen, onClose }: { isOpen: boolean; o
     }
   }
 
+  const closeAll = () => {
+    setSummary(null)
+    setFile(null)
+    onClose()
+  }
+
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
       {/* Backdrop */}
-      <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(8,26,17,0.6)', backdropFilter: 'blur(4px)' }} onClick={onClose} />
+      <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(8,26,17,0.6)', backdropFilter: 'blur(4px)' }} onClick={closeAll} />
 
       {/* Modal */}
       <div style={{
@@ -196,7 +132,7 @@ export default function PDFImportModal({ isOpen, onClose }: { isOpen: boolean; o
           <h2 style={{ fontFamily: 'var(--font-inter), Inter, sans-serif', fontWeight: 700, fontSize: '20px', color: '#01472e', margin: 0 }}>
             Import PDF
           </h2>
-          <button onClick={onClose} style={{
+          <button onClick={closeAll} style={{
             width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center',
             borderRadius: '10px', border: '1px solid rgba(1,71,46,0.12)', backgroundColor: 'transparent',
             color: '#64705f', fontSize: '16px', cursor: 'pointer', transition: 'all 0.3s',
@@ -210,6 +146,31 @@ export default function PDFImportModal({ isOpen, onClose }: { isOpen: boolean; o
 
         {/* Body */}
         <div style={{ padding: '24px 28px' }}>
+          {summary ? (
+            <div style={{ textAlign: 'center', padding: '12px 0' }}>
+              <div style={{
+                width: '56px', height: '56px', borderRadius: '50%', margin: '0 auto 16px',
+                backgroundColor: 'rgba(1,71,46,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: '24px',
+              }}>
+                &#x2713;
+              </div>
+              <h3 style={{ fontFamily: 'var(--font-inter), Inter, sans-serif', fontWeight: 700, fontSize: '17px', color: '#01472e', margin: '0 0 8px' }}>
+                Import complete
+              </h3>
+              <p style={{ fontFamily: 'var(--font-roboto), Roboto, sans-serif', fontSize: '14px', color: '#64705f', margin: 0, lineHeight: 1.6 }}>
+                {summary.imported} imported, {summary.categorised} auto-categorised,{' '}
+                {summary.pendingReview} need review.
+              </p>
+              {summary.pendingReview > 0 && (
+                <p style={{ fontFamily: 'var(--font-roboto), Roboto, sans-serif', fontSize: '13px', color: '#64705f', margin: '12px 0 0' }}>
+                  A few taps in the review queue will clear them — payees are grouped so you
+                  categorise each person once.
+                </p>
+              )}
+            </div>
+          ) : (
+            <>
           {/* Statement Template */}
           <div style={{ marginBottom: '24px' }}>
             <label style={{ display: 'block', fontFamily: 'var(--font-roboto), Roboto, sans-serif', fontWeight: 900, fontSize: '11px', color: '#64705f', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '10px' }}>
@@ -275,6 +236,8 @@ export default function PDFImportModal({ isOpen, onClose }: { isOpen: boolean; o
               />
             </div>
           </div>
+            </>
+          )}
         </div>
 
         {/* Footer */}
@@ -282,7 +245,35 @@ export default function PDFImportModal({ isOpen, onClose }: { isOpen: boolean; o
           display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '10px',
           padding: '16px 28px 24px',
         }}>
-          <button onClick={onClose} style={{
+          {summary ? (
+            <>
+              <button onClick={closeAll} style={{
+                padding: '10px 20px', borderRadius: '11px', border: '1px solid rgba(1,71,46,0.12)',
+                backgroundColor: 'transparent', color: '#64705f', fontSize: '13px', fontWeight: 500,
+                cursor: 'pointer', transition: 'all 0.3s',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'rgba(1,71,46,0.08)'; e.currentTarget.style.color = '#01472e' }}
+              onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#64705f' }}
+              >
+                Done
+              </button>
+              {summary.pendingReview > 0 && (
+                <button
+                  onClick={() => { closeAll(); onReview?.() }}
+                  style={{
+                    padding: '10px 24px', borderRadius: '11px', border: 'none',
+                    backgroundColor: '#01472e', color: '#ffffff', fontSize: '13px', fontWeight: 600,
+                    cursor: 'pointer', transition: 'all 0.3s',
+                    boxShadow: '0 4px 16px rgba(1,71,46,0.25)',
+                  }}
+                >
+                  Review {summary.pendingReview} transaction{summary.pendingReview !== 1 ? 's' : ''}
+                </button>
+              )}
+            </>
+          ) : (
+            <>
+          <button onClick={closeAll} style={{
             padding: '10px 20px', borderRadius: '11px', border: '1px solid rgba(1,71,46,0.12)',
             backgroundColor: 'transparent', color: '#64705f', fontSize: '13px', fontWeight: 500,
             cursor: 'pointer', transition: 'all 0.3s',
@@ -308,6 +299,8 @@ export default function PDFImportModal({ isOpen, onClose }: { isOpen: boolean; o
           >
             {isUploading ? 'Importing...' : 'Import Data'}
           </button>
+            </>
+          )}
         </div>
       </div>
     </div>

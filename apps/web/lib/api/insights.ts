@@ -1,5 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { GoogleGenerativeAI } from '@google/generative-ai'
+import { currentMonthKey } from './dashboard'
 
 interface MerchantSpend {
   name: string
@@ -16,9 +17,80 @@ export interface CategoryInsightContext {
   lastMonthSpent: number
   merchantSpend: MerchantSpend[]
   monthlyBudget: number
+  /** Display label for the analysed month (e.g. "October 2026"). */
+  monthLabel?: string
 }
 
-export async function generateCategoryInsights(supabase: SupabaseClient, ctx: CategoryInsightContext) {
+function isMissingTipsTable(error: { code?: string; message?: string } | null | undefined): boolean {
+  if (!error) return false
+  if (error.code === '42P01') return true
+  return /ai_tips_cache/.test(error.message || '')
+}
+
+async function readTipsCache(
+  supabase: SupabaseClient,
+  userId: string,
+  categoryName: string,
+  month: string
+): Promise<string[] | null> {
+  const { data, error } = await supabase
+    .from('ai_tips_cache')
+    .select('tips')
+    .eq('user_id', userId)
+    .eq('category_name', categoryName)
+    .eq('month', month)
+    .maybeSingle()
+  if (error) {
+    if (!isMissingTipsTable(error)) {
+      console.warn('ai_tips_cache read failed:', error.message)
+    }
+    return null
+  }
+  const tips = data?.tips
+  return Array.isArray(tips) && tips.length > 0 ? (tips as string[]) : null
+}
+
+async function writeTipsCache(
+  supabase: SupabaseClient,
+  userId: string,
+  categoryName: string,
+  month: string,
+  tips: string[]
+): Promise<void> {
+  const { error } = await supabase
+    .from('ai_tips_cache')
+    .upsert(
+      { user_id: userId, category_name: categoryName, month, tips },
+      { onConflict: 'user_id,category_name,month' }
+    )
+  if (error && !isMissingTipsTable(error)) {
+    console.warn('ai_tips_cache write failed:', error.message)
+  }
+}
+
+export async function generateCategoryInsights(
+  supabase: SupabaseClient,
+  ctx: CategoryInsightContext,
+  opts: { userId?: string; month?: string } = {}
+): Promise<string[]> {
+  // Past months are immutable — serve tips from the per-month cache and only
+  // call Gemini on a miss (PRD 4.5).
+  const { userId, month } = opts
+  const isPastMonth = Boolean(month && userId && month < currentMonthKey())
+  if (isPastMonth && userId && month) {
+    const cached = await readTipsCache(supabase, userId, ctx.name, month)
+    if (cached) return cached
+  }
+
+  const { tips, fromModel } = await runGeminiInsights(ctx)
+
+  if (isPastMonth && userId && month && fromModel && tips.length > 0) {
+    await writeTipsCache(supabase, userId, ctx.name, month, tips)
+  }
+  return tips
+}
+
+async function runGeminiInsights(ctx: CategoryInsightContext): Promise<{ tips: string[]; fromModel: boolean }> {
   const merchantLines = ctx.merchantSpend
     .slice(0, 8)
     .map((m, i) => {
@@ -42,7 +114,7 @@ export async function generateCategoryInsights(supabase: SupabaseClient, ctx: Ca
   const prompt =
     'You are an expert personal finance advisor analysing a user spending in the "' + ctx.name + '" category. ' +
     'Use the real numbers below — do NOT give generic advice. Every recommendation MUST reference specific amounts, merchants, or percentages from the data.\n\n' +
-    'THIS MONTHS SPENDING DATA\n' +
+    (ctx.monthLabel ? 'SPENDING DATA FOR ' + ctx.monthLabel.toUpperCase() + '\n' : 'THIS MONTHS SPENDING DATA\n') +
     '- Total spent: Rs.' + ctx.totalSpent.toLocaleString('en-IN') + '\n' +
     '- ' + budgetStatus + '\n' +
     '- Number of transactions: ' + ctx.transactionCount + '\n' +
@@ -63,11 +135,14 @@ export async function generateCategoryInsights(supabase: SupabaseClient, ctx: Ca
 
   const apiKey = process.env.GEMINI_API_KEY
   if (!apiKey) {
-    return [
-      'GEMINI_API_KEY is not configured. Add it to .env.local',
-      'This is a placeholder tip because the API key is missing.',
-      'Once configured, you will get real AI-powered insights here.'
-    ]
+    return {
+      tips: [
+        'GEMINI_API_KEY is not configured. Add it to .env.local',
+        'This is a placeholder tip because the API key is missing.',
+        'Once configured, you will get real AI-powered insights here.'
+      ],
+      fromModel: false,
+    }
   }
 
   try {
@@ -80,7 +155,7 @@ export async function generateCategoryInsights(supabase: SupabaseClient, ctx: Ca
 
     const parsed = JSON.parse(responseText)
     if (Array.isArray(parsed) && parsed.length >= 2) {
-      return parsed.slice(0, 3)
+      return { tips: parsed.slice(0, 3), fromModel: true }
     } else {
       throw new Error('Invalid JSON format returned from Gemini')
     }
@@ -132,6 +207,6 @@ export async function generateCategoryInsights(supabase: SupabaseClient, ctx: Ca
       "that could be batched or eliminated to save 10-15%."
     )
 
-    return fallbacks
+    return { tips: fallbacks, fromModel: false }
   }
 }

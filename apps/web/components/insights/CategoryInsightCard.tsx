@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { generateCategoryInsights } from '@/app/(dashboard)/insights/actions'
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
+import { AreaChart, Area, Tooltip, ResponsiveContainer } from 'recharts'
 import { GlowCard } from '@/components/ui/spotlight-card'
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react'
 
@@ -23,10 +23,22 @@ type CategoryData = {
   budgetPercentage: number
 }
 
-export default function CategoryInsightCard({ category, globalBudget }: { category: CategoryData, globalBudget: number }) {
-  const [tips, setTips] = useState<string[]>([])
+export default function CategoryInsightCard({
+  category,
+  globalBudget,
+  month,
+  monthLabel,
+  cachedTips = null,
+}: {
+  category: CategoryData
+  globalBudget: number
+  month: string
+  monthLabel?: string
+  cachedTips?: string[] | null
+}) {
+  const [tips, setTips] = useState<string[]>(cachedTips ?? [])
   const [loading, setLoading] = useState(false)
-  const [hasGenerated, setHasGenerated] = useState(false)
+  const [hasGenerated, setHasGenerated] = useState((cachedTips?.length ?? 0) > 0)
 
   const handleGenerate = async () => {
     setLoading(true)
@@ -41,7 +53,8 @@ export default function CategoryInsightCard({ category, globalBudget }: { catego
         lastMonthSpent: category.lastMonthSpent,
         merchantSpend: category.merchantSpend,
         monthlyBudget: globalBudget,
-      })
+        monthLabel,
+      }, month)
       setTips(data)
       setHasGenerated(true)
     } catch (error) {
@@ -149,7 +162,7 @@ export default function CategoryInsightCard({ category, globalBudget }: { catego
             <Tooltip 
               contentStyle={{ backgroundColor: '#ffffff', borderColor: 'rgba(1,71,46,0.12)', borderRadius: '11px', color: '#01472e', fontSize: '12px', padding: '6px 10px' }}
               itemStyle={{ color: '#01472e' }}
-              formatter={(value: any) => ['\u20B9' + Number(value).toLocaleString('en-IN'), 'Spent']}
+              formatter={(value) => ['\u20B9' + Number(value).toLocaleString('en-IN'), 'Spent']}
               labelStyle={{ color: '#64705f', fontSize: '11px' }}
             />
             <Area 

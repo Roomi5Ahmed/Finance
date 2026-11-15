@@ -13,9 +13,16 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Missing context' }, { status: 400 })
     }
 
-    const tips = await generateCategoryInsights(auth.supabase, body.context as CategoryInsightContext)
+    const month = typeof body.month === 'string' ? body.month : undefined
+    const tips = await generateCategoryInsights(auth.supabase, body.context as CategoryInsightContext, {
+      userId: auth.user.id,
+      month,
+    })
     return NextResponse.json({ tips })
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message || 'Internal Server Error' }, { status: 500 })
+  } catch (err) {
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : 'Internal Server Error' },
+      { status: 500 }
+    )
   }
 }

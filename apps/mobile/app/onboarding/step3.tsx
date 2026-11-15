@@ -44,10 +44,10 @@ export default function OnboardingStep3() {
         Step 3 of 3
       </Text>
       <Text style={{ fontFamily: 'Inter_700Bold', fontSize: 28, color: Colors.foreground, fontWeight: '700', marginBottom: 8 }}>
-        What's your goal?
+        What&apos;s your goal?
       </Text>
       <Text style={{ fontSize: 14, color: Colors.muted, marginBottom: 32 }}>
-        We'll tailor insights to help you reach it.
+        We&apos;ll tailor insights to help you reach it.
       </Text>
 
       <View style={{ gap: 12 }}>

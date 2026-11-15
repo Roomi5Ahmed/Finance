@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { categorizeMerchantsWithGemini } from '@/utils/gemini';
+import { runCategorisationPipeline } from '@/lib/categorisation/pipeline';
 
 // Webhook receiver for Indian Bank Aggregator (e.g., Setu / Mock)
 export async function POST(req: Request) {
@@ -46,6 +46,7 @@ export async function POST(req: Request) {
       date: new Date(tx.date).toISOString(),
       merchant: tx.merchant,
       notes: tx.notes || 'Aggregator Sync',
+      category_source: 'import',
     }));
 
     const { data: insertedTxs, error: insertError } = await supabaseAdmin
@@ -58,75 +59,17 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Database insert failed' }, { status: 500 });
     }
 
-    // 2. Trigger Auto-Categorisation in the background (fire and forget)
-    // In a real prod app, you might queue this via Inngest or similar.
-    autoCategorizeWebhookData(supabaseAdmin, userId, insertedTxs || []);
+    // 2. Run the shared 4-layer categorisation pipeline in the background
+    // (same pipeline as CSV/PDF import and the Categorise button — respects
+    // user-owned cache rules and flags low-confidence payees for review).
+    runCategorisationPipeline(supabaseAdmin, userId).catch(err =>
+      console.error('Background categorisation failed:', err)
+    );
 
     return NextResponse.json({ success: true, inserted: insertedTxs?.length || 0 });
 
   } catch (err: any) {
     console.error('Webhook processing error:', err);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
-  }
-}
-
-// Background categorisation helper
-async function autoCategorizeWebhookData(supabaseAdmin: any, userId: string, newTxs: any[]) {
-  if (newTxs.length === 0) return;
-
-  try {
-    // Fetch categories
-    const { data: categories } = await supabaseAdmin.from('categories').select('*');
-    if (!categories) return;
-
-    // Fetch user cache
-    const { data: cache } = await supabaseAdmin
-      .from('merchant_category_cache')
-      .select('merchant_name, category_id')
-      .eq('user_id', userId);
-
-    const cacheMap = new Map((cache || []).map((c: any) => [c.merchant_name.toLowerCase(), c.category_id]));
-    const toUpdate: { id: string, category_id: string }[] = [];
-    const uniqueUnknownMerchants = new Set<string>();
-
-    for (const tx of newTxs) {
-      const merchantLower = tx.merchant.toLowerCase();
-      if (cacheMap.has(merchantLower)) {
-        toUpdate.push({ id: tx.id, category_id: cacheMap.get(merchantLower) as string });
-      } else {
-        uniqueUnknownMerchants.add(tx.merchant);
-      }
-    }
-
-    if (uniqueUnknownMerchants.size > 0) {
-      const merchantsArray = Array.from(uniqueUnknownMerchants);
-      const geminiResults = await categorizeMerchantsWithGemini(merchantsArray, categories);
-      const newCacheEntries = [];
-      
-      for (const [merchant, categoryId] of Object.entries(geminiResults)) {
-        if (!categoryId || !categoryId.includes('-')) continue; 
-        
-        newCacheEntries.push({ user_id: userId, merchant_name: merchant, category_id: categoryId });
-
-        for (const tx of newTxs) {
-          if (tx.merchant === merchant) {
-            toUpdate.push({ id: tx.id, category_id: categoryId });
-          }
-        }
-      }
-
-      if (newCacheEntries.length > 0) {
-        await supabaseAdmin.from('merchant_category_cache').upsert(newCacheEntries, { onConflict: 'user_id, merchant_name' });
-      }
-    }
-
-    if (toUpdate.length > 0) {
-      for (const update of toUpdate) {
-        await supabaseAdmin.from('transactions').update({ category_id: update.category_id }).eq('id', update.id);
-      }
-    }
-    console.log(`Webhook auto-categorised ${toUpdate.length} transactions for user ${userId}`);
-  } catch (err) {
-    console.error('Background categorisation failed:', err);
   }
 }

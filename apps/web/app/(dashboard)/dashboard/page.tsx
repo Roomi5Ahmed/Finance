@@ -1,7 +1,19 @@
 import { createClient } from '@/utils/supabase/server'
 import DashboardContent from '@/components/dashboard/DashboardContent'
+import TrendsCard from '@/components/dashboard/TrendsCard'
+import {
+  currentMonthKey,
+  getAvailableMonths,
+  getDashboardMonth,
+  getTrends,
+  monthRange,
+} from '@/lib/api/dashboard'
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ month?: string }>
+}) {
   const supabase = await createClient()
 
   const {
@@ -10,91 +22,37 @@ export default async function DashboardPage() {
 
   if (!user) return null
 
-  const { data: txs } = await supabase
-    .from('transactions')
-    .select('id, amount, date, merchant, categories(name, icon, color)')
-    .eq('user_id', user.id)
-    .order('date', { ascending: false })
+  const { month: monthParam } = await searchParams
+  const current = currentMonthKey()
+  const month = monthParam && monthRange(monthParam) ? monthParam : current
 
-  const { data: profile } = await supabase
-    .from('user_profiles')
-    .select('monthly_income, monthly_budget')
-    .eq('id', user.id)
-    .single()
-
-  // Fetch category budgets with current spend
-  const { data: budgets } = await supabase
-    .from('budgets')
-    .select('*, categories(name, icon, color)')
-    .eq('user_id', user.id)
-    .eq('period', 'monthly')
-
-  const now = new Date()
-  const periodStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
-
-  const budgetsWithSpend = await Promise.all(
-    (budgets || []).map(async (budget: any) => {
-      let spent = 0
-      if (budget.category_id) {
-        const { data: txs } = await supabase
-          .from('transactions')
-          .select('amount')
-          .eq('user_id', user.id)
-          .eq('category_id', budget.category_id)
-          .gte('date', periodStart)
-          .lt('amount', 0)
-        spent = (txs || []).reduce((sum: number, tx: any) => sum + Math.abs(tx.amount), 0)
-      } else {
-        const { data: txs } = await supabase
-          .from('transactions')
-          .select('amount')
-          .eq('user_id', user.id)
-          .gte('date', periodStart)
-          .lt('amount', 0)
-        spent = (txs || []).reduce((sum: number, tx: any) => sum + Math.abs(tx.amount), 0)
-      }
-      return { ...budget, spent }
-    })
-  )
-
-  // Fetch upcoming bills
-  const { data: bills } = await supabase
-    .from('bills')
-    .select('*')
-    .eq('user_id', user.id)
-    .eq('status', 'active')
-    .order('next_due_at', { ascending: true })
-    .limit(3)
-
-  // Fetch active subscriptions count and monthly cost
-  const { data: subs } = await supabase
-    .from('subscriptions')
-    .select('avg_amount, cadence')
-    .eq('user_id', user.id)
-    .in('status', ['active', 'candidate'])
-
-  const totalSubMonthly = (subs || []).reduce((sum: number, s: any) => {
-    const amt = Number(s.avg_amount) || 0
-    switch (s.cadence) {
-      case 'weekly': return sum + amt * 4.33
-      case 'quarterly': return sum + amt / 3
-      case 'annual': return sum + amt / 12
-      default: return sum + amt
-    }
-  }, 0)
-
-  const transactions = txs || []
+  const [availableMonths, data, trends] = await Promise.all([
+    getAvailableMonths(supabase, user.id),
+    getDashboardMonth(supabase, user.id, month),
+    getTrends(supabase, user.id, 12),
+  ])
 
   return (
-    <DashboardContent
-      transactions={transactions}
-      userEmail={user.email || ''}
-      monthlyBudget={profile?.monthly_budget || 50000}
-      monthlyIncome={profile?.monthly_income || 0}
-      budgets={budgetsWithSpend}
-      upcomingBills={bills || []}
-      subscriptionCount={subs?.length || 0}
-      subscriptionMonthlyCost={totalSubMonthly}
-    />
+    <div className="flex flex-col gap-8">
+      <DashboardContent
+        month={data.month}
+        monthLabel={data.label}
+        shortLabel={data.shortLabel}
+        isCurrentMonth={data.isCurrentMonth}
+        partial={data.partial}
+        availableMonths={availableMonths}
+        transactions={data.transactions}
+        userEmail={user.email || ''}
+        monthlyBudget={data.monthlyBudget}
+        budgets={data.budgets}
+        upcomingBills={data.upcomingBills}
+        subscriptionCount={data.subscriptionCount}
+        subscriptionMonthlyCost={data.subscriptionMonthlyCost}
+        subscriptionsCharged={data.subscriptionsCharged}
+        comparison={data.comparison}
+        dailySeries={data.dailySeries}
+      />
+      <TrendsCard trends={trends} currentMonth={current} />
+    </div>
   )
 }

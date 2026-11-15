@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Papa from 'papaparse'
 import { bulkAddTransactions } from '@/app/(dashboard)/transactions/actions'
 
-export default function CSVImportModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+export default function CSVImportModal({ isOpen, onClose, onImported }: { isOpen: boolean; onClose: () => void; onImported?: (months: string[]) => void }) {
   const [file, setFile] = useState<File | null>(null)
   const [template, setTemplate] = useState('HDFC')
   const [isUploading, setIsUploading] = useState(false)
@@ -22,19 +22,19 @@ export default function CSVImportModal({ isOpen, onClose }: { isOpen: boolean; o
         try {
           const parsedTransactions = []
 
-          for (const row of results.data as any[]) {
+          for (const row of results.data as Record<string, string>[]) {
             let date = ''
             let merchant = ''
             let amount = 0
             
             if (template === 'HDFC') {
-              date = row['Date'] || row['Value Date']
+              date = row['Date'] || row['Value Date'] || ''
               merchant = row['Narration'] || row['Description'] || 'Unknown'
               const withdrawal = parseFloat(row['Withdrawal Amount'] || '0')
               const deposit = parseFloat(row['Deposit Amount'] || '0')
               amount = deposit > 0 ? deposit : -withdrawal
             } else if (template === 'SBI') {
-              date = row['Txn Date'] || row['Date']
+              date = row['Txn Date'] || row['Date'] || ''
               merchant = row['Description'] || 'Unknown'
               const debit = parseFloat(row['Debit'] || '0')
               const credit = parseFloat(row['Credit'] || '0')
@@ -64,8 +64,8 @@ export default function CSVImportModal({ isOpen, onClose }: { isOpen: boolean; o
             return
           }
 
-          await bulkAddTransactions(parsedTransactions)
-          alert(`Successfully imported ${parsedTransactions.length} transactions!`)
+          const result = await bulkAddTransactions(parsedTransactions)
+          onImported?.(result.months)
           onClose()
         } catch (err) {
           console.error(err)

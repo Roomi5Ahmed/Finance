@@ -2,7 +2,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import { createNotification } from './notifications'
 import { sendPushToUser } from '@/lib/push'
 
-function normalizeMerchant(name: string): string {
+export function normalizeMerchant(name: string): string {
   return name
     .toLowerCase()
     .replace(/[^a-z0-9\s]/g, '')

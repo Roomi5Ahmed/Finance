@@ -258,5 +258,153 @@ CREATE TABLE public.device_tokens (
 
 ALTER TABLE public.device_tokens ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Users can manage own device tokens" ON public.device_tokens FOR ALL
-    USING (auth.uid() = user_id)
-    WITH CHECK (auth.uid() = user_id);
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
+
+-- ============================================================================
+-- PERSONAL PAYEE CATEGORISATION (PRD_Personal_Payee_Categorisation.md)
+-- Idempotent: safe to run on an existing database (fresh installs get this
+-- automatically as part of this file; existing databases should run only
+-- this section in the Supabase SQL editor).
+-- ============================================================================
+
+-- 14. Categorisation provenance + review queue columns
+ALTER TABLE public.transactions
+  ADD COLUMN IF NOT EXISTS category_source TEXT
+    CHECK (category_source IN ('user','rule','ai','import')),
+  ADD COLUMN IF NOT EXISTS category_confidence NUMERIC(3,2),
+  ADD COLUMN IF NOT EXISTS needs_review BOOLEAN NOT NULL DEFAULT FALSE,
+  ADD COLUMN IF NOT EXISTS payee_type TEXT
+    CHECK (payee_type IN ('business','person','unknown')) DEFAULT 'unknown',
+  ADD COLUMN IF NOT EXISTS txn_time TIME;
+
+-- Who set the cached category (AI must never overwrite source='user' rows)
+-- Base table may predate this section on older databases — create it if missing.
+CREATE TABLE IF NOT EXISTS public.merchant_category_cache (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    merchant_name TEXT NOT NULL,
+    category_id UUID NOT NULL REFERENCES public.categories(id) ON DELETE CASCADE,
+    confidence DECIMAL(3,2) DEFAULT 1.00,
+    source TEXT NOT NULL DEFAULT 'ai'
+      CHECK (source IN ('user','rule','ai')),
+    payee_type TEXT DEFAULT 'unknown',
+    label TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()) NOT NULL,
+    UNIQUE(user_id, merchant_name)
+);
+
+ALTER TABLE public.merchant_category_cache ENABLE ROW LEVEL SECURITY;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname = 'public'
+      AND tablename = 'merchant_category_cache'
+      AND policyname = 'Users can manage own cache'
+  ) THEN
+    CREATE POLICY "Users can manage own cache" ON public.merchant_category_cache
+      FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+  END IF;
+END $$;
+
+ALTER TABLE public.merchant_category_cache
+  ADD COLUMN IF NOT EXISTS source TEXT NOT NULL DEFAULT 'ai'
+    CHECK (source IN ('user','rule','ai')),
+  ADD COLUMN IF NOT EXISTS payee_type TEXT DEFAULT 'unknown',
+  ADD COLUMN IF NOT EXISTS label TEXT;
+
+CREATE INDEX IF NOT EXISTS tx_review_idx
+  ON public.transactions(user_id) WHERE needs_review = TRUE;
+
+-- 15. Fallback category for person-to-person payments with no better answer
+INSERT INTO public.categories (name, icon, color)
+SELECT 'Personal Transfers', '⇄', '#0d9488'
+WHERE NOT EXISTS (
+  SELECT 1 FROM public.categories
+  WHERE user_id IS NULL AND lower(name) = 'personal transfers'
+);
+
+-- ============================================================================
+-- PAST-MONTH DASHBOARD AND ANALYSIS (PRD_Historical_Month_Dashboard.md)
+-- Idempotent: safe to run on an existing database.
+-- ============================================================================
+
+-- 16. Server-side month aggregation (security invoker: RLS applies).
+-- Date ranges are half-open and converted from local calendar dates in p_tz
+-- (default Asia/Kolkata) so month boundaries follow the user's clock.
+
+CREATE OR REPLACE FUNCTION public.monthly_summary(
+  p_user UUID, p_start DATE, p_end DATE, p_tz TEXT DEFAULT 'Asia/Kolkata'
+)
+RETURNS TABLE (month DATE, income NUMERIC, expenses NUMERIC, txn_count INT)
+LANGUAGE sql STABLE AS $$
+  SELECT date_trunc('month', date AT TIME ZONE p_tz)::date,
+         COALESCE(sum(amount) FILTER (WHERE amount > 0), 0),
+         COALESCE(-sum(amount) FILTER (WHERE amount < 0), 0),
+         count(*)::int
+  FROM public.transactions
+  WHERE user_id = p_user
+    AND date >= (p_start::timestamp AT TIME ZONE p_tz)
+    AND date <  (p_end::timestamp AT TIME ZONE p_tz)
+  GROUP BY 1
+  ORDER BY 1;
+$$;
+
+CREATE OR REPLACE FUNCTION public.category_summary(
+  p_user UUID, p_start DATE, p_end DATE, p_tz TEXT DEFAULT 'Asia/Kolkata'
+)
+RETURNS TABLE (category_id UUID, spent NUMERIC, txn_count INT)
+LANGUAGE sql STABLE AS $$
+  SELECT category_id, -sum(amount), count(*)::int
+  FROM public.transactions
+  WHERE user_id = p_user AND amount < 0
+    AND date >= (p_start::timestamp AT TIME ZONE p_tz)
+    AND date <  (p_end::timestamp AT TIME ZONE p_tz)
+  GROUP BY category_id;
+$$;
+
+CREATE OR REPLACE FUNCTION public.monthly_category_summary(
+  p_user UUID, p_start DATE, p_end DATE, p_tz TEXT DEFAULT 'Asia/Kolkata'
+)
+RETURNS TABLE (month DATE, category_id UUID, spent NUMERIC)
+LANGUAGE sql STABLE AS $$
+  SELECT date_trunc('month', date AT TIME ZONE p_tz)::date,
+         category_id, -sum(amount)
+  FROM public.transactions
+  WHERE user_id = p_user AND amount < 0
+    AND date >= (p_start::timestamp AT TIME ZONE p_tz)
+    AND date <  (p_end::timestamp AT TIME ZONE p_tz)
+  GROUP BY 1, 2
+  ORDER BY 1;
+$$;
+
+CREATE INDEX IF NOT EXISTS transactions_user_date_idx
+  ON public.transactions(user_id, date DESC);
+
+-- 17. AI tips cache for immutable past months (key: user + category + month)
+CREATE TABLE IF NOT EXISTS public.ai_tips_cache (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    category_name TEXT NOT NULL,
+    month DATE NOT NULL,
+    tips JSONB NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()) NOT NULL,
+    UNIQUE(user_id, category_name, month)
+);
+
+ALTER TABLE public.ai_tips_cache ENABLE ROW LEVEL SECURITY;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname = 'public'
+      AND tablename = 'ai_tips_cache'
+      AND policyname = 'Users can manage own tips'
+  ) THEN
+    CREATE POLICY "Users can manage own tips" ON public.ai_tips_cache
+      FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+  END IF;
+END $$;

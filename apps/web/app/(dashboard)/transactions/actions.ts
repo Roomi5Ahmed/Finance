@@ -3,6 +3,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
 import * as txLib from '@/lib/api/transactions'
+import * as reviewLib from '@/lib/api/review'
 
 export async function addTransaction(formData: FormData) {
   const supabase = await createClient()
@@ -34,10 +35,11 @@ export async function bulkAddTransactions(transactions: any[]) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Not authenticated')
 
-  await txLib.bulkAddTransactions(supabase, user.id, transactions)
+  const result = await txLib.bulkAddTransactions(supabase, user.id, transactions)
 
   revalidatePath('/transactions')
   revalidatePath('/dashboard')
+  return result
 }
 
 export async function getCategories() {
@@ -67,4 +69,44 @@ export async function triggerMockWebhook() {
   revalidatePath('/transactions')
   revalidatePath('/dashboard')
   return result
+}
+
+export async function fetchReviewGroups() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return []
+  return reviewLib.getReviewGroups(supabase, user.id)
+}
+
+export async function resolveReviewGroup(input: reviewLib.ResolveReviewInput) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Not authenticated')
+
+  const result = await reviewLib.resolveReviewGroup(supabase, user.id, input)
+
+  revalidatePath('/transactions')
+  revalidatePath('/dashboard')
+  return result
+}
+
+/** Single-transaction category change; returns the payee + sibling count for
+ *  the "Apply to all transactions from this payee?" offer (PRD 4.5). */
+export async function setTransactionCategory(txnId: string, categoryId: string | null) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Not authenticated')
+
+  const result = await txLib.setTransactionCategory(supabase, user.id, txnId, categoryId)
+
+  revalidatePath('/transactions')
+  revalidatePath('/dashboard')
+  return result
+}
+
+export async function fetchPayeeTransactions(payee: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return []
+  return reviewLib.getPayeeTransactions(supabase, user.id, payee)
 }

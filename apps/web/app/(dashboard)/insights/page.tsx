@@ -1,48 +1,87 @@
 import { createClient } from '@/utils/supabase/server'
 import CategoryInsightCard from '@/components/insights/CategoryInsightCard'
+import MonthSelector from '@/components/dashboard/MonthSelector'
+import {
+  currentMonthKey,
+  getAvailableMonths,
+  monthRange,
+  shiftMonth,
+} from '@/lib/api/dashboard'
 
-export default async function InsightsPage() {
+interface ExpenseRow {
+  amount: number
+  date: string
+  merchant: string
+  categories: { name?: string | null; icon?: string | null; color?: string | null } | null
+}
+
+export default async function InsightsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ month?: string }>
+}) {
   const supabase = await createClient()
-  
+
   const {
     data: { user },
   } = await supabase.auth.getUser()
 
   if (!user) return null
 
-  const now = new Date()
-  const firstDay = new Date(now.getFullYear(), now.getMonth(), 1)
-  
-  // Current month expenses
-  const { data: txs } = await supabase
-    .from('transactions')
-    .select('amount, date, merchant, categories(name, icon, color)')
-    .eq('user_id', user.id)
-    .gte('date', firstDay.toISOString())
-    .lt('amount', 0)
-    .order('date', { ascending: false })
+  const { month: monthParam } = await searchParams
+  const current = currentMonthKey()
+  const month = monthParam && monthRange(monthParam) ? monthParam : current
+  const isCurrentMonth = month === current
+  const range = monthRange(month)
+  if (!range) return null
+  const prevRange = monthRange(shiftMonth(month, -1))
 
-  // Previous month expenses (for MoM comparison)
-  const lastMonthFirst = new Date(now.getFullYear(), now.getMonth() - 1, 1)
-  const lastMonthLast = new Date(now.getFullYear(), now.getMonth(), 0)
-  const { data: lastMonthTxs } = await supabase
-    .from('transactions')
-    .select('amount, merchant, categories(name)')
-    .eq('user_id', user.id)
-    .gte('date', lastMonthFirst.toISOString())
-    .lte('date', lastMonthLast.toISOString())
-    .lt('amount', 0)
+  const [availableMonths, txRes, prevTxRes, profileRes, cachedRes] = await Promise.all([
+    getAvailableMonths(supabase, user.id),
+    supabase
+      .from('transactions')
+      .select('amount, date, merchant, categories(name, icon, color)')
+      .eq('user_id', user.id)
+      .gte('date', range.startISO)
+      .lt('date', range.endISO)
+      .lt('amount', 0)
+      .order('date', { ascending: false }),
+    supabase
+      .from('transactions')
+      .select('amount, merchant, categories(name)')
+      .eq('user_id', user.id)
+      .gte('date', prevRange?.startISO ?? range.startISO)
+      .lt('date', prevRange?.endISO ?? range.startISO)
+      .lt('amount', 0),
+    supabase
+      .from('user_profiles')
+      .select('monthly_budget')
+      .eq('id', user.id)
+      .maybeSingle(),
+    // Past-month tips are immutable — preload anything already generated.
+    isCurrentMonth
+      ? Promise.resolve({ data: null as { category_name: string; tips: unknown }[] | null, error: null })
+      : supabase
+        .from('ai_tips_cache')
+        .select('category_name, tips')
+        .eq('user_id', user.id)
+        .eq('month', month),
+  ])
 
-  const transactions = txs || []
-  const lastMonthTransactions = lastMonthTxs || []
+  const transactions = (txRes.data || []) as ExpenseRow[]
+  const lastMonthTransactions = (prevTxRes.data || []) as Pick<ExpenseRow, 'amount' | 'merchant' | 'categories'>[]
+  const monthlyBudget = Number(profileRes.data?.monthly_budget) || 50000
 
-  const { data: profile } = await supabase
-    .from('user_profiles')
-    .select('monthly_budget')
-    .eq('id', user.id)
-    .single()
+  const cachedTips = new Map<string, string[]>()
+  if (cachedRes?.data && !cachedRes.error) {
+    for (const row of cachedRes.data) {
+      if (Array.isArray(row.tips) && row.tips.length > 0) {
+        cachedTips.set(row.category_name, row.tips as string[])
+      }
+    }
+  }
 
-  // ── Current month by category ────────────────────────────
+  // ── Selected month by category ──────────────────────────
   const categoryData: Record<string, {
     name: string
     icon: string
@@ -59,9 +98,9 @@ export default async function InsightsPage() {
   transactions.forEach((tx) => {
     const amount = Math.abs(tx.amount)
     totalMonthlyExpenses += amount
-    const catName = (tx.categories as any)?.name || 'Uncategorized'
-    const icon = (tx.categories as any)?.icon || '❔'
-    const color = (tx.categories as any)?.color || '#64748B'
+    const catName = tx.categories?.name || 'Uncategorized'
+    const icon = tx.categories?.icon || '❔'
+    const color = tx.categories?.color || '#64748B'
 
     if (!categoryData[catName]) {
       categoryData[catName] = {
@@ -85,16 +124,14 @@ export default async function InsightsPage() {
     }
   })
 
-  // ── Previous month totals per category ───────────────────
+  // ── Previous month totals per category ─────────────────
   const lastMonthByCategory: Record<string, number> = {}
-  lastMonthTransactions.forEach((tx: any) => {
-    const catName = (tx.categories as any)?.name || 'Uncategorized'
+  lastMonthTransactions.forEach((tx) => {
+    const catName = tx.categories?.name || 'Uncategorized'
     lastMonthByCategory[catName] = (lastMonthByCategory[catName] || 0) + Math.abs(tx.amount)
   })
 
   // ── Assemble final sorted list ──────────────────────────
-  const monthlyBudget = profile?.monthly_budget || 50000
-
   const sortedCategories = Object.values(categoryData)
     .sort((a, b) => b.totalSpent - a.totalSpent)
     .map(c => {
@@ -127,6 +164,19 @@ export default async function InsightsPage() {
         <p className="mt-1.5 text-sm text-[#ccd5ae]">
           Analyze your spending habits category by category and get personalized AI advice.
         </p>
+        <div className="mt-4 flex items-center gap-3 flex-wrap">
+          <MonthSelector
+            month={month}
+            months={availableMonths}
+            isCurrentMonth={isCurrentMonth}
+            pathname="/insights"
+          />
+          {!isCurrentMonth && (
+            <span className="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-[rgba(254,250,224,0.08)] text-[#ccd5ae] border border-[rgba(254,250,224,0.2)]">
+              Viewing past month — read only
+            </span>
+          )}
+        </div>
       </div>
 
       {sortedCategories.length > 0 && (
@@ -136,7 +186,7 @@ export default async function InsightsPage() {
               <svg className="w-5 h-5 text-[#01472e]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
             </div>
             <div>
-              <p className="text-xs text-[#64705f]" style={{ fontFamily: 'var(--font-roboto)', marginBottom: '4px' }}>Total Expenses This Month</p>
+              <p className="text-xs text-[#64705f]" style={{ fontFamily: 'var(--font-roboto)', marginBottom: '4px' }}>Total Expenses — {range.label}</p>
               <p className="text-xl font-bold text-[#01472e]">{'\u20B9'}{totalMonthlyExpenses.toLocaleString('en-IN')}</p>
             </div>
           </div>
@@ -149,15 +199,18 @@ export default async function InsightsPage() {
 
       {sortedCategories.length === 0 ? (
         <div className="bg-[#ffffff] rounded-[0px] border border-[#dde3d0] p-8 text-center">
-          <p className="text-[#64705f] text-sm">You have no expenses this month to analyze.</p>
+          <p className="text-[#64705f] text-sm">You have no expenses in {range.label} to analyze.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
           {sortedCategories.map((cat) => (
-            <CategoryInsightCard 
-              key={cat.name} 
-              category={cat} 
-              globalBudget={monthlyBudget} 
+            <CategoryInsightCard
+              key={cat.name}
+              category={cat}
+              globalBudget={monthlyBudget}
+              month={month}
+              monthLabel={range.label}
+              cachedTips={cachedTips.get(cat.name) ?? null}
             />
           ))}
         </div>

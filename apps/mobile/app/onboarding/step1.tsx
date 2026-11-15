@@ -36,7 +36,7 @@ export default function OnboardingStep1() {
         Choose your currency
       </Text>
       <Text style={{ fontSize: 14, color: Colors.muted, marginBottom: 32 }}>
-        We'll use this to display all amounts.
+        We&apos;ll use this to display all amounts.
       </Text>
 
       <ScrollView style={{ flex: 1 }}>

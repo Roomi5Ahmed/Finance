@@ -106,7 +106,7 @@ export default function SignInScreen() {
           </TouchableOpacity>
 
           <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 24 }}>
-            <Text style={{ color: Colors.muted, fontSize: 14 }}>Don't have an account? </Text>
+            <Text style={{ color: Colors.muted, fontSize: 14 }}>Don&apos;t have an account? </Text>
             <Link href="/(auth)/sign-up" asChild>
               <TouchableOpacity>
                 <Text style={{ color: Colors.primary, fontSize: 14, fontWeight: '600' }}>Sign Up</Text>

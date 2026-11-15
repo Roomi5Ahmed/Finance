@@ -8,6 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint --max-warnings 0",
+    "test": "vitest run",
     "check-types": "next typegen && tsc --noEmit",
     "postinstall": "node scripts/sync-pdf-worker.mjs"
   },
@@ -42,6 +43,7 @@
     "eslint": "^9.39.1",
     "postcss": "^8.5.10",
     "tailwindcss": "^4.2.4",
-    "typescript": "5.9.2"
+    "typescript": "5.9.2",
+    "vitest": "^5.1.0"
   }
 }

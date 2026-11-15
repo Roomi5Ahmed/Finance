@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react'
-import { View, Text, FlatList, TouchableOpacity, RefreshControl, ActivityIndicator, TextInput, Alert, Modal, KeyboardAvoidingView, Platform } from 'react-native'
+import { View, Text, FlatList, TouchableOpacity, RefreshControl, ActivityIndicator, TextInput, Alert, Modal, KeyboardAvoidingView, Platform, ScrollView } from 'react-native'
 import * as DocumentPicker from 'expo-document-picker'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../lib/auth'
@@ -90,6 +90,10 @@ export default function TransactionsScreen() {
   const [csvTemplate, setCsvTemplate] = useState<'HDFC' | 'SBI'>('HDFC')
   const [csvFileName, setCsvFileName] = useState<string | null>(null)
   const [csvContent, setCsvContent] = useState<string | null>(null)
+  const [reviewGroups, setReviewGroups] = useState<any[]>([])
+  const [showReview, setShowReview] = useState(false)
+  const [skippedPayees, setSkippedPayees] = useState<string[]>([])
+  const [editTxn, setEditTxn] = useState<any | null>(null)
 
   const [merchant, setMerchant] = useState('')
   const [amount, setAmount] = useState('')
@@ -107,6 +111,11 @@ export default function TransactionsScreen() {
     setPage(0)
     setCategories(catRes.data || [])
     setLoading(false)
+
+    // Review queue (PRD 4.4) — non-blocking, banner appears when ready.
+    api.getReview()
+      .then(r => setReviewGroups(r.groups || []))
+      .catch(() => {})
   }, [session])
 
   useEffect(() => { fetchData() }, [fetchData])
@@ -159,6 +168,85 @@ export default function TransactionsScreen() {
     } catch (e: any) {
       hapticError()
       Alert.alert('Error', e.message)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  // --- Review queue (PRD 4.4) -------------------------------------------
+
+  const openReview = async () => {
+    hapticTap()
+    setShowReview(true)
+    try {
+      const r = await api.getReview()
+      setReviewGroups(r.groups || [])
+    } catch {
+      // keep whatever we already have
+    }
+  }
+
+  const handleResolveReview = async (group: any, categoryId: string) => {
+    setBusy(true)
+    hapticTap()
+    try {
+      await api.resolveReview({ payee: group.payee, categoryId, applyToAll: true })
+      hapticSuccess()
+      setReviewGroups(prev => prev.filter(g => g.key !== group.key))
+    } catch (e: any) {
+      hapticError()
+      Alert.alert('Error', e.message || 'Failed to apply category')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const skipReviewGroup = (group: any) => {
+    hapticTap()
+    setSkippedPayees(prev => [...prev, group.key])
+    setReviewGroups(prev => prev.filter(g => g.key !== group.key))
+  }
+
+  // --- Single-transaction category change + apply-to-all offer (PRD 4.5) -
+
+  const handleEditCategory = async (categoryId: string | null) => {
+    if (!editTxn) return
+    setBusy(true)
+    try {
+      const result = await api.setTransactionCategory(editTxn.id, categoryId)
+      setEditTxn(null)
+      hapticSuccess()
+
+      if (result.payee && categoryId && result.count > 1) {
+        // Default action is "Apply to all" (PRD 4.5: offer, default on).
+        Alert.alert(
+          'Apply to all?',
+          `Apply this category to all ${result.count} transactions from “${result.payee}”? Future payments will get it automatically.`,
+          [
+            {
+              text: 'Apply to all',
+              onPress: async () => {
+                try {
+                  await api.resolveReview({ payee: result.payee!, categoryId, applyToAll: true })
+                  hapticSuccess()
+                } catch (e: any) {
+                  hapticError()
+                  Alert.alert('Error', e.message)
+                } finally {
+                  await fetchData()
+                }
+              },
+            },
+            { text: 'Just this one', onPress: () => fetchData() },
+          ],
+          { cancelable: true }
+        )
+      } else {
+        await fetchData()
+      }
+    } catch (e: any) {
+      hapticError()
+      Alert.alert('Error', e.message || 'Failed to update category')
     } finally {
       setBusy(false)
     }
@@ -254,6 +342,12 @@ export default function TransactionsScreen() {
       )
     : transactions
 
+  const visibleReview = reviewGroups.filter(g => !skippedPayees.includes(g.key))
+  const reviewTxnCount = visibleReview.reduce((sum, g) => sum + (g.count || 0), 0)
+  const personalTransfers = categories.find(
+    c => (c.name || '').toLowerCase() === 'personal transfers'
+  )
+
   if (loading) {
     return (
       <View style={{ flex: 1, backgroundColor: Colors.background, justifyContent: 'center', alignItems: 'center' }}>
@@ -304,6 +398,24 @@ export default function TransactionsScreen() {
             <Text style={{ color: '#000', fontSize: 12, fontWeight: '600' }}>+ Add</Text>
           </TouchableOpacity>
         </View>
+
+        {/* Review queue banner (PRD 4.4) */}
+        {reviewTxnCount > 0 && (
+          <TouchableOpacity onPress={openReview}
+            style={{
+              flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10,
+              marginTop: 12, padding: 12, borderRadius: BorderRadius.button,
+              backgroundColor: 'rgba(233,237,201,0.18)', borderWidth: 1, borderColor: 'rgba(233,237,201,0.4)',
+            }}>
+            <Text style={{ color: Colors.foreground, fontSize: 13, flex: 1 }}>
+              {reviewTxnCount} transaction{reviewTxnCount !== 1 ? 's' : ''} from {visibleReview.length}{' '}
+              payee{visibleReview.length !== 1 ? 's' : ''} need a category
+            </Text>
+            <Text style={{ color: '#000', backgroundColor: Colors.foreground, fontSize: 12, fontWeight: '700', borderRadius: 8, paddingHorizontal: 12, paddingVertical: 8, overflow: 'hidden' }}>
+              Review
+            </Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       <FlatList
@@ -319,11 +431,12 @@ export default function TransactionsScreen() {
           </View>
         ) : null}
         renderItem={({ item }) => (
-          <View style={{
-            backgroundColor: Colors.surface, padding: 14, marginBottom: 8,
-            borderWidth: 1, borderColor: Colors.border,
-            flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-          }}>
+          <TouchableOpacity onPress={() => setEditTxn(item)} activeOpacity={0.7}
+            style={{
+              backgroundColor: Colors.surface, padding: 14, marginBottom: 8,
+              borderWidth: 1, borderColor: Colors.border,
+              flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+            }}>
             <View style={{ flex: 1, marginRight: 12 }}>
               <Text style={{ color: Colors.foreground, fontSize: 14, fontWeight: '500' }}>{item.merchant}</Text>
               <Text style={{ color: Colors.muted, fontSize: 11, marginTop: 3 }}>
@@ -333,7 +446,7 @@ export default function TransactionsScreen() {
             <Text style={{ color: item.amount < 0 ? Colors.expense : Colors.income, fontSize: 14, fontWeight: '600' }}>
               {item.amount < 0 ? '-' : '+'}{formatINR(Math.abs(item.amount))}
             </Text>
-          </View>
+          </TouchableOpacity>
         )}
         ListEmptyComponent={
           <View style={{ alignItems: 'center', padding: 40 }}>
@@ -437,6 +550,148 @@ export default function TransactionsScreen() {
                 <Text style={{ color: '#000', fontWeight: '600' }}>{busy ? 'Adding...' : 'Add Transaction'}</Text>
               </TouchableOpacity>
             </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+      {/* Review queue modal (PRD 4.4) */}
+      <Modal visible={showReview} animationType="slide" transparent>
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'flex-end' }}>
+          <View style={{
+            backgroundColor: Colors.surface, borderTopLeftRadius: BorderRadius.modal, borderTopRightRadius: BorderRadius.modal,
+            padding: 24, paddingBottom: 40, maxHeight: '85%',
+          }}>
+            <Text style={{ fontFamily: 'Inter_700Bold', fontSize: 20, color: Colors.foreground, fontWeight: '700' }}>
+              Needs review
+            </Text>
+            <Text style={{ color: Colors.muted, fontSize: 13, marginTop: 4, marginBottom: 16 }}>
+              {visibleReview.length === 0
+                ? 'Nothing needs a category.'
+                : `${visibleReview.length} payee${visibleReview.length !== 1 ? 's' : ''} — one tap assigns a payee, past and future.`}
+            </Text>
+
+            {visibleReview.length === 0 ? (
+              <View style={{ alignItems: 'center', padding: 24 }}>
+                <Text style={{ color: Colors.foreground, fontSize: 15, fontWeight: '600', marginBottom: 4 }}>
+                  All clear
+                </Text>
+                <Text style={{ color: Colors.muted, fontSize: 13 }}>
+                  {skippedPayees.length > 0
+                    ? `${skippedPayees.length} skipped — they reappear next time.`
+                    : 'Every transaction has a category.'}
+                </Text>
+              </View>
+            ) : (
+              <ScrollView style={{ maxHeight: 440 }} showsVerticalScrollIndicator={false}>
+                {visibleReview.map(group => (
+                  <View key={group.key} style={{
+                    borderWidth: 1, borderColor: Colors.border, borderRadius: 12,
+                    padding: 14, marginBottom: 10, backgroundColor: Colors.background,
+                  }}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <View style={{ flex: 1, marginRight: 8 }}>
+                        <Text style={{ color: Colors.foreground, fontSize: 15, fontWeight: '700' }}>
+                          {group.payee}
+                        </Text>
+                        <Text style={{ color: Colors.muted, fontSize: 12, marginTop: 3 }}>
+                          {group.count} txn{group.count !== 1 ? 's' : ''} · {formatINR(group.total)} total
+                          {group.payeeType === 'person' ? ' · Person' : group.payeeType === 'business' ? ' · Business' : ''}
+                        </Text>
+                      </View>
+                      <TouchableOpacity onPress={() => skipReviewGroup(group)} disabled={busy}
+                        style={{ paddingHorizontal: 8, paddingVertical: 6 }}>
+                        <Text style={{ color: Colors.muted, fontSize: 12, fontWeight: '600' }}>Skip</Text>
+                      </TouchableOpacity>
+                    </View>
+
+                    {group.suggestion && (
+                      <View style={{
+                        flexDirection: 'row', gap: 6, alignItems: 'center', marginTop: 8,
+                        backgroundColor: 'rgba(233,237,201,0.15)', borderWidth: 1, borderColor: 'rgba(233,237,201,0.35)',
+                        borderRadius: 8, paddingHorizontal: 10, paddingVertical: 7,
+                      }}>
+                        <Text style={{ color: Colors.foreground, fontSize: 12 }}>
+                          <Text style={{ fontWeight: '700' }}>AI suggests </Text>
+                          {group.suggestion.icon} {group.suggestion.name} ({Math.round(group.suggestion.confidence * 100)}%)
+                        </Text>
+                      </View>
+                    )}
+
+                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 10 }}>
+                      {personalTransfers && (
+                        <TouchableOpacity onPress={() => handleResolveReview(group, personalTransfers.id)} disabled={busy}
+                          style={{ paddingHorizontal: 10, paddingVertical: 7, borderRadius: 999, borderWidth: 1, borderColor: Colors.borderLight, backgroundColor: Colors.surface }}>
+                          <Text style={{ color: Colors.foreground, fontSize: 11, fontWeight: '600', fontStyle: 'italic' }}>
+                            ⇄ Personal Transfer
+                          </Text>
+                        </TouchableOpacity>
+                      )}
+                      {categories.map(c => {
+                        const suggested = group.suggestion?.categoryId === c.id
+                        return (
+                          <TouchableOpacity key={c.id} onPress={() => handleResolveReview(group, c.id)} disabled={busy}
+                            style={{
+                              paddingHorizontal: 10, paddingVertical: 7, borderRadius: 999,
+                              borderWidth: suggested ? 1.5 : 1,
+                              borderColor: suggested ? Colors.primary : Colors.borderLight,
+                              backgroundColor: suggested ? 'rgba(255,152,162,0.12)' : Colors.surface,
+                            }}>
+                            <Text style={{ color: suggested ? Colors.primary : Colors.foreground, fontSize: 11, fontWeight: '600' }}>
+                              {c.icon} {c.name}
+                            </Text>
+                          </TouchableOpacity>
+                        )
+                      })}
+                    </View>
+                  </View>
+                ))}
+              </ScrollView>
+            )}
+
+            <TouchableOpacity onPress={() => setShowReview(false)}
+              style={{ marginTop: 16, padding: 14, borderRadius: BorderRadius.button, alignItems: 'center', borderWidth: 1, borderColor: Colors.borderLight }}>
+              <Text style={{ color: Colors.muted, fontWeight: '600' }}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+
+      {/* Change category modal — tap a transaction (PRD 4.5) */}
+      <Modal visible={!!editTxn} animationType="slide" transparent>
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'flex-end' }}>
+          <View style={{ backgroundColor: Colors.surface, borderTopLeftRadius: BorderRadius.modal, borderTopRightRadius: BorderRadius.modal, padding: 24, paddingBottom: 40 }}>
+            <Text style={{ fontFamily: 'Inter_700Bold', fontSize: 20, color: Colors.foreground, fontWeight: '700', marginBottom: 4 }}>
+              {editTxn?.merchant}
+            </Text>
+            <Text style={{ color: Colors.muted, fontSize: 13, marginBottom: 16 }}>
+              {editTxn && `${editTxn.amount < 0 ? '-' : '+'}${formatINR(Math.abs(editTxn.amount))} · ${new Date(editTxn.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}`}
+              {' · pick a category'}
+            </Text>
+
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 20 }}>
+              <TouchableOpacity onPress={() => handleEditCategory(null)} disabled={busy}
+                style={{ paddingHorizontal: 10, paddingVertical: 6, borderRadius: BorderRadius.badge, borderWidth: 1, borderColor: !editTxn?.category_id ? Colors.primary : Colors.borderLight }}>
+                <Text style={{ fontSize: 11, color: !editTxn?.category_id ? Colors.primary : Colors.muted }}>None</Text>
+              </TouchableOpacity>
+              {categories.map(c => (
+                <TouchableOpacity key={c.id} onPress={() => handleEditCategory(c.id)} disabled={busy}
+                  style={{
+                    paddingHorizontal: 10, paddingVertical: 6, borderRadius: BorderRadius.badge,
+                    borderWidth: 1, borderColor: editTxn?.category_id === c.id ? Colors.primary : Colors.borderLight,
+                    backgroundColor: editTxn?.category_id === c.id ? 'rgba(255,152,162,0.1)' : 'transparent',
+                  }}>
+                  <Text style={{ fontSize: 11, color: editTxn?.category_id === c.id ? Colors.primary : Colors.muted }}>
+                    {c.icon} {c.name}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            <TouchableOpacity onPress={() => setEditTxn(null)}
+              style={{ padding: 14, borderRadius: BorderRadius.button, alignItems: 'center', borderWidth: 1, borderColor: Colors.borderLight }}>
+              <Text style={{ color: Colors.muted, fontWeight: '500' }}>Cancel</Text>
+            </TouchableOpacity>
           </View>
         </KeyboardAvoidingView>
       </Modal>

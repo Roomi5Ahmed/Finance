@@ -8,7 +8,13 @@ export async function POST(req: Request) {
 
   try {
     const result = await autoCategoriseTransactions(auth.supabase, auth.user.id)
-    return NextResponse.json({ updated: result.count, ids: result.updatedIds, message: result.message })
+    return NextResponse.json({
+      updated: result.count,
+      categorised: result.categorised,
+      needsReview: result.pendingReview,
+      ids: result.updatedIds,
+      message: result.message,
+    })
   } catch (err: any) {
     return NextResponse.json({ error: err.message || 'Internal Server Error' }, { status: 500 })
   }

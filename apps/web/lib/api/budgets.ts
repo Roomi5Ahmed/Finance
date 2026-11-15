@@ -52,7 +52,7 @@ export interface UpdateBudgetInput {
 }
 
 export async function updateBudget(supabase: SupabaseClient, userId: string, budgetId: string, input: UpdateBudgetInput) {
-  const updates: any = {}
+  const updates: Record<string, unknown> = {}
   if (input.amount !== undefined && !isNaN(input.amount) && input.amount > 0) updates.amount = input.amount
   if (input.period) updates.period = input.period
   if (input.autoRenew !== undefined) updates.auto_renew = input.autoRenew
@@ -80,60 +80,104 @@ export async function deleteBudget(supabase: SupabaseClient, userId: string, bud
   return { success: true, message: 'Budget deleted.' }
 }
 
-export async function getBudgetsWithProgress(supabase: SupabaseClient, userId: string) {
+export interface BudgetWithSpend {
+  id: string
+  category_id: string | null
+  amount: number
+  spent: number
+  categories?: { name?: string | null; icon?: string | null; color?: string | null } | null
+  [key: string]: unknown
+}
+
+/**
+ * Budgets with spend for an arbitrary (half-open) period — used by the
+ * past-month dashboard. One expenses query feeds every budget (no N+1).
+ */
+export async function getBudgetsForPeriod(
+  supabase: SupabaseClient,
+  userId: string,
+  periodStartISO: string,
+  periodEndISO: string
+): Promise<BudgetWithSpend[]> {
+  const [{ data: budgets }, { data: expenseRows }] = await Promise.all([
+    supabase
+      .from('budgets')
+      .select('*, categories(name, icon, color)')
+      .eq('user_id', userId)
+      .eq('period', 'monthly'),
+    supabase
+      .from('transactions')
+      .select('amount, category_id')
+      .eq('user_id', userId)
+      .gte('date', periodStartISO)
+      .lt('date', periodEndISO)
+      .lt('amount', 0),
+  ])
+
+  const expenses = (expenseRows || []) as { amount: number | string; category_id: string | null }[]
+  const byCategory = new Map<string, number>()
+  let overall = 0
+  for (const t of expenses) {
+    const abs = Math.abs(Number(t.amount) || 0)
+    overall += abs
+    if (t.category_id) byCategory.set(t.category_id, (byCategory.get(t.category_id) ?? 0) + abs)
+  }
+  const round = (n: number) => Math.round(n * 100) / 100
+
+  return ((budgets || []) as unknown as BudgetWithSpend[]).map(budget => ({
+    ...budget,
+    spent: budget.category_id ? round(byCategory.get(budget.category_id) ?? 0) : round(overall),
+  }))
+}
+
+export async function getBudgetsWithProgress(
+  supabase: SupabaseClient,
+  userId: string,
+  periodStartISO?: string,
+  periodEndISO?: string
+) {
   const budgets = await getBudgets(supabase, userId)
   const now = new Date()
-  const periodStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
+  const startISO = periodStartISO ?? new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
+  const endISO = periodEndISO ?? new Date(now.getFullYear(), now.getMonth() + 1, 1).toISOString()
 
-  const budgetsWithSpend = await Promise.all(
-    budgets.map(async (budget: any) => {
-      let spent = 0
-
-      if (budget.category_id) {
-        const { data: txs } = await supabase
-          .from('transactions')
-          .select('amount')
-          .eq('user_id', userId)
-          .eq('category_id', budget.category_id)
-          .gte('date', periodStart)
-          .lt('amount', 0)
-
-        spent = (txs || []).reduce((sum: number, tx: any) => sum + Math.abs(tx.amount), 0)
-      } else {
-        const { data: txs } = await supabase
-          .from('transactions')
-          .select('amount')
-          .eq('user_id', userId)
-          .gte('date', periodStart)
-          .lt('amount', 0)
-
-        spent = (txs || []).reduce((sum: number, tx: any) => sum + Math.abs(tx.amount), 0)
-      }
-
-      const percentage = budget.amount > 0 ? Math.min(100, Math.round((spent / budget.amount) * 100)) : 0
-      const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0)
-      const daysLeft = Math.max(0, Math.ceil((endDate.getTime() - now.getTime()) / 86400000))
-
-      return {
-        ...budget,
-        spent,
-        percentage,
-        daysLeft,
-        remaining: Math.max(0, budget.amount - spent),
-      }
-    })
-  )
-
-  const { data: allExpenses } = await supabase
+  const { data: expenseRows } = await supabase
     .from('transactions')
-    .select('amount')
+    .select('amount, category_id')
     .eq('user_id', userId)
-    .gte('date', periodStart)
+    .gte('date', startISO)
+    .lt('date', endISO)
     .lt('amount', 0)
 
-  const totalMonthlySpend = (allExpenses || []).reduce((sum: number, tx: any) => sum + Math.abs(tx.amount), 0)
+  const expenses = (expenseRows || []) as { amount: number | string; category_id: string | null }[]
+  const byCategory = new Map<string, number>()
+  let overall = 0
+  for (const t of expenses) {
+    const abs = Math.abs(Number(t.amount) || 0)
+    overall += abs
+    if (t.category_id) byCategory.set(t.category_id, (byCategory.get(t.category_id) ?? 0) + abs)
+  }
 
-  return { budgets: budgetsWithSpend, totalMonthlySpend }
+  const budgetsWithSpend = budgets.map((budget: {
+    id: string
+    amount: number
+    category_id?: string | null
+  }) => {
+    const spent = budget.category_id ? byCategory.get(budget.category_id) ?? 0 : overall
+    const percentage = budget.amount > 0 ? Math.min(100, Math.round((spent / budget.amount) * 100)) : 0
+    const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0)
+    const daysLeft = Math.max(0, Math.ceil((endDate.getTime() - now.getTime()) / 86400000))
+
+    return {
+      ...budget,
+      spent,
+      percentage,
+      daysLeft,
+      remaining: Math.max(0, budget.amount - spent),
+    }
+  })
+
+  return { budgets: budgetsWithSpend, totalMonthlySpend: overall }
 }
 
 export async function checkAndFireBudgetAlerts(supabase: SupabaseClient, userId: string) {
@@ -161,7 +205,7 @@ export async function checkAndFireBudgetAlerts(supabase: SupabaseClient, userId:
         .gte('date', periodStart)
         .lt('amount', 0)
 
-      spent = (catTxs || []).reduce((sum: number, tx: any) => sum + Math.abs(tx.amount), 0)
+      spent = (catTxs || []).reduce((sum: number, tx: { amount: number | string }) => sum + Math.abs(Number(tx.amount)), 0)
     } else {
       const { data: txs } = await supabase
         .from('transactions')
@@ -170,7 +214,7 @@ export async function checkAndFireBudgetAlerts(supabase: SupabaseClient, userId:
         .gte('date', periodStart)
         .lt('amount', 0)
 
-      spent = (txs || []).reduce((sum: number, tx: any) => sum + Math.abs(tx.amount), 0)
+      spent = (txs || []).reduce((sum: number, tx: { amount: number | string }) => sum + Math.abs(Number(tx.amount)), 0)
     }
 
     const percentage = Math.round((spent / budget.amount) * 100)
@@ -181,11 +225,11 @@ export async function checkAndFireBudgetAlerts(supabase: SupabaseClient, userId:
       .eq('budget_id', budget.id)
       .eq('period_start', periodStart)
 
-    const sentThresholds = new Set((alreadySent || []).map((a: any) => a.threshold))
+    const sentThresholds = new Set((alreadySent || []).map((a: { threshold: number }) => a.threshold))
 
     for (const threshold of budget.alert_thresholds) {
       if (percentage >= threshold && !sentThresholds.has(threshold)) {
-        const catName = (budget.categories as any)?.name || 'Overall'
+        const catName = (budget.categories as { name?: string } | null)?.name || 'Overall'
         const title = threshold >= 100 ? `Budget exceeded: ${catName}` : `Budget alert: ${catName}`
         const body = `You've used ${percentage}% of your ${catName} budget (\u20B9${spent.toLocaleString('en-IN')} / \u20B9${budget.amount.toLocaleString('en-IN')}).`
 
