@@ -1,7 +1,9 @@
 import React, { useState } from 'react'
 import { View, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, Alert } from 'react-native'
 import { Link, useRouter } from 'expo-router'
+import { SvgXml } from 'react-native-svg'
 import { useAuth } from '../../lib/auth'
+import { LOGO_XML } from '../../lib/logo'
 import { Colors, BorderRadius } from '../../constants/theme'
 
 export default function SignUpScreen() {
@@ -42,6 +44,7 @@ export default function SignUpScreen() {
     >
       <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', padding: 24 }}>
         <View style={{ marginBottom: 48 }}>
+          <SvgXml xml={LOGO_XML} width={64} height={62} style={{ marginBottom: 20 }} />
           <Text style={{ fontFamily: 'Inter_700Bold', fontSize: 32, color: Colors.foreground, fontWeight: '700' }}>
             Create account
           </Text>
@@ -131,7 +134,7 @@ export default function SignUpScreen() {
               opacity: loading ? 0.5 : 1,
             }}
           >
-            <Text style={{ color: '#000', fontWeight: '600', fontSize: 15 }}>
+            <Text style={{ color: '#01472e', fontWeight: '600', fontSize: 15 }}>
               {loading ? 'Creating account...' : 'Sign Up'}
             </Text>
           </TouchableOpacity>

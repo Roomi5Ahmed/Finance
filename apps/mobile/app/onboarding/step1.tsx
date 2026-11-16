@@ -46,7 +46,7 @@ export default function OnboardingStep1() {
               key={c.code}
               onPress={() => setSelected(c.code)}
               style={{
-                backgroundColor: selected === c.code ? 'rgba(255,152,162,0.1)' : Colors.surface,
+                backgroundColor: selected === c.code ? 'rgba(204,213,174,0.1)' : Colors.surface,
                 borderWidth: 1,
                 borderColor: selected === c.code ? Colors.primary : Colors.borderLight,
                 borderRadius: BorderRadius.input,
@@ -62,7 +62,7 @@ export default function OnboardingStep1() {
               </View>
               {selected === c.code && (
                 <View style={{ width: 20, height: 20, borderRadius: 10, backgroundColor: Colors.primary, alignItems: 'center', justifyContent: 'center' }}>
-                  <Text style={{ color: '#000', fontSize: 12, fontWeight: '700' }}>✓</Text>
+                  <Text style={{ color: '#01472e', fontSize: 12, fontWeight: '700' }}>✓</Text>
                 </View>
               )}
             </TouchableOpacity>
@@ -80,7 +80,7 @@ export default function OnboardingStep1() {
           marginTop: 24,
         }}
       >
-        <Text style={{ color: '#000', fontWeight: '600', fontSize: 15 }}>Continue</Text>
+        <Text style={{ color: '#01472e', fontWeight: '600', fontSize: 15 }}>Continue</Text>
       </TouchableOpacity>
     </View>
   )

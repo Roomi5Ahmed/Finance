@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import SignUpForm from './SignUpForm'
 
 export default async function SignUpPage(props: { searchParams: Promise<{ message?: string }> }) {
@@ -10,8 +11,7 @@ export default async function SignUpPage(props: { searchParams: Promise<{ messag
         <div className="auth-nav-inner">
           <Link href="/" className="auth-brand">
             <span className="auth-tile auth-tile-sm" aria-hidden="true">
-              <span className="auth-monogram">S</span>
-              <span className="auth-tile-dot" />
+              <Image src="/sf-logo.svg" alt="" width={30} height={29} unoptimized priority />
             </span>
             <span className="auth-wordmark">Smart Finance</span>
           </Link>
@@ -40,8 +40,7 @@ export default async function SignUpPage(props: { searchParams: Promise<{ messag
             <div className="auth-rail" aria-hidden="true" />
             <div className="auth-card-head">
               <span className="auth-tile auth-tile-lg" aria-hidden="true">
-                <span className="auth-monogram">S</span>
-                <span className="auth-tile-dot" />
+                <Image src="/sf-logo.svg" alt="" width={44} height={43} unoptimized priority />
               </span>
               <h1 className="auth-title">Create your account</h1>
               <p className="auth-sub">Start tracking your money in minutes.</p>

@@ -173,7 +173,7 @@ export default function InsightsScreen() {
           {item.tips.length > 0 && (
             <View style={{ marginBottom: 12, gap: 8 }}>
               {item.tips.map((tip, i) => (
-                <View key={i} style={{ backgroundColor: 'rgba(255,152,162,0.06)', padding: 12, borderRadius: BorderRadius.badge, borderLeftWidth: 2, borderLeftColor: Colors.primary }}>
+                <View key={i} style={{ backgroundColor: 'rgba(204,213,174,0.06)', padding: 12, borderRadius: BorderRadius.badge, borderLeftWidth: 2, borderLeftColor: Colors.primary }}>
                   <Text style={{ color: Colors.foreground, fontSize: 13, lineHeight: 18 }}>{tip}</Text>
                 </View>
               ))}
@@ -181,7 +181,7 @@ export default function InsightsScreen() {
           )}
 
           <TouchableOpacity onPress={() => generateTips(item)} disabled={item.tipsLoading}
-            style={{ backgroundColor: item.tips.length > 0 ? 'transparent' : 'rgba(255,152,162,0.1)', borderRadius: BorderRadius.button, padding: 10, alignItems: 'center', borderWidth: 1, borderColor: Colors.primary, opacity: item.tipsLoading ? 0.5 : 1 }}>
+            style={{ backgroundColor: item.tips.length > 0 ? 'transparent' : 'rgba(204,213,174,0.1)', borderRadius: BorderRadius.button, padding: 10, alignItems: 'center', borderWidth: 1, borderColor: Colors.primary, opacity: item.tipsLoading ? 0.5 : 1 }}>
             <Text style={{ color: Colors.primary, fontSize: 12, fontWeight: '600' }}>
               {item.tipsLoading ? 'Generating...' : item.tips.length > 0 ? 'Refresh Tips' : 'Generate AI Tips'}
             </Text>

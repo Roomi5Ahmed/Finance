@@ -382,20 +382,20 @@ export default function TransactionsScreen() {
 
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
           <TouchableOpacity onPress={handleSyncBank} disabled={busy}
-            style={{ backgroundColor: 'rgba(16,185,129,0.15)', borderRadius: BorderRadius.button, paddingHorizontal: 14, paddingVertical: 10, borderWidth: 1, borderColor: 'rgba(16,185,129,0.3)' }}>
+            style={{ backgroundColor: 'rgba(52,211,153,0.15)', borderRadius: BorderRadius.button, paddingHorizontal: 14, paddingVertical: 10, borderWidth: 1, borderColor: 'rgba(52,211,153,0.3)' }}>
             <Text style={{ color: Colors.success, fontSize: 12, fontWeight: '600' }}>🏦 {busy ? '...' : 'Sync Bank'}</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={handleAutoCategorise} disabled={busy}
-            style={{ backgroundColor: 'rgba(255,152,162,0.1)', borderRadius: BorderRadius.button, paddingHorizontal: 14, paddingVertical: 10, borderWidth: 1, borderColor: 'rgba(255,152,162,0.3)' }}>
+            style={{ backgroundColor: 'rgba(204,213,174,0.1)', borderRadius: BorderRadius.button, paddingHorizontal: 14, paddingVertical: 10, borderWidth: 1, borderColor: 'rgba(204,213,174,0.3)' }}>
             <Text style={{ color: Colors.primary, fontSize: 12, fontWeight: '600' }}>✨ {busy ? '...' : 'Auto Categorise'}</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => setShowCsv(true)}
-            style={{ backgroundColor: 'rgba(96,165,250,0.1)', borderRadius: BorderRadius.button, paddingHorizontal: 14, paddingVertical: 10, borderWidth: 1, borderColor: 'rgba(96,165,250,0.3)' }}>
-            <Text style={{ color: '#60A5FA', fontSize: 12, fontWeight: '600' }}>📄 CSV</Text>
+            style={{ backgroundColor: 'rgba(233,237,201,0.1)', borderRadius: BorderRadius.button, paddingHorizontal: 14, paddingVertical: 10, borderWidth: 1, borderColor: 'rgba(233,237,201,0.3)' }}>
+            <Text style={{ color: '#e9edc9', fontSize: 12, fontWeight: '600' }}>📄 CSV</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => setShowAdd(true)}
             style={{ backgroundColor: Colors.primary, borderRadius: BorderRadius.button, paddingHorizontal: 14, paddingVertical: 10 }}>
-            <Text style={{ color: '#000', fontSize: 12, fontWeight: '600' }}>+ Add</Text>
+            <Text style={{ color: '#01472e', fontSize: 12, fontWeight: '600' }}>+ Add</Text>
           </TouchableOpacity>
         </View>
 
@@ -411,7 +411,7 @@ export default function TransactionsScreen() {
               {reviewTxnCount} transaction{reviewTxnCount !== 1 ? 's' : ''} from {visibleReview.length}{' '}
               payee{visibleReview.length !== 1 ? 's' : ''} need a category
             </Text>
-            <Text style={{ color: '#000', backgroundColor: Colors.foreground, fontSize: 12, fontWeight: '700', borderRadius: 8, paddingHorizontal: 12, paddingVertical: 8, overflow: 'hidden' }}>
+            <Text style={{ color: '#01472e', backgroundColor: Colors.foreground, fontSize: 12, fontWeight: '700', borderRadius: 8, paddingHorizontal: 12, paddingVertical: 8, overflow: 'hidden' }}>
               Review
             </Text>
           </TouchableOpacity>
@@ -429,7 +429,7 @@ export default function TransactionsScreen() {
           <View style={{ padding: 16, alignItems: 'center' }}>
             <ActivityIndicator size="small" color={Colors.primary} />
           </View>
-        ) : null}
+        ) : undefined}
         renderItem={({ item }) => (
           <TouchableOpacity onPress={() => setEditTxn(item)} activeOpacity={0.7}
             style={{
@@ -470,7 +470,7 @@ export default function TransactionsScreen() {
             <View style={{ flexDirection: 'row', gap: 8, marginBottom: 16 }}>
               {(['HDFC', 'SBI'] as const).map(t => (
                 <TouchableOpacity key={t} onPress={() => setCsvTemplate(t)}
-                  style={{ flex: 1, padding: 12, borderRadius: BorderRadius.button, alignItems: 'center', borderWidth: 1, borderColor: csvTemplate === t ? Colors.primary : Colors.borderLight, backgroundColor: csvTemplate === t ? 'rgba(255,152,162,0.1)' : 'transparent' }}>
+                  style={{ flex: 1, padding: 12, borderRadius: BorderRadius.button, alignItems: 'center', borderWidth: 1, borderColor: csvTemplate === t ? Colors.primary : Colors.borderLight, backgroundColor: csvTemplate === t ? 'rgba(204,213,174,0.1)' : 'transparent' }}>
                   <Text style={{ color: csvTemplate === t ? Colors.primary : Colors.muted, fontWeight: '600' }}>{t}</Text>
                 </TouchableOpacity>
               ))}
@@ -494,7 +494,7 @@ export default function TransactionsScreen() {
               </TouchableOpacity>
               <TouchableOpacity onPress={handleCsvImport} disabled={busy || !csvContent}
                 style={{ flex: 2, padding: 14, borderRadius: BorderRadius.button, alignItems: 'center', backgroundColor: Colors.primary, opacity: busy || !csvContent ? 0.5 : 1 }}>
-                <Text style={{ color: '#000', fontWeight: '600' }}>{busy ? 'Importing...' : 'Import'}</Text>
+                <Text style={{ color: '#01472e', fontWeight: '600' }}>{busy ? 'Importing...' : 'Import'}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -512,11 +512,11 @@ export default function TransactionsScreen() {
 
             <View style={{ flexDirection: 'row', gap: 8, marginBottom: 16 }}>
               <TouchableOpacity onPress={() => setType('expense')}
-                style={{ flex: 1, padding: 12, borderRadius: BorderRadius.button, alignItems: 'center', borderWidth: 1, borderColor: type === 'expense' ? Colors.expense : Colors.borderLight, backgroundColor: type === 'expense' ? 'rgba(255,152,162,0.1)' : 'transparent' }}>
+                style={{ flex: 1, padding: 12, borderRadius: BorderRadius.button, alignItems: 'center', borderWidth: 1, borderColor: type === 'expense' ? Colors.expense : Colors.borderLight, backgroundColor: type === 'expense' ? 'rgba(244,114,182,0.1)' : 'transparent' }}>
                 <Text style={{ color: type === 'expense' ? Colors.expense : Colors.muted, fontWeight: '600' }}>Expense</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={() => setType('income')}
-                style={{ flex: 1, padding: 12, borderRadius: BorderRadius.button, alignItems: 'center', borderWidth: 1, borderColor: type === 'income' ? Colors.income : Colors.borderLight, backgroundColor: type === 'income' ? 'rgba(16,185,129,0.1)' : 'transparent' }}>
+                style={{ flex: 1, padding: 12, borderRadius: BorderRadius.button, alignItems: 'center', borderWidth: 1, borderColor: type === 'income' ? Colors.income : Colors.borderLight, backgroundColor: type === 'income' ? 'rgba(52,211,153,0.1)' : 'transparent' }}>
                 <Text style={{ color: type === 'income' ? Colors.income : Colors.muted, fontWeight: '600' }}>Income</Text>
               </TouchableOpacity>
             </View>
@@ -547,7 +547,7 @@ export default function TransactionsScreen() {
               </TouchableOpacity>
               <TouchableOpacity onPress={handleAdd} disabled={busy}
                 style={{ flex: 2, padding: 14, borderRadius: BorderRadius.button, alignItems: 'center', backgroundColor: Colors.primary, opacity: busy ? 0.5 : 1 }}>
-                <Text style={{ color: '#000', fontWeight: '600' }}>{busy ? 'Adding...' : 'Add Transaction'}</Text>
+                <Text style={{ color: '#01472e', fontWeight: '600' }}>{busy ? 'Adding...' : 'Add Transaction'}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -634,7 +634,7 @@ export default function TransactionsScreen() {
                               paddingHorizontal: 10, paddingVertical: 7, borderRadius: 999,
                               borderWidth: suggested ? 1.5 : 1,
                               borderColor: suggested ? Colors.primary : Colors.borderLight,
-                              backgroundColor: suggested ? 'rgba(255,152,162,0.12)' : Colors.surface,
+                              backgroundColor: suggested ? 'rgba(204,213,174,0.12)' : Colors.surface,
                             }}>
                             <Text style={{ color: suggested ? Colors.primary : Colors.foreground, fontSize: 11, fontWeight: '600' }}>
                               {c.icon} {c.name}
@@ -679,7 +679,7 @@ export default function TransactionsScreen() {
                   style={{
                     paddingHorizontal: 10, paddingVertical: 6, borderRadius: BorderRadius.badge,
                     borderWidth: 1, borderColor: editTxn?.category_id === c.id ? Colors.primary : Colors.borderLight,
-                    backgroundColor: editTxn?.category_id === c.id ? 'rgba(255,152,162,0.1)' : 'transparent',
+                    backgroundColor: editTxn?.category_id === c.id ? 'rgba(204,213,174,0.1)' : 'transparent',
                   }}>
                   <Text style={{ fontSize: 11, color: editTxn?.category_id === c.id ? Colors.primary : Colors.muted }}>
                     {c.icon} {c.name}

@@ -234,7 +234,7 @@ export default function DashboardScreen() {
   }
   const trendMax = Math.max(...spendTrend.map(d => d.value), 100)
 
-  const catColors = [Colors.primary, '#A78BFA', '#60A5FA', '#34D399', '#FBBF24']
+  const catColors = [Colors.primary, '#818cf8', '#38bdf8', '#34d399', '#fbbf24']
   const topCategories = data.categories.slice(0, 5).map((c, i) => ({
     value: Math.round(c.value),
     label: c.name.length > 8 ? c.name.slice(0, 7) + '…' : c.name,
@@ -482,7 +482,7 @@ export default function DashboardScreen() {
                 style={{
                   flexDirection: 'row', alignItems: 'center', gap: 8,
                   paddingVertical: 6, paddingHorizontal: active ? 6 : 0,
-                  backgroundColor: active ? 'rgba(1,71,46,0.06)' : 'transparent',
+                  backgroundColor: active ? 'rgba(204,213,174,0.1)' : 'transparent',
                 }}
               >
                 <Text style={{ width: 34, fontSize: 11, color: active ? Colors.primary : Colors.muted, fontWeight: active ? '700' : '500' }}>

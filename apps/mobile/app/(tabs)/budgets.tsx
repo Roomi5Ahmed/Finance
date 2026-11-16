@@ -105,7 +105,7 @@ export default function BudgetsScreen() {
         </Text>
         <TouchableOpacity onPress={() => setShowAdd(true)}
           style={{ backgroundColor: Colors.primary, borderRadius: BorderRadius.button, paddingHorizontal: 14, paddingVertical: 10 }}>
-          <Text style={{ color: '#000', fontSize: 12, fontWeight: '600' }}>+ Add</Text>
+          <Text style={{ color: '#01472e', fontSize: 12, fontWeight: '600' }}>+ Add</Text>
         </TouchableOpacity>
       </View>
 
@@ -201,7 +201,7 @@ export default function BudgetsScreen() {
             <View style={{ flexDirection: 'row', gap: 8, marginBottom: 20 }}>
               {['monthly', 'weekly'].map(p => (
                 <TouchableOpacity key={p} onPress={() => setPeriod(p)}
-                  style={{ flex: 1, padding: 12, borderRadius: BorderRadius.button, alignItems: 'center', borderWidth: 1, borderColor: period === p ? Colors.primary : Colors.borderLight, backgroundColor: period === p ? 'rgba(255,152,162,0.1)' : 'transparent' }}>
+                  style={{ flex: 1, padding: 12, borderRadius: BorderRadius.button, alignItems: 'center', borderWidth: 1, borderColor: period === p ? Colors.primary : Colors.borderLight, backgroundColor: period === p ? 'rgba(204,213,174,0.1)' : 'transparent' }}>
                   <Text style={{ color: period === p ? Colors.primary : Colors.muted, fontWeight: '600', textTransform: 'capitalize' }}>{p}</Text>
                 </TouchableOpacity>
               ))}
@@ -214,7 +214,7 @@ export default function BudgetsScreen() {
               </TouchableOpacity>
               <TouchableOpacity onPress={handleAdd} disabled={busy}
                 style={{ flex: 2, padding: 14, borderRadius: BorderRadius.button, alignItems: 'center', backgroundColor: Colors.primary, opacity: busy ? 0.5 : 1 }}>
-                <Text style={{ color: '#000', fontWeight: '600' }}>{busy ? 'Creating...' : 'Create Budget'}</Text>
+                <Text style={{ color: '#01472e', fontWeight: '600' }}>{busy ? 'Creating...' : 'Create Budget'}</Text>
               </TouchableOpacity>
             </View>
           </View>

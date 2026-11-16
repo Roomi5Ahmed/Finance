@@ -2,6 +2,7 @@
 
 import { createClient } from '@/utils/supabase/client'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { useState, useEffect, useRef } from 'react'
 import { Input } from '@/components/ui/input'
 import { Bell, Check } from 'lucide-react'
@@ -88,7 +89,8 @@ export default function Header() {
   return (
     <header style={{ height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingLeft: '48px', paddingRight: '48px', position: 'sticky', top: 0, zIndex: 20, backgroundColor: 'rgba(1,71,46,0.88)', backdropFilter: 'blur(4px)', borderBottom: '1px solid rgba(254,250,224,0.12)' }}>
       {/* Brand */}
-      <span className="text-lg font-bold text-[#fefae0] tracking-wide shrink-0">
+      <span className="flex items-center gap-2.5 text-lg font-bold text-[#fefae0] tracking-wide shrink-0">
+        <Image src="/sf-logo.svg" alt="" width={28} height={27} unoptimized />
         Smart <span className="text-[#fefae0]">Finance</span>
       </span>
 

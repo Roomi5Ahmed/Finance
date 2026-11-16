@@ -95,7 +95,7 @@ export default function OnboardingStep2() {
           alignItems: 'center',
         }}
       >
-        <Text style={{ color: '#000', fontWeight: '600', fontSize: 15 }}>Continue</Text>
+        <Text style={{ color: '#01472e', fontWeight: '600', fontSize: 15 }}>Continue</Text>
       </TouchableOpacity>
 
       <TouchableOpacity

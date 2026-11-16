@@ -82,7 +82,7 @@ export default function NotificationsScreen() {
         </View>
         {unreadCount > 0 && (
           <TouchableOpacity onPress={handleMarkAllRead} disabled={busy}
-            style={{ backgroundColor: 'rgba(255,152,162,0.1)', borderRadius: BorderRadius.button, paddingHorizontal: 14, paddingVertical: 10, borderWidth: 1, borderColor: 'rgba(255,152,162,0.3)', opacity: busy ? 0.5 : 1 }}>
+            style={{ backgroundColor: 'rgba(204,213,174,0.1)', borderRadius: BorderRadius.button, paddingHorizontal: 14, paddingVertical: 10, borderWidth: 1, borderColor: 'rgba(204,213,174,0.3)', opacity: busy ? 0.5 : 1 }}>
             <Text style={{ color: Colors.primary, fontSize: 12, fontWeight: '600' }}>Mark all read</Text>
           </TouchableOpacity>
         )}
@@ -98,7 +98,7 @@ export default function NotificationsScreen() {
             style={{
               backgroundColor: item.read ? Colors.surface : Colors.surfaceLight,
               padding: 14, marginBottom: 8, borderWidth: 1,
-              borderColor: item.read ? Colors.border : 'rgba(255,152,162,0.2)',
+              borderColor: item.read ? Colors.border : 'rgba(204,213,174,0.2)',
               flexDirection: 'row', alignItems: 'flex-start', gap: 12,
             }}>
             <Text style={{ fontSize: 20, marginTop: 2 }}>

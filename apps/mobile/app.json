@@ -7,14 +7,14 @@
     "icon": "./assets/images/icon.png",
     "scheme": "smartfinance",
     "userInterfaceStyle": "dark",
-    "backgroundColor": "#000000",
+    "backgroundColor": "#01472e",
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.roomiahmed.smartfinance"
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#000000",
+        "backgroundColor": "#01472e",
         "foregroundImage": "./assets/images/android-icon-foreground.png"
       },
       "package": "com.roomiahmed.smartfinance"
@@ -31,7 +31,7 @@
         {
           "image": "./assets/images/splash-icon.png",
           "resizeMode": "contain",
-          "backgroundColor": "#000000"
+          "backgroundColor": "#01472e"
         }
       ],
       "expo-secure-store",
@@ -40,9 +40,11 @@
         "expo-notifications",
         {
           "icon": "./assets/images/icon.png",
-          "color": "#FF98A2"
+          "color": "#ccd5ae"
         }
-      ]
+      ],
+      "expo-status-bar",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true

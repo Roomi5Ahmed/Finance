@@ -100,7 +100,7 @@ export default function BillsScreen() {
         </Text>
         <TouchableOpacity onPress={() => setShowAdd(true)}
           style={{ backgroundColor: Colors.primary, borderRadius: BorderRadius.button, paddingHorizontal: 14, paddingVertical: 10 }}>
-          <Text style={{ color: '#000', fontSize: 12, fontWeight: '600' }}>+ Add</Text>
+          <Text style={{ color: '#01472e', fontSize: 12, fontWeight: '600' }}>+ Add</Text>
         </TouchableOpacity>
       </View>
 
@@ -128,7 +128,7 @@ export default function BillsScreen() {
                   </Text>
                 </View>
                 <TouchableOpacity onPress={() => handlePay(item)}
-                  style={{ backgroundColor: 'rgba(16,185,129,0.15)', borderRadius: BorderRadius.button, paddingHorizontal: 12, paddingVertical: 8, borderWidth: 1, borderColor: 'rgba(16,185,129,0.3)' }}>
+                  style={{ backgroundColor: 'rgba(52,211,153,0.15)', borderRadius: BorderRadius.button, paddingHorizontal: 12, paddingVertical: 8, borderWidth: 1, borderColor: 'rgba(52,211,153,0.3)' }}>
                   <Text style={{ color: Colors.success, fontSize: 12, fontWeight: '600' }}>Mark Paid</Text>
                 </TouchableOpacity>
               </View>
@@ -170,7 +170,7 @@ export default function BillsScreen() {
               </TouchableOpacity>
               <TouchableOpacity onPress={handleAdd} disabled={busy}
                 style={{ flex: 2, padding: 14, borderRadius: BorderRadius.button, alignItems: 'center', backgroundColor: Colors.primary, opacity: busy ? 0.5 : 1 }}>
-                <Text style={{ color: '#000', fontWeight: '600' }}>{busy ? 'Adding...' : 'Add Bill'}</Text>
+                <Text style={{ color: '#01472e', fontWeight: '600' }}>{busy ? 'Adding...' : 'Add Bill'}</Text>
               </TouchableOpacity>
             </View>
           </View>

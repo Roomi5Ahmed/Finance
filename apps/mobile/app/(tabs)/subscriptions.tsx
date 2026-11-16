@@ -108,7 +108,7 @@ export default function SubscriptionsScreen() {
           </Text>
           <TouchableOpacity onPress={handleScan} disabled={busy}
             style={{ backgroundColor: Colors.primary, borderRadius: BorderRadius.button, paddingHorizontal: 14, paddingVertical: 10, opacity: busy ? 0.5 : 1 }}>
-            <Text style={{ color: '#000', fontSize: 12, fontWeight: '600' }}>{busy ? 'Scanning...' : 'Scan'}</Text>
+            <Text style={{ color: '#01472e', fontSize: 12, fontWeight: '600' }}>{busy ? 'Scanning...' : 'Scan'}</Text>
           </TouchableOpacity>
         </View>
 
@@ -150,7 +150,7 @@ export default function SubscriptionsScreen() {
               </Text>
             </View>
             {item.status === 'candidate' && (
-              <View style={{ backgroundColor: 'rgba(245,158,11,0.15)', paddingHorizontal: 8, paddingVertical: 3, borderRadius: BorderRadius.badge }}>
+              <View style={{ backgroundColor: 'rgba(251,191,36,0.15)', paddingHorizontal: 8, paddingVertical: 3, borderRadius: BorderRadius.badge }}>
                 <Text style={{ fontSize: 10, color: Colors.warning }}>Candidate</Text>
               </View>
             )}

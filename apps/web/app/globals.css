@@ -239,11 +239,18 @@ body:has(.lp-root) {
 }
 
 .lp-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
   font-family: var(--font-anton), Anton, sans-serif;
   font-size: 20px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--lp-cream);
+}
+
+.lp-logo img {
+  display: block;
 }
 
 .lp-navpill {

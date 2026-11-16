@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 
 const HERO_WORD = 'FINANCE'.split('')
 
@@ -109,7 +110,8 @@ export default function LandingPage() {
 
       <nav className="lp-nav">
         <Link href="/" className="lp-logo">
-          -Smart Finance
+          <Image src="/sf-logo.svg" alt="" width={27} height={26} unoptimized priority />
+          <span>Smart Finance</span>
         </Link>
         <div className="lp-navpill">
           <a href="#features">Features</a>

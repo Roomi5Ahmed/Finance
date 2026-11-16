@@ -56,7 +56,7 @@ export default function OnboardingStep3() {
             key={g.id}
             onPress={() => setSelected(g.id)}
             style={{
-              backgroundColor: selected === g.id ? 'rgba(255,152,162,0.1)' : Colors.surface,
+              backgroundColor: selected === g.id ? 'rgba(204,213,174,0.1)' : Colors.surface,
               borderWidth: 1,
               borderColor: selected === g.id ? Colors.primary : Colors.borderLight,
               borderRadius: BorderRadius.input,
@@ -69,7 +69,7 @@ export default function OnboardingStep3() {
             <Text style={{ color: Colors.foreground, fontSize: 16, fontWeight: '600', flex: 1 }}>{g.label}</Text>
             {selected === g.id && (
               <View style={{ width: 20, height: 20, borderRadius: 10, backgroundColor: Colors.primary, alignItems: 'center', justifyContent: 'center' }}>
-                <Text style={{ color: '#000', fontSize: 12, fontWeight: '700' }}>✓</Text>
+                <Text style={{ color: '#01472e', fontSize: 12, fontWeight: '700' }}>✓</Text>
               </View>
             )}
           </TouchableOpacity>
@@ -89,7 +89,7 @@ export default function OnboardingStep3() {
           opacity: saving ? 0.5 : 1,
         }}
       >
-        <Text style={{ color: '#000', fontWeight: '600', fontSize: 15 }}>
+        <Text style={{ color: '#01472e', fontWeight: '600', fontSize: 15 }}>
           {saving ? 'Saving...' : 'Get Started'}
         </Text>
       </TouchableOpacity>
